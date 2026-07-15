@@ -8,7 +8,7 @@ COPY omnibioai-dev-hub-ui/ ./
 RUN npm run build
 
 # ── Stage 2: Python API + nginx ───────────────────────────────────────────────
-FROM --platform=linux/arm64 ghcr.io/man4ish/omnibioai-base:latest AS backend
+FROM --platform=linux/arm64 ghcr.io/omnibioai/omnibioai-base:latest AS backend
 
 LABEL org.opencontainers.image.source=https://github.com/man4ish/omnibioai
 
