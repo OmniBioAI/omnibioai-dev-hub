@@ -1,5 +1,6 @@
 import os
 import json
+import time
 import logging
 import requests
 import numpy as np
@@ -34,15 +35,30 @@ EMBED_DIM = 768
 
 
 def ollama_embed(text: str, model: str = "nomic-embed-text"):
-    res = requests.post(
-        f"{OLLAMA_URL}/embeddings",
-        json={
-            "model": model,
-            "prompt": text
-        },
-        timeout=60
-    )
-    res.raise_for_status()
+    # Ollama's llama-server subprocess can transiently fail CUDA context
+    # init under host memory pressure on unified-memory GPUs (issue #12) —
+    # a short retry recovers once pressure passes, without masking a
+    # persistently broken Ollama.
+    attempts = 3
+    for attempt in range(1, attempts + 1):
+        try:
+            res = requests.post(
+                f"{OLLAMA_URL}/embeddings",
+                json={
+                    "model": model,
+                    "prompt": text
+                },
+                timeout=60
+            )
+            res.raise_for_status()
+            break
+        except requests.exceptions.RequestException:
+            if attempt == attempts:
+                raise
+            logger.warning(
+                f"ollama_embed attempt {attempt}/{attempts} failed, retrying"
+            )
+            time.sleep(2 * attempt)
 
     vec = res.json()["embedding"]
 
