@@ -1,4 +1,4 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, Depends, HTTPException
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
 from typing import Optional
@@ -6,6 +6,7 @@ import json
 import traceback
 
 from rag.control_plane import CONTROL_PLANE
+from api.auth import require_auth
 
 router = APIRouter()
 
@@ -46,7 +47,7 @@ def get_engine():
 # =========================================================
 
 @router.post("/query")
-def query(req: QueryRequest):
+def query(req: QueryRequest, actor: str = Depends(require_auth)):
 
     try:
         engine = get_engine()
@@ -74,7 +75,7 @@ def query(req: QueryRequest):
 # =========================================================
 
 @router.post("/stream")
-def stream(req: QueryRequest):
+def stream(req: QueryRequest, actor: str = Depends(require_auth)):
 
     def event_stream():
 

@@ -43,19 +43,9 @@ COPY configs/    ./configs/
 # Copy built UI from builder stage
 COPY --from=ui-builder /ui/dist /usr/share/nginx/html
 
-# nginx config — serve UI on 5173, proxy API routes to FastAPI on 8082
-RUN printf 'server {\n\
-    listen 5173;\n\
-    root /usr/share/nginx/html;\n\
-    index index.html;\n\
-    location / { try_files $uri $uri/ /index.html; }\n\
-    location /api/ { proxy_pass http://127.0.0.1:8082; proxy_set_header Host $host; }\n\
-    location /rag/ { proxy_pass http://127.0.0.1:8082; }\n\
-    location /health { proxy_pass http://127.0.0.1:8082; }\n\
-    location /status { proxy_pass http://127.0.0.1:8082; }\n\
-    location /docs   { proxy_pass http://127.0.0.1:8082; }\n\
-}\n' > /etc/nginx/conf.d/devhub.conf && \
-    rm -f /etc/nginx/sites-enabled/default \
+# Remove the default nginx site; the real devhub.conf is generated at
+# container start (see CMD) so it can embed the runtime JWT_SECRET value.
+RUN rm -f /etc/nginx/sites-enabled/default \
           /etc/nginx/sites-available/default
 
 ENV PYTHONDONTWRITEBYTECODE=1 \
@@ -68,8 +58,11 @@ EXPOSE 8082 5173
 # Startup sequence:
 #   1. Wait for Ollama to be ready (it starts in parallel via depends_on)
 #   2. Build FAISS index on first run only (skipped if index already exists)
-#   3. Start nginx (serves UI on 5173)
-#   4. Start FastAPI (serves API on 8082)
+#   3. Generate nginx's devhub.conf with the runtime JWT_SECRET baked in as
+#      the internal proxy header (see api/auth.py) -- can't be done at
+#      build time since the secret is only known at container start
+#   4. Start nginx (serves UI on 5173)
+#   5. Start FastAPI (serves API on 8082)
 CMD ["bash", "-c", "\
   echo '⏳ Waiting for Ollama...' && \
   until curl -sf http://ollama:11434/api/tags > /dev/null 2>&1; do \
@@ -82,6 +75,17 @@ CMD ["bash", "-c", "\
   else \
     echo '✅ Index already exists, skipping build'; \
   fi && \
+  printf 'server {\n\
+    listen 5173;\n\
+    root /usr/share/nginx/html;\n\
+    index index.html;\n\
+    location / { try_files $uri $uri/ /index.html; }\n\
+    location /api/ { proxy_pass http://127.0.0.1:8082; proxy_set_header Host $host; }\n\
+    location /rag/ { proxy_pass http://127.0.0.1:8082; proxy_set_header X-Devhub-Internal \"%s\"; }\n\
+    location /health { proxy_pass http://127.0.0.1:8082; }\n\
+    location /status { proxy_pass http://127.0.0.1:8082; }\n\
+    location /docs   { proxy_pass http://127.0.0.1:8082; }\n\
+}\n' \"${JWT_SECRET:-change-me}\" > /etc/nginx/conf.d/devhub.conf && \
   nginx && \
   echo '🌐 nginx started on port 5173' && \
   uvicorn api.main:app --host 0.0.0.0 --port 8082"]

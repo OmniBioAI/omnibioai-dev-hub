@@ -4,3 +4,4 @@ requests
 numpy
 faiss-cpu
 sentence-transformers
+PyJWT>=2.8.0
