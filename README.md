@@ -94,12 +94,21 @@ omnibioai-dev-hub/
 │
 ├── api/
 │   ├── main.py              # FastAPI app, startup, /status, /health
+│   ├── auth.py               # JWT dependency for /rag/*, gated by AUTH_ENABLED
+│   │                          # — see "Authentication" below
+│   ├── middleware/
+│   │   └── trace.py           # TraceContext — written but not wired into
+│   │                          # main.py or tested; not on any live request path
 │   └── routes/
-│       └── rag.py           # /rag/query and /rag/stream endpoints
+│       └── rag.py           # /rag/query and /rag/stream endpoints (auth-gated)
 │
 ├── rag/
 │   ├── engine.py            # RAGEngine: retrieve, build_context, answer, stream_llm
-│   └── control_plane.py     # Singleton lifecycle manager
+│   ├── control_plane.py     # Singleton lifecycle manager
+│   ├── query_router.py      # RAGQueryRouterV4 — superseded agentic router,
+│   ├── tool_executor.py     # ToolExecutorV4 — from a prior "V4" architecture,
+│   └── memory_store.py      # MemoryStoreV4 — tests only (see tests/test_rag_*),
+│                              # not on any live request path in the current V6 engine
 │
 ├── index/
 │   ├── vector_store.py      # FAISS wrapper (add, search, save, load)
@@ -119,16 +128,44 @@ omnibioai-dev-hub/
 │   └── chunker.py           # 500-word / 2000-char chunker
 │
 ├── scripts/
-│   └── build_index.py       # Index builder entry point
+│   ├── build_index.py       # Index builder entry point
+│   ├── ingest.py             # Standalone ingestion helper
+│   ├── run_eval.py           # Recall@K eval harness (tests/eval/)
+│   └── check_and_reindex.sh  # Rebuilds the index on new Studio releases (hourly cron)
 │
 ├── data/
 │   └── faiss_index/         # index.faiss + metadata.pkl (gitignored)
 │
 ├── configs/
-│   └── repos.yaml           # Repo list documentation
+│   └── repos.yaml           # Repo list — actual source of truth build_index.py reads
+│
+├── omnibioai-dev-hub-ui/     # Dev Hub UI (React + TypeScript) — see "Frontend" below
 │
 └── .env.example             # Environment variable template
 ```
+
+---
+
+# Frontend
+
+`omnibioai-dev-hub-ui/` is a React + TypeScript UI (Vite, served at
+`/_svc/devhub`), built and shipped alongside the API — not a separate
+repo. The `Dockerfile`'s `ui-builder` stage builds it and copies the
+static output into the same image the FastAPI backend runs in
+(`EXPOSE 8082 5173` — API and UI dev server ports both exposed).
+
+```bash
+cd omnibioai-dev-hub-ui
+npm install
+npm run dev       # Vite dev server on :5173, proxies /api, /rag, /health to :8082
+npm run build      # production build
+```
+
+The dev server's proxy (`vite.config.ts`) rewrites `/api/*` to the FastAPI
+backend at `http://127.0.0.1:8082` (stripping the `/api` prefix) and
+forwards `/rag/*` and `/health` there directly — so `AUTH_ENABLED` on the
+backend (see "Authentication" below) applies to UI-issued requests the
+same as any other client.
 
 ---
 
@@ -290,7 +327,13 @@ This excludes `omnibioai/work/` which contains UUID-named runtime copies of work
 
 # Current Index Stats
 
-As of 2026-06-14 (Phase 3 — metadata filtering + cross-encoder reranking):
+As of 2026-06-14 (Phase 3 — metadata filtering + cross-encoder reranking).
+**Not re-verified since** — `omnibioai-security-audit` and
+`omnibioai-hpc-policy-engine` (both listed as "not present on disk" below
+and in this table's "17 of 19") now exist on disk, so a rebuild today
+would very likely index closer to 19 of 19 and produce different vector
+counts than shown here. Regenerate with `python scripts/build_index.py`
+for current numbers before relying on this table.
 
 | Metric | Value |
 |--------|-------|
@@ -309,7 +352,13 @@ As of 2026-06-14 (Phase 3 — metadata filtering + cross-encoder reranking):
 
 **Remaining failure:** The one unscoped failure (metagenomics shotgun profiling vs. microbiome/kraken sub-workflows) passes with either `bundle="metagenomics"` scoped filtering or `rerank=True` cross-encoder reranking.
 
-Missing repos (not present on disk): `omnibioai-security-audit`, `omnibioai-hpc-policy-engine`. The indexer skips them with a warning and continues.
+At the time these stats were captured, `omnibioai-security-audit` and
+`omnibioai-hpc-policy-engine` were not present on disk and the indexer
+skipped them with a warning. **Both now exist** — the "skipped" comments
+on those two entries in [Supported Repositories](#supported-repositories)
+below are stale; a rebuild today should index them like any other repo,
+gracefully, no code change needed (the indexer's on-disk check is dynamic,
+not a hardcoded list).
 
 > **Note:** `data/faiss_index/` is excluded from git (see `.gitignore`). Regenerate with `python scripts/build_index.py`.
 
@@ -325,6 +374,33 @@ In Docker the server starts automatically as PID 1.
 
 ---
 
+# Authentication
+
+`/rag/query` and `/rag/stream` are gated by a JWT bearer-token dependency
+(`api/auth.py`), off by default and controlled by `AUTH_ENABLED`:
+
+```bash
+export AUTH_ENABLED=true
+export JWT_SECRET=...   # HS256 secret, must match omnibioai-auth's SECRET_KEY
+```
+
+`AUTH_ENABLED=false` (the default for local/`uvicorn --reload` use) runs
+both endpoints open, no token required — this is what the curl examples
+below assume. **`omnibioai-studio`'s deployed compose config sets
+`AUTH_ENABLED=true`**, so against a real deployment both endpoints require:
+
+```bash
+curl -X POST http://localhost:8082/rag/query \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer <jwt-token>" \
+  -d '{"query":"..."}'
+```
+
+A missing/invalid/expired token returns `401`. This follows the same
+shared-secret pattern as `omnibioai-model-registry`'s `require_auth`.
+
+---
+
 # Test Query API
 
 ```bash
@@ -332,6 +408,9 @@ curl -X POST http://localhost:8082/rag/query \
   -H "Content-Type: application/json" \
   -d '{"query":"What is workflow engine in OmniBioAI?"}'
 ```
+
+> Add `-H "Authorization: Bearer <jwt-token>"` if the server you're
+> talking to has `AUTH_ENABLED=true` — see "Authentication" above.
 
 Example response:
 
@@ -467,12 +546,18 @@ repos = [
     "omnibioai-iam-client",
     "omnibioai-policy-engine",
     "omnibioai-security-sdk",
-    "omnibioai-security-audit",       # not present on disk — skipped with warning
-    "omnibioai-hpc-policy-engine",    # not present on disk — skipped with warning
+    "omnibioai-security-audit",
+    "omnibioai-hpc-policy-engine",
 ]
 ```
 
-The two missing repos are skipped gracefully at build time. When they become available, no code change is needed — just add them to the directory.
+`omnibioai-security-audit` and `omnibioai-hpc-policy-engine` were absent
+on disk when [Current Index Stats](#current-index-stats) above was last
+captured (2026-06-14) — that table's "skipped with warning" framing
+reflects that snapshot, not necessarily today's state. Either way, a
+missing repo is skipped gracefully at build time and needs no code
+change to pick up once it appears — the indexer checks the filesystem at
+run time, not a hardcoded present/absent list.
 
 ---
 
