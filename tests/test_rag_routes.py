@@ -1,8 +1,8 @@
 import pytest
 from fastapi import FastAPI
-from fastapi.testclient import TestClient
 from unittest.mock import MagicMock, patch
 import json
+from tests.sync_client import SyncASGIClient
 
 # Import the router and models from the target file
 from api.routes.rag import router, get_engine
@@ -13,7 +13,7 @@ app.include_router(router)
 
 @pytest.fixture
 def client():
-    return TestClient(app)
+    return SyncASGIClient(app)
 
 @pytest.fixture
 def mock_control_plane():
