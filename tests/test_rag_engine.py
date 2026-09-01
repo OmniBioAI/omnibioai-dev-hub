@@ -1,8 +1,10 @@
-import pytest
-import numpy as np
 from unittest.mock import MagicMock, patch
-from rag.engine import RAGEngine, ollama_embed, ollama_generate, cosine
+
+import numpy as np
+import pytest
+
 import rag.engine as _engine_mod
+from rag.engine import RAGEngine, cosine, ollama_embed, ollama_generate
 
 # =========================================================
 # UNIT TESTS FOR ollama_embed
@@ -89,7 +91,7 @@ def test_engine_embed_success(mock_embed, engine):
 
 @patch("rag.engine.ollama_embed")
 def test_engine_embed_invalid_type(mock_embed, engine):
-    with pytest.raises(ValueError, match="Query must be a string"):
+    with pytest.raises(TypeError, match="Query must be a string"):
         engine._embed(123)
 
 @patch("rag.engine.ollama_embed")
@@ -168,6 +170,7 @@ def test_engine_answer_success(mock_gen, engine, mock_vector_store):
     # Mock retrieve to return something
     with patch.object(engine, "retrieve", return_value=[{"source": "s1"}]) as mock_retrieve:
         res = engine.answer("query")
+        mock_retrieve.assert_called_once_with("query", repo=None, bundle=None)
         assert res["answer"] == "final answer"
         assert res["sources"] == ["s1"]
         assert res["version"] == "v6-faiss"
@@ -254,10 +257,12 @@ def test_engine_retrieve_bundle_takes_priority_over_repo(mock_embed, engine, moc
 def test_engine_answer_passes_scope(mock_embed, engine, mock_vector_store):
     mock_embed.return_value = np.array([0.1] * 768, dtype=np.float32)
 
-    with patch.object(engine, "retrieve", return_value=[]) as mock_retrieve:
-        with patch("rag.engine.ollama_generate", return_value="ans"):
-            engine.answer("q", repo="r", bundle="b")
-            mock_retrieve.assert_called_once_with("q", repo="r", bundle="b")
+    with (
+        patch.object(engine, "retrieve", return_value=[]) as mock_retrieve,
+        patch("rag.engine.ollama_generate", return_value="ans"),
+    ):
+        engine.answer("q", repo="r", bundle="b")
+        mock_retrieve.assert_called_once_with("q", repo="r", bundle="b")
 
 
 # =========================================================

@@ -1,8 +1,9 @@
+import logging
 import os
 import pickle
-import numpy as np
+
 import faiss
-import logging
+import numpy as np
 
 logger = logging.getLogger(__name__)
 
@@ -103,7 +104,7 @@ class VectorStore:
 
         return results
 
-    def filter_search(self, query_vec, top_k: int = 5, field: str = None, value: str = None):
+    def filter_search(self, query_vec, top_k: int = 5, field: str | None = None, value: str | None = None):
         """FAISS search with post-filtering on a metadata field.
 
         Retrieves top_k * 3 candidates from FAISS then keeps only those whose

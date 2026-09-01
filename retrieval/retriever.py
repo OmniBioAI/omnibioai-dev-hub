@@ -1,5 +1,6 @@
 from embeddings.embedder import Embedder
 
+
 class Retriever:
     def __init__(self, vector_store):
         self.embedder = Embedder()

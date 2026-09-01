@@ -1,8 +1,7 @@
-import time
 import threading
+import time
 from dataclasses import dataclass, field
-from typing import Optional, Dict, Any
-
+from typing import Any
 
 # =========================================================
 # CONTROL PLANE STATE
@@ -12,8 +11,8 @@ from typing import Optional, Dict, Any
 class ControlPlaneState:
     status: str = "INIT"   # INIT | BUILDING | READY | FAILED
     started_at: float = field(default_factory=time.time)
-    last_error: Optional[str] = None
-    metrics: Dict[str, Any] = field(default_factory=dict)
+    last_error: str | None = None
+    metrics: dict[str, Any] = field(default_factory=dict)
 
 
 # =========================================================

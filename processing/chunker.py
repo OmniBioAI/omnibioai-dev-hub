@@ -1,5 +1,4 @@
 import re
-from typing import List, Optional
 
 MAX_CHARS = 2000
 
@@ -7,7 +6,7 @@ _FENCE_RE = re.compile(r'```.*?```', re.DOTALL)
 _HEADER_RE = re.compile(r'^(#{1,3})\s+.+$', re.MULTILINE)
 
 
-def _split_at_word_boundary(text: str, max_chars: int) -> List[str]:
+def _split_at_word_boundary(text: str, max_chars: int) -> list[str]:
     """Split text at word boundaries, keeping each piece ≤ max_chars."""
     if len(text) <= max_chars:
         return [text]
@@ -23,7 +22,7 @@ def _split_at_word_boundary(text: str, max_chars: int) -> List[str]:
     return chunks
 
 
-def _split_at_paragraphs(text: str, max_chars: int) -> List[str]:
+def _split_at_paragraphs(text: str, max_chars: int) -> list[str]:
     """Split at blank-line boundaries; fall back to word-boundary for oversize paragraphs."""
     if max_chars <= 0:
         return _split_at_word_boundary(text, MAX_CHARS) if text.strip() else []
@@ -31,8 +30,8 @@ def _split_at_paragraphs(text: str, max_chars: int) -> List[str]:
         return [text] if text.strip() else []
 
     paragraphs = [p for p in re.split(r'\n\n+', text) if p.strip()]
-    result: List[str] = []
-    current_parts: List[str] = []
+    result: list[str] = []
+    current_parts: list[str] = []
     current_len = 0
 
     for para in paragraphs:
@@ -58,7 +57,7 @@ def _split_at_paragraphs(text: str, max_chars: int) -> List[str]:
     return result
 
 
-def chunk_text(text: str, chunk_size: int = 500) -> List[str]:
+def chunk_text(text: str, chunk_size: int = 500) -> list[str]:
     """
     Markdown-structure-aware chunker. chunk_size is kept for API compatibility.
 
@@ -73,7 +72,7 @@ def chunk_text(text: str, chunk_size: int = 500) -> List[str]:
         return []
 
     # Protect fenced code blocks — replace with non-splitting placeholders
-    fences: List[str] = []
+    fences: list[str] = []
 
     def _stash(m: re.Match) -> str:
         fences.append(m.group(0))
@@ -82,9 +81,9 @@ def chunk_text(text: str, chunk_size: int = 500) -> List[str]:
     protected = _FENCE_RE.sub(_stash, text)
 
     # Split into sections: list of (header_line | None, body_str, header_level)
-    sections: List[tuple] = []
+    sections: list[tuple] = []
     last_end = 0
-    current_header: Optional[str] = None
+    current_header: str | None = None
     current_level = 0
 
     for m in _HEADER_RE.finditer(protected):
@@ -100,8 +99,8 @@ def chunk_text(text: str, chunk_size: int = 500) -> List[str]:
         sections.append((current_header, tail, current_level))
 
     # Build chunks, maintaining a header breadcrumb stack
-    header_stack: List[str] = []
-    all_chunks: List[str] = []
+    header_stack: list[str] = []
+    all_chunks: list[str] = []
 
     for header_line, body, level in sections:
         if header_line is not None:
@@ -133,7 +132,7 @@ def chunk_text(text: str, chunk_size: int = 500) -> List[str]:
             all_chunks.append(full)  # fallback: emit as-is
 
     # Restore fenced code blocks in every chunk
-    restored: List[str] = []
+    restored: list[str] = []
     for chunk in all_chunks:
         for i, fence in enumerate(fences):
             chunk = chunk.replace(f'\x00FENCE{i}\x00', fence)

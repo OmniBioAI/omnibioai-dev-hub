@@ -1,6 +1,7 @@
-import pytest
-from unittest.mock import patch, mock_open
+from unittest.mock import mock_open, patch
+
 from ingestion.doc_loader import load_documents
+
 
 def test_load_documents():
     fake_walk = [("/repo", [], ["README.md", "notes.txt"])]

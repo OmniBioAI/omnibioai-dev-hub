@@ -1,11 +1,13 @@
-import os
 import json
-import time
 import logging
-import requests
+import os
+import time
+from collections.abc import Generator
+from typing import Any
+
 import numpy as np
+import requests
 import yaml
-from typing import Generator, List, Dict, Any, Optional
 
 logger = logging.getLogger(__name__)
 
@@ -22,7 +24,7 @@ def _get_cross_encoder():
             from sentence_transformers import CrossEncoder
             _CROSS_ENCODER = CrossEncoder(_CE_MODEL, device="cpu")
             logger.info(f"CrossEncoder loaded: {_CE_MODEL}")
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001 -- optional dependency: any load failure degrades to no reranking rather than crashing
             logger.warning(f"CrossEncoder unavailable ({e}); reranking will be skipped")
             _CROSS_ENCODER = False  # sentinel: tried and failed
     return _CROSS_ENCODER if _CROSS_ENCODER is not False else None
@@ -154,7 +156,7 @@ class RAGEngine:
     def _embed(self, text: str):
 
         if not isinstance(text, str):
-            raise ValueError("Query must be a string")
+            raise TypeError("Query must be a string")
 
         vec = ollama_embed(text, model=self.embed_model)
 
@@ -171,7 +173,7 @@ class RAGEngine:
     # =====================================================
     # CROSS-ENCODER RERANKING
     # =====================================================
-    def rerank(self, query: str, docs: List[Dict[str, Any]], top_k: int = 5) -> List[Dict[str, Any]]:
+    def rerank(self, query: str, docs: list[dict[str, Any]], top_k: int = 5) -> list[dict[str, Any]]:
         """Re-order docs by cross-encoder relevance score.
 
         Returns the top_k highest-scoring docs.  Falls back to the original
@@ -200,7 +202,7 @@ class RAGEngine:
     # =====================================================
     # RETRIEVAL (FAISS ONLY)
     # =====================================================
-    def retrieve(self, query: str, top_k: int = 5, repo: str = None, bundle: str = None,
+    def retrieve(self, query: str, top_k: int = 5, repo: str | None = None, bundle: str | None = None,
                  rerank: bool = False):
 
         query_vec = self._embed(query).reshape(1, -1)
@@ -242,7 +244,7 @@ class RAGEngine:
     # =====================================================
     # CONTEXT BUILDER
     # =====================================================
-    def build_context(self, docs: List[Dict[str, Any]]) -> str:
+    def build_context(self, docs: list[dict[str, Any]]) -> str:
 
         if not docs:
             return "No relevant context found."
@@ -274,7 +276,7 @@ Answer clearly, technically, and concisely:
     # =====================================================
     # MAIN PIPELINE
     # =====================================================
-    def answer(self, query: str, repo: str = None, bundle: str = None):
+    def answer(self, query: str, repo: str | None = None, bundle: str | None = None):
 
         docs = self.retrieve(query, repo=repo, bundle=bundle)
         context = self.build_context(docs)
@@ -282,8 +284,8 @@ Answer clearly, technically, and concisely:
 
         try:
             response = ollama_generate(prompt)
-        except Exception as e:
-            response = f"[LLM_ERROR] {str(e)}"
+        except Exception as e:  # noqa: BLE001 -- LLM call boundary: any failure becomes an inline error string instead of crashing the request
+            response = f"[LLM_ERROR] {e!s}"
 
         return {
             "query": query,
@@ -316,11 +318,11 @@ Answer clearly, technically, and concisely:
                     yield token
                 if chunk.get("done"):
                     break
-        except Exception as e:
-            yield f"[LLM_ERROR] {str(e)}"
+        except Exception as e:  # noqa: BLE001 -- LLM streaming boundary: any failure becomes an inline error token instead of killing the generator
+            yield f"[LLM_ERROR] {e!s}"
 
     # =====================================================
     # FASTAPI COMPATIBILITY
     # =====================================================
-    def query(self, question: str, repo: str = None, bundle: str = None):
+    def query(self, question: str, repo: str | None = None, bundle: str | None = None):
         return self.answer(question, repo=repo, bundle=bundle)

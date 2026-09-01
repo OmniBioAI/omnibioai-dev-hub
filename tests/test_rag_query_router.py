@@ -1,7 +1,10 @@
-import pytest
 import json
 from unittest.mock import MagicMock, patch
-from rag.query_router import RAGQueryRouterV4, init_engine, get_engine
+
+import pytest
+
+from rag.query_router import RAGQueryRouterV4, get_engine, init_engine
+
 
 @pytest.fixture
 def mock_vs():
@@ -67,12 +70,14 @@ def test_plugin_search_error(router, mock_pi):
     assert router.plugin_search("q") == []
 
 def test_hybrid_retrieve(router):
-    with patch.object(router, "detect_intent", return_value="intent"):
-        with patch.object(router, "vector_search", return_value=[]):
-            with patch.object(router, "graph_search", return_value=[]):
-                with patch.object(router, "plugin_search", return_value=[]):
-                    res = router.hybrid_retrieve("q")
-                    assert res["intent"] == "intent"
+    with (
+        patch.object(router, "detect_intent", return_value="intent"),
+        patch.object(router, "vector_search", return_value=[]),
+        patch.object(router, "graph_search", return_value=[]),
+        patch.object(router, "plugin_search", return_value=[]),
+    ):
+        res = router.hybrid_retrieve("q")
+        assert res["intent"] == "intent"
 
 def test_build_context(router):
     results = {
@@ -104,11 +109,13 @@ def test_stream_llm_error(mock_post, router):
     assert "[STREAM_ERROR] HTTP error" in tokens[0]
 
 def test_query(router):
-    with patch.object(router, "hybrid_retrieve", return_value={"intent": "i", "vector": [], "graph": [], "plugin": []}):
-        with patch.object(router, "stream_llm", return_value=["ans"]):
-            res = router.query("q")
-            assert res["intent"] == "i"
-            assert res["answer"] == "ans"
+    with (
+        patch.object(router, "hybrid_retrieve", return_value={"intent": "i", "vector": [], "graph": [], "plugin": []}),
+        patch.object(router, "stream_llm", return_value=["ans"]),
+    ):
+        res = router.query("q")
+        assert res["intent"] == "i"
+        assert res["answer"] == "ans"
 
 def test_engine_singleton():
     init_engine(MagicMock())

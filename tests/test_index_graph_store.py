@@ -1,5 +1,7 @@
 import pytest
+
 from index.graph_store import GraphStore
+
 
 @pytest.fixture
 def gs():
