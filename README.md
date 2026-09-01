@@ -399,6 +399,8 @@ curl -X POST http://localhost:8082/rag/query \
 A missing/invalid/expired token returns `401`. This follows the same
 shared-secret pattern as `omnibioai-model-registry`'s `require_auth`.
 
+`DEBUG_TRACEBACKS` (default: unset/false) controls whether `/rag/query`'s error responses include a full stack trace (`trace` field) — omitted by default, included only when explicitly set to `true`; keep it off in production.
+
 ---
 
 # Test Query API
