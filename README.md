@@ -203,13 +203,19 @@ ollama pull nomic-embed-text
 
 ### Generation Model
 
-The system uses `llama3` by default (hardcoded in `rag/engine.py`):
+The system uses `llama3` by default:
 
 ```bash
 ollama pull llama3
 ```
 
-Optional alternatives (change `model=` in `engine.py` if needed):
+The model name is read from `configs/index_config.yaml`'s `llm_model` key
+(see [Configuration](#configuration) below) — `llama3` is just that file's
+current value, and also what `rag/engine.py` falls back to if the config
+is missing, empty, or unset.
+
+Optional alternatives — pull the model, then set `llm_model:` in
+`configs/index_config.yaml` accordingly:
 
 ```bash
 ollama pull mistral
@@ -248,6 +254,12 @@ pip install -r requirements.txt -r requirements-dev.txt
 pytest
 ```
 
+CI (`.github/workflows/ci.yml`) runs this same install + `ruff check .` +
+`pytest` combination in a `Lint & Test` job on every push/PR, alongside a
+separate `Frontend Build & Test` job (`npm ci`, `npm run build`, `npm
+test` in `omnibioai-dev-hub-ui/`) — both must pass before the tag-triggered
+Docker build job runs.
+
 ---
 
 # Configuration
@@ -277,6 +289,32 @@ Copy `.env.example` to `.env` for local development:
 cp .env.example .env
 # edit REPO_BASE as needed
 ```
+
+---
+
+## configs/repos.yaml
+
+Lists the repo names `scripts/build_index.py` indexes (paths are built as
+`${REPO_BASE}/<name>`, same as [Supported Repositories](#supported-repositories)
+below). Edit this file to add, remove, or reorder indexed repos without
+touching code.
+
+If the file is missing, empty, fails to parse, or its `repos:` list is
+empty, the indexer falls back to the same 19-repo list hardcoded in
+`build_index.py` — so leaving it untouched changes nothing.
+
+---
+
+## configs/index_config.yaml
+
+Sets `llm_model`, the Ollama generation model name used by
+`ollama_generate()`'s default and `RAGEngine.stream_llm()` (see
+[Generation Model](#generation-model) above). Edit `llm_model:` here to
+switch models without touching code.
+
+If the file is missing, empty, or doesn't set `llm_model`, both call
+sites fall back to the prior hardcoded value, `"llama3"` — so leaving it
+untouched changes nothing.
 
 ---
 
@@ -312,7 +350,7 @@ Expected output:
 
 `seen_hashes` is **reset per repo** so cross-repo identical chunks each get their own index entry under their canonical source path. Within a single repo, duplicate chunks (e.g. shared boilerplate across plugin READMEs) are deduplicated.
 
-Chunks shorter than 10 characters are discarded (`MIN_CHUNK_CHARS = 10`) to eliminate overflow tails produced by the hard character-slice in `chunker.py`.
+Chunks shorter than 10 characters are discarded (`MIN_CHUNK_CHARS = 10`) to filter out low-information fragments (e.g. a lone header with no body).
 
 ### Excluded paths
 
@@ -409,6 +447,23 @@ curl -X POST http://localhost:8082/rag/query \
 
 A missing/invalid/expired token returns `401`. This follows the same
 shared-secret pattern as `omnibioai-model-registry`'s `require_auth`.
+
+**Fail-fast startup check:** if `AUTH_ENABLED=true` and `JWT_SECRET` is
+unset or empty, the app now **refuses to start** — `validate_auth_config()`
+(`api/auth.py`) raises `RuntimeError` from the FastAPI startup event
+(`api/main.py`) before a single request can be served. Previously an
+unset `JWT_SECRET` silently fell through to validating tokens against an
+empty HMAC secret, which PyJWT accepts, so anyone could forge a valid
+token — this closed that bypass. If you deploy with `AUTH_ENABLED=true`,
+make sure `JWT_SECRET` is actually set or the container/process will not
+come up.
+
+The Docker image enforces the equivalent check at the shell level before
+nginx or FastAPI start: if `AUTH_ENABLED=true` and `JWT_SECRET` is unset,
+the container exits immediately with an error instead of generating
+nginx's `devhub.conf` with an empty/placeholder value baked into the
+`X-Devhub-Internal` header (the internal UI-proxy auth path — see
+`Dockerfile`'s `CMD`).
 
 `DEBUG_TRACEBACKS` (default: unset/false) controls whether `/rag/query`'s error responses include a full stack trace (`trace` field) — omitted by default, included only when explicitly set to `true`; keep it off in production.
 
@@ -538,7 +593,9 @@ docs = engine.retrieve(query, top_k=5, rerank=True)
 
 # Supported Repositories
 
-The indexer targets 19 repositories. All paths are relative to `REPO_BASE`:
+The indexer targets 19 repositories, sourced from
+[`configs/repos.yaml`](#configsreposyaml) (falls back to this hardcoded
+list if that file is missing/empty). All paths are relative to `REPO_BASE`:
 
 ```python
 repos = [
@@ -727,13 +784,15 @@ Expected: `ntotal: 2067` (or your current count).
 
 # Known Limitations / Future Work
 
-## Chunker word-wrap (planned)
-
-`chunker.py` slices at a hard 2000-character boundary without snapping to word boundaries. This produces 1–2 word fragments at the tail of some documents (e.g. "onment", "abases" — 16–18 chars, above the `MIN_CHUNK_CHARS=10` filter). These fragments are harmless but pollute the index with low-information chunks. The fix is to snap the slice to the nearest preceding space.
+> **Resolved:** `chunker.py` previously sliced at a hard 2000-character
+> boundary without snapping to word boundaries, producing short tail
+> fragments. It is now markdown-structure-aware and snaps splits to
+> paragraph and word boundaries (see [Chunking strategy](#current-index-stats)
+> and `processing/chunker.py`'s `_split_at_paragraphs` /
+> `_split_at_word_boundary`) — no fix needed here anymore.
 
 ## Planned V7 Features
 
-* Chunker word-boundary snapping
 * IVF or HNSW indexes for million-scale corpora
 * Hybrid BM25 + vector search
 * Persistent storage and distributed / incremental index updates
