@@ -83,14 +83,30 @@ USER appuser
 EXPOSE 8082 5173
 
 # Startup sequence:
-#   1. Wait for Ollama to be ready (it starts in parallel via depends_on)
-#   2. Build FAISS index on first run only (skipped if index already exists)
-#   3. Generate nginx's devhub.conf with the runtime JWT_SECRET baked in as
+#   1. Fail fast if AUTH_ENABLED=true but JWT_SECRET is unset/empty --
+#      refuse to start rather than silently baking a well-known "change-me"
+#      placeholder into nginx's X-Devhub-Internal header (the internal
+#      UI-proxy auth path). This runs BEFORE nginx starts, and before the
+#      Ollama wait / index build, so a misconfigured container fails
+#      immediately instead of coming up looking like it's working. Mirrors
+#      api/auth.py's validate_auth_config() check on the FastAPI side --
+#      same AUTH_ENABLED=true + JWT_SECRET-unset condition, same fail-closed
+#      intent, enforced here because this is an architecturally separate
+#      code path (shell/nginx-config-generation vs. Python/JWT-validation).
+#   2. Wait for Ollama to be ready (it starts in parallel via depends_on)
+#   3. Build FAISS index on first run only (skipped if index already exists)
+#   4. Generate nginx's devhub.conf with the runtime JWT_SECRET baked in as
 #      the internal proxy header (see api/auth.py) -- can't be done at
 #      build time since the secret is only known at container start
-#   4. Start nginx (serves UI on 5173)
-#   5. Start FastAPI (serves API on 8082)
+#   5. Start nginx (serves UI on 5173)
+#   6. Start FastAPI (serves API on 8082)
 CMD ["bash", "-c", "\
+  _auth_enabled=$(printf '%s' \"${AUTH_ENABLED:-}\" | tr -d '[:space:]' | tr '[:upper:]' '[:lower:]'); \
+  if [ \"$_auth_enabled\" = 'true' ] && [ -z \"${JWT_SECRET:-}\" ]; then \
+    echo '❌ AUTH_ENABLED is true but JWT_SECRET is not set -- refusing to start with the internal UI-proxy auth header silently falling back to a placeholder.' >&2; \
+    echo '   Set JWT_SECRET before starting this container.' >&2; \
+    exit 1; \
+  fi && \
   echo '⏳ Waiting for Ollama...' && \
   until curl -sf http://ollama:11434/api/tags > /dev/null 2>&1; do \
     echo '  ollama not ready, retrying in 3s...'; sleep 3; \
@@ -112,7 +128,7 @@ CMD ["bash", "-c", "\
     location /health { proxy_pass http://127.0.0.1:8082; }\n\
     location /status { proxy_pass http://127.0.0.1:8082; }\n\
     location /docs   { proxy_pass http://127.0.0.1:8082; }\n\
-}\n' \"${JWT_SECRET:-change-me}\" > /etc/nginx/conf.d/devhub.conf && \
+}\n' \"${JWT_SECRET:-}\" > /etc/nginx/conf.d/devhub.conf && \
   nginx && \
   echo '🌐 nginx started on port 5173' && \
   uvicorn api.main:app --host 0.0.0.0 --port 8082"]
