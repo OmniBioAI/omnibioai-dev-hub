@@ -1,0 +1,12 @@
+# Dev/test-only dependencies. Install alongside requirements.txt to run the
+# test suite locally or in CI:
+#
+#   pip install -r requirements.txt -r requirements-dev.txt
+#
+# requirements.txt alone is sufficient to run the app; nothing here is
+# imported by application code.
+pytest==9.0.2
+pytest-asyncio==1.3.0
+pytest-cov==7.0.0
+httpx==0.28.1
+ruff==0.16.1

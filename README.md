@@ -237,6 +237,17 @@ pip install -r requirements.txt
 
 > `sentence-transformers` is required for cross-encoder reranking (`rerank=True` in `retrieve()`). It is also used by the test suite. If reranking is not needed you can omit it — the engine degrades gracefully to FAISS order when the model is unavailable.
 
+`requirements.txt` alone is enough to run the app — it does not install anything needed to run the test suite.
+
+### Running Tests
+
+If you're contributing and want to run `pytest` locally, also install the dev/test dependencies:
+
+```bash
+pip install -r requirements.txt -r requirements-dev.txt
+pytest
+```
+
 ---
 
 # Configuration
