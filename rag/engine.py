@@ -4,6 +4,7 @@ import time
 import logging
 import requests
 import numpy as np
+import yaml
 from typing import Generator, List, Dict, Any, Optional
 
 logger = logging.getLogger(__name__)
@@ -32,6 +33,36 @@ def _get_cross_encoder():
 # =========================================================
 OLLAMA_URL = os.environ.get("OLLAMA_URL", "http://ollama:11434/api")
 EMBED_DIM = 768
+
+_INDEX_CONFIG_PATH = os.path.join(
+    os.path.dirname(os.path.abspath(__file__)), "..", "configs", "index_config.yaml"
+)
+_DEFAULT_LLM_MODEL = "llama3"
+
+
+def _load_llm_model(default: str = _DEFAULT_LLM_MODEL, path: str = _INDEX_CONFIG_PATH) -> str:
+    """Read `llm_model` from configs/index_config.yaml.
+
+    Falls back to `default` if the file is missing, empty, fails to parse,
+    or doesn't set llm_model -- so behavior is unchanged unless the config
+    is explicitly edited. Both ollama_generate()'s default arg and
+    RAGEngine.stream_llm() read this same LLM_MODEL value.
+    """
+    try:
+        with open(path, "r") as f:
+            data = yaml.safe_load(f)
+    except (OSError, yaml.YAMLError) as e:
+        logger.warning(f"Could not read {path} ({e}); defaulting llm_model to {default!r}")
+        return default
+
+    if not isinstance(data, dict):
+        return default
+
+    value = data.get("llm_model")
+    return str(value) if value else default
+
+
+LLM_MODEL = _load_llm_model()
 
 
 def ollama_embed(text: str, model: str = "nomic-embed-text"):
@@ -80,7 +111,7 @@ def ollama_embed(text: str, model: str = "nomic-embed-text"):
     return vec
 
 
-def ollama_generate(prompt: str, model: str = "llama3"):
+def ollama_generate(prompt: str, model: str = LLM_MODEL):
     res = requests.post(
         f"{OLLAMA_URL}/generate",
         json={
@@ -271,7 +302,7 @@ Answer clearly, technically, and concisely:
         try:
             res = requests.post(
                 f"{OLLAMA_URL}/generate",
-                json={"model": "llama3", "prompt": prompt, "stream": True},
+                json={"model": LLM_MODEL, "prompt": prompt, "stream": True},
                 stream=True,
                 timeout=300,
             )
