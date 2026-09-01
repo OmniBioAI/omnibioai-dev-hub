@@ -1,6 +1,6 @@
 import os
 
-SKIP_DIRS = {".git", "__pycache__", "node_modules", ".venv", "venv", ".pytest_cache", "obsolete"}
+SKIP_DIRS = {".git", "__pycache__", "node_modules", ".venv", "venv", ".pytest_cache", "obsolete", "production-readiness"}
 
 # Path-based exclusion: skip any subtree whose path contains one of these
 # directory names *relative to the repo root*.  "work" covers omnibioai/work/,
