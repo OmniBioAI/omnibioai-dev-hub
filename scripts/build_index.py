@@ -2,6 +2,7 @@ import sys
 import os
 import hashlib
 import numpy as np
+import yaml
 
 sys.path.append(os.path.abspath("."))
 
@@ -12,8 +13,39 @@ from processing.chunker import chunk_text
 
 MIN_CHUNK_CHARS = 10  # discard overflow tails from chunker.py's hard char-slice
 
+REPOS_CONFIG_PATH = os.path.join(
+    os.path.dirname(os.path.abspath(__file__)), "..", "configs", "repos.yaml"
+)
+
+
 def hash_text(text: str) -> str:
     return hashlib.sha256(text.encode("utf-8")).hexdigest()
+
+
+def _load_repo_names_from_config(path: str = REPOS_CONFIG_PATH):
+    """Read the `repos:` name list from configs/repos.yaml.
+
+    Returns the list of names on success, or None if the file is missing,
+    empty, fails to parse, or doesn't define a non-empty `repos:` list. In
+    every one of those cases the caller falls back to the hardcoded list in
+    build_index(), so behavior is unchanged unless the YAML is actually
+    populated and wired in.
+    """
+    try:
+        with open(path, "r") as f:
+            data = yaml.safe_load(f)
+    except (OSError, yaml.YAMLError) as e:
+        print(f"⚠️  Could not read {path} ({e}); falling back to hardcoded repo list")
+        return None
+
+    if not isinstance(data, dict):
+        return None
+
+    names = data.get("repos")
+    if not names or not isinstance(names, list):
+        return None
+
+    return list(names)
 
 
 def normalize_vector(vec):
@@ -39,27 +71,32 @@ def build_index():
     # Locally: export REPO_BASE=/home/manish/Desktop/machine (or set in .env).
     REPO_BASE = os.environ.get("REPO_BASE", "/home/manish/Desktop/machine")
 
-    repos = [
-        f"{REPO_BASE}/omnibioai",
-        f"{REPO_BASE}/omnibioai-rag",
-        f"{REPO_BASE}/omnibioai-toolserver",
-        f"{REPO_BASE}/omnibioai-sdk",
-        f"{REPO_BASE}/omnibioai-workflow-bundles",
-        f"{REPO_BASE}/omnibioai-control-center",
-        f"{REPO_BASE}/omnibioai-lims",
-        f"{REPO_BASE}/omnibioai-model-registry",
-        f"{REPO_BASE}/omnibioai-dev-docker",
-        f"{REPO_BASE}/omnibioai-api-gateway",
-        f"{REPO_BASE}/omnibioai-docs",
-        f"{REPO_BASE}/omnibioai-studio",
-        f"{REPO_BASE}/omnibioai-auth",
-        f"{REPO_BASE}/omnibioai-tool-runtime",
-        f"{REPO_BASE}/omnibioai-iam-client",
-        f"{REPO_BASE}/omnibioai-policy-engine",
-        f"{REPO_BASE}/omnibioai-security-audit",
-        f"{REPO_BASE}/omnibioai-security-sdk",
-        f"{REPO_BASE}/omnibioai-hpc-policy-engine",
+    # Hardcoded fallback -- kept in place (not deleted) so behavior is
+    # unchanged if configs/repos.yaml is missing, empty, or fails to parse.
+    HARDCODED_REPO_NAMES = [
+        "omnibioai",
+        "omnibioai-rag",
+        "omnibioai-toolserver",
+        "omnibioai-sdk",
+        "omnibioai-workflow-bundles",
+        "omnibioai-control-center",
+        "omnibioai-lims",
+        "omnibioai-model-registry",
+        "omnibioai-dev-docker",
+        "omnibioai-api-gateway",
+        "omnibioai-docs",
+        "omnibioai-studio",
+        "omnibioai-auth",
+        "omnibioai-tool-runtime",
+        "omnibioai-iam-client",
+        "omnibioai-policy-engine",
+        "omnibioai-security-audit",
+        "omnibioai-security-sdk",
+        "omnibioai-hpc-policy-engine",
     ]
+
+    repo_names = _load_repo_names_from_config() or HARDCODED_REPO_NAMES
+    repos = [f"{REPO_BASE}/{name}" for name in repo_names]
 
     # Fail fast: if not a single repo exists, the REPO_BASE is wrong.
     existing = [r for r in repos if os.path.isdir(r)]
