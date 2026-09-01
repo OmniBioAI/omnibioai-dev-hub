@@ -3,12 +3,19 @@ from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
 from typing import Optional
 import json
+import os
 import traceback
 
 from rag.control_plane import CONTROL_PLANE
 from api.auth import require_auth
 
 router = APIRouter()
+
+
+def _debug_tracebacks_enabled() -> bool:
+    # Same shared-secret-style convention as api/auth.py's _auth_enabled():
+    # a no-op (tracebacks hidden) unless explicitly turned on.
+    return os.getenv("DEBUG_TRACEBACKS", "").strip().lower() == "true"
 
 
 # =========================================================
@@ -61,13 +68,13 @@ def query(req: QueryRequest, actor: str = Depends(require_auth)):
         }
 
     except Exception as e:
-        raise HTTPException(
-            status_code=500,
-            detail={
-                "error": str(e),
-                "trace": traceback.format_exc()
-            }
-        )
+        detail = {"error": str(e)}
+        # Stack traces can leak file paths, internals, and other sensitive
+        # detail into the HTTP response -- only include one when a deployer
+        # has explicitly opted in via DEBUG_TRACEBACKS=true.
+        if _debug_tracebacks_enabled():
+            detail["trace"] = traceback.format_exc()
+        raise HTTPException(status_code=500, detail=detail)
 
 
 # =========================================================

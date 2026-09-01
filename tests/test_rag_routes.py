@@ -66,18 +66,33 @@ def test_query_endpoint_success(client, mock_control_plane):
     assert data["answer"] == "test answer"
     assert data["api_version"] == "v6"
 
-def test_query_endpoint_failure(client, mock_control_plane):
+def test_query_endpoint_failure_traceback_enabled(client, mock_control_plane, monkeypatch):
+    monkeypatch.setenv("DEBUG_TRACEBACKS", "true")
     mock_engine = MagicMock()
     mock_engine.query.side_effect = Exception("Query Failed")
     mock_control_plane.get_engine.return_value = mock_engine
-    
+
     response = client.post("/query", json={"query": "hello"})
-    
+
     assert response.status_code == 500
     data = response.json()
     assert "detail" in data
     assert data["detail"]["error"] == "Query Failed"
     assert "trace" in data["detail"]
+
+def test_query_endpoint_failure_traceback_disabled(client, mock_control_plane, monkeypatch):
+    monkeypatch.delenv("DEBUG_TRACEBACKS", raising=False)
+    mock_engine = MagicMock()
+    mock_engine.query.side_effect = Exception("Query Failed")
+    mock_control_plane.get_engine.return_value = mock_engine
+
+    response = client.post("/query", json={"query": "hello"})
+
+    assert response.status_code == 500
+    data = response.json()
+    assert "detail" in data
+    assert data["detail"]["error"] == "Query Failed"
+    assert "trace" not in data["detail"]
 
 
 # =========================================================
