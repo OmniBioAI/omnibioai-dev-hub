@@ -26,7 +26,7 @@ Repositories  (REPO_BASE/omnibioai-*)
      ↓
 Document Loader  (ingestion/doc_loader.py)
      ↓
-Chunker  (processing/chunker.py, 500-word windows / 2000-char max)
+Chunker  (processing/chunker.py, markdown-structure-aware, header/paragraph/word-boundary splitting, 2000-char max)
      ↓
 Ollama Embeddings  (nomic-embed-text, 768-d, normalized)
      ↓
@@ -232,7 +232,7 @@ conda activate omnibioai-dev-hub
 ## Install Dependencies
 
 ```bash
-pip install fastapi uvicorn requests numpy faiss-cpu sentence-transformers
+pip install -r requirements.txt
 ```
 
 > `sentence-transformers` is required for cross-encoder reranking (`rerank=True` in `retrieve()`). It is also used by the test suite. If reranking is not needed you can omit it — the engine degrades gracefully to FAISS order when the model is unavailable.
@@ -565,9 +565,7 @@ run time, not a hardcoded present/absent list.
 
 ## Step 1 — Chunking
 
-Documents are split using a 500-word sliding window, hard-capped at 2000 characters per chunk. Chunks shorter than 10 characters are discarded.
-
-> **Known limitation:** The hard character slice at 2000 chars can produce 1–2 word overflow fragments at word boundaries (e.g. "onment", "abases"). These are above the 10-char filter threshold. A future fix will snap the slice to the nearest word boundary. See *Future Work* below.
+Documents are split using a markdown-structure-aware chunker (`processing/chunker.py`). Fenced code blocks (` ``` `) are never split. Text is divided at H1/H2/H3 header lines as natural section boundaries; sections longer than 2000 characters (`MAX_CHARS`) are split at paragraph boundaries (`\n\n`), and paragraphs still longer than 2000 characters fall back to word-boundary splitting. Each chunk is prefixed with its ancestor header chain (e.g. `# H1 > ## H2`) so retrieval context carries section identity. Chunks shorter than 10 characters are discarded.
 
 ---
 
