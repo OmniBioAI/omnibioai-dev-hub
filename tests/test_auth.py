@@ -1,11 +1,13 @@
 """Unit tests for api/auth.py's JWT dependency.
 
-These tests exercise api/auth.py's CURRENT behavior as written -- including
-one documented security gap in the JWT_SECRET-unset case (see the tests in
-the final section below, and the PR description). Nothing in api/auth.py
-is modified by this file.
+These tests exercise api/auth.py's current behavior as written, including
+validate_auth_config() -- the startup guard that makes the app refuse to
+start when AUTH_ENABLED=true but JWT_SECRET is unset/empty (previously a
+silent request-time auth bypass; see the tests near the bottom of this
+file, and the PR description for before/after).
 """
 
+import asyncio
 import time
 
 import jwt
@@ -13,7 +15,13 @@ import pytest
 from fastapi import Depends, FastAPI
 from fastapi.testclient import TestClient
 
-from api.auth import AuthError, extract_token, require_auth, validate_token
+from api.auth import (
+    AuthError,
+    extract_token,
+    require_auth,
+    validate_auth_config,
+    validate_token,
+)
 
 SECRET = "test-secret-value"
 
@@ -206,10 +214,6 @@ def test_require_auth_internal_header_wrong_value_falls_through_and_fails(monkey
 
 # =========================================================
 # JWT_SECRET unset -- documents ACTUAL current behavior.
-#
-# One of these (test_require_auth_unset_secret_accepts_token_forged_with_
-# empty_secret) documents a real security gap in api/auth.py today. It is
-# NOT fixed here per instructions -- see the PR description for the report.
 # =========================================================
 
 def test_require_auth_unset_secret_internal_header_path_is_unreachable(monkeypatch):
@@ -225,30 +229,59 @@ def test_require_auth_unset_secret_internal_header_path_is_unreachable(monkeypat
     assert resp.status_code == 401  # falls through to the JWT path, no Authorization header
 
 
-def test_require_auth_unset_secret_accepts_token_forged_with_empty_secret(monkeypatch):
-    """
-    SECURITY GAP -- documented here, not fixed (see PR description).
+# =========================================================
+# validate_auth_config() -- startup guard against the empty-secret bypass.
+#
+# Previously, AUTH_ENABLED=true with JWT_SECRET unset/empty silently fell
+# through at request time to validate_token(token, "") -- and PyJWT does
+# not reject an empty HMAC secret, so anyone could forge a token signed
+# with secret="" (e.g. jwt.encode({"sub": "attacker"}, "", algorithm=
+# "HS256")) and it would pass validation. That let a deployment look
+# auth-protected while actually being wide open. These tests now confirm
+# the app refuses to start in that configuration instead of silently
+# serving requests with auth effectively disabled.
+# =========================================================
 
-    When AUTH_ENABLED=true but JWT_SECRET is unset/empty, require_auth()
-    calls validate_token(token, "") -- i.e. it verifies the JWT signature
-    against an empty-string HMAC secret. PyJWT does not reject an empty
-    secret for HS256: `jwt.encode(payload, "", algorithm="HS256")` produces
-    a token that `jwt.decode(token, "", algorithms=["HS256"])` happily
-    accepts. So anyone can forge a token signed with secret="" and it will
-    pass validation -- auth is effectively bypassable whenever a deployment
-    sets AUTH_ENABLED=true without also setting JWT_SECRET.
-
-    This test asserts what api/auth.py actually does today. It is not an
-    endorsement of the behavior.
-    """
+def test_validate_auth_config_raises_when_enabled_without_secret(monkeypatch):
     monkeypatch.setenv("AUTH_ENABLED", "true")
     monkeypatch.delenv("JWT_SECRET", raising=False)
 
-    forged_token = jwt.encode({"sub": "attacker"}, "", algorithm="HS256")
+    with pytest.raises(RuntimeError, match="AUTH_ENABLED is true but JWT_SECRET is not set"):
+        validate_auth_config()
 
-    resp = client.get("/protected", headers={"Authorization": f"Bearer {forged_token}"})
 
-    # Documents the current (buggy) behavior: this succeeds instead of
-    # being rejected.
-    assert resp.status_code == 200
-    assert resp.json()["actor"] == "attacker"
+def test_validate_auth_config_raises_when_enabled_with_blank_secret(monkeypatch):
+    monkeypatch.setenv("AUTH_ENABLED", "true")
+    monkeypatch.setenv("JWT_SECRET", "   ")  # whitespace-only -> strips to ""
+
+    with pytest.raises(RuntimeError, match="AUTH_ENABLED is true but JWT_SECRET is not set"):
+        validate_auth_config()
+
+
+def test_validate_auth_config_passes_when_enabled_with_secret_set(monkeypatch):
+    monkeypatch.setenv("AUTH_ENABLED", "true")
+    monkeypatch.setenv("JWT_SECRET", SECRET)
+
+    validate_auth_config()  # must not raise
+
+
+def test_validate_auth_config_ignores_missing_secret_when_auth_disabled(monkeypatch):
+    # Requirement: AUTH_ENABLED=false must be completely unaffected by this
+    # check -- JWT_SECRET stays irrelevant when auth is off.
+    monkeypatch.delenv("AUTH_ENABLED", raising=False)
+    monkeypatch.delenv("JWT_SECRET", raising=False)
+
+    validate_auth_config()  # must not raise
+
+
+def test_startup_refuses_when_auth_enabled_without_secret(monkeypatch):
+    """End-to-end version of the guard: api.main's real startup_event()
+    (not just validate_auth_config() in isolation) refuses to start in
+    this configuration."""
+    monkeypatch.setenv("AUTH_ENABLED", "true")
+    monkeypatch.delenv("JWT_SECRET", raising=False)
+
+    from api.main import startup_event
+
+    with pytest.raises(RuntimeError, match="AUTH_ENABLED is true but JWT_SECRET is not set"):
+        asyncio.run(startup_event())

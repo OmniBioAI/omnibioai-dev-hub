@@ -7,6 +7,7 @@ from fastapi.responses import JSONResponse
 import logging
 
 from api.routes import rag
+from api.auth import validate_auth_config
 
 from index.vector_store import VectorStore
 from index.graph_store import GraphStore
@@ -93,6 +94,10 @@ async def init_control_plane():
 
 @app.on_event("startup")
 async def startup_event():
+    # Fail loudly and refuse to start rather than silently serving a
+    # deployment that looks auth-protected but isn't -- see api/auth.py's
+    # validate_auth_config() for why.
+    validate_auth_config()
     await init_control_plane()
 
 
