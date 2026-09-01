@@ -1,4 +1,13 @@
 __pycache__/
 data/faiss_index/
-__pycache__/
 *.pyc
+.coverage
+coverage.json
+.pytest_cache/
+.benchmarks/
+node_modules/
+dist/
+*.egg-info/
+.env
+cache/
+logs/
