@@ -24,6 +24,26 @@ def _jwt_secret() -> str:
     return os.getenv("JWT_SECRET", "").strip()
 
 
+def validate_auth_config() -> None:
+    """Fail loudly at startup if auth is enabled but misconfigured.
+
+    AUTH_ENABLED=true with an unset/empty JWT_SECRET used to fall through
+    at request time to validate_token(token, "") -- and PyJWT does not
+    reject an empty HMAC secret, so anyone could forge a token signed with
+    secret="" (e.g. jwt.encode({"sub": "attacker"}, "", algorithm="HS256"))
+    and it would pass validation. That left a deployment looking secured
+    while actually being wide open. Refusing to start is the fix: a loud
+    crash at boot beats a silent bypass in production. Call this from the
+    app's startup path (see api/main.py) -- not from require_auth(), so a
+    misconfigured deployment never serves a single request.
+    """
+    if _auth_enabled() and not _jwt_secret():
+        raise RuntimeError(
+            "AUTH_ENABLED is true but JWT_SECRET is not set -- "
+            "refusing to start with auth silently disabled."
+        )
+
+
 def extract_token(authorization_header: str | None) -> str:
     if not authorization_header:
         raise AuthError("Authorization header is missing", 401)
