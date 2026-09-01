@@ -1,5 +1,6 @@
 from rag.memory_store import MemoryStoreV4
 
+
 def test_memory_store():
     ms = MemoryStoreV4(max_len=2)
     ms.add("user", "hi")

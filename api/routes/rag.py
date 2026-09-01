@@ -1,13 +1,13 @@
-from fastapi import APIRouter, Depends, HTTPException
-from fastapi.responses import StreamingResponse
-from pydantic import BaseModel
-from typing import Optional
 import json
 import os
 import traceback
 
-from rag.control_plane import CONTROL_PLANE
+from fastapi import APIRouter, Depends, HTTPException
+from fastapi.responses import StreamingResponse
+from pydantic import BaseModel
+
 from api.auth import require_auth
+from rag.control_plane import CONTROL_PLANE
 
 router = APIRouter()
 
@@ -24,8 +24,8 @@ def _debug_tracebacks_enabled() -> bool:
 
 class QueryRequest(BaseModel):
     query: str
-    repo: Optional[str] = None
-    bundle: Optional[str] = None
+    repo: str | None = None
+    bundle: str | None = None
 
 
 # =========================================================
@@ -45,8 +45,8 @@ def get_engine():
 
         return engine
 
-    except Exception as e:
-        raise RuntimeError(f"Engine access failed: {str(e)}")
+    except Exception as e:  # noqa: BLE001 -- boundary: any engine-access failure becomes a clean RuntimeError for the caller
+        raise RuntimeError(f"Engine access failed: {e!s}")
 
 
 # =========================================================
@@ -67,7 +67,7 @@ def query(req: QueryRequest, actor: str = Depends(require_auth)):
             "api_version": "v6"
         }
 
-    except Exception as e:
+    except Exception as e:  # noqa: BLE001 -- top-level HTTP boundary: must catch anything to return a clean 500 instead of an unhandled crash
         detail = {"error": str(e)}
         # Stack traces can leak file paths, internals, and other sensitive
         # detail into the HTTP response -- only include one when a deployer
@@ -106,7 +106,7 @@ def stream(req: QueryRequest, actor: str = Depends(require_auth)):
 
             yield f"data: {json.dumps({'type': 'done'})}\n\n"
 
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001 -- SSE generator boundary: must catch anything to emit an error event instead of killing the stream
             yield f"data: {json.dumps({'type': 'error', 'message': str(e)})}\n\n"
 
     return StreamingResponse(

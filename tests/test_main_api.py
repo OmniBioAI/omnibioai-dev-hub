@@ -1,8 +1,8 @@
+import sys
+from unittest.mock import AsyncMock, MagicMock, patch
+
 import pytest
 from fastapi.testclient import TestClient
-from unittest.mock import MagicMock, patch, AsyncMock
-import asyncio
-import sys
 
 # Mock heavy dependencies properly
 mock_faiss = MagicMock()
@@ -26,19 +26,23 @@ def test_health_endpoint():
         assert response.json()["status"] == "ok"
 
 def test_status_endpoint():
-    with patch("api.main.CONTROL_PLANE.status", return_value={"status": "READY"}):
-        with patch("api.main.graph_store") as mock_gs:
-            mock_gs.size.return_value = {"nodes": 3, "edges": 4}
-            response = client.get("/status")
-            assert response.status_code == 200
-            assert response.json()["graph_edges"] == 4
+    with (
+        patch("api.main.CONTROL_PLANE.status", return_value={"status": "READY"}),
+        patch("api.main.graph_store") as mock_gs,
+    ):
+        mock_gs.size.return_value = {"nodes": 3, "edges": 4}
+        response = client.get("/status")
+        assert response.status_code == 200
+        assert response.json()["graph_edges"] == 4
 
 
 def test_guard_requests_middleware_ready():
-    with patch("api.main.CONTROL_PLANE.status", return_value={"status": "READY"}):
-        with patch("api.routes.rag.get_engine"):
-            response = client.post("/rag/query", json={"query": "q"})
-            assert response.status_code != 503
+    with (
+        patch("api.main.CONTROL_PLANE.status", return_value={"status": "READY"}),
+        patch("api.routes.rag.get_engine"),
+    ):
+        response = client.post("/rag/query", json={"query": "q"})
+        assert response.status_code != 503
 
 def test_guard_requests_middleware_not_ready():
     with patch("api.main.CONTROL_PLANE.status", return_value={"status": "INIT"}):
@@ -47,14 +51,14 @@ def test_guard_requests_middleware_not_ready():
         assert response.json()["detail"] == "Control plane not ready"
 
 def test_build_graph_seed():
-    from api.main import build_graph_seed, graph_store
+    from api.main import build_graph_seed
     mock_gs = MagicMock()
     with patch("api.main.graph_store", mock_gs):
         build_graph_seed()
         assert mock_gs.add_edge.call_count == 4
 
 def test_build_plugin_index():
-    from api.main import build_plugin_index, plugin_index
+    from api.main import build_plugin_index
     mock_pi = MagicMock()
     with patch("api.main.plugin_index", mock_pi):
         build_plugin_index()

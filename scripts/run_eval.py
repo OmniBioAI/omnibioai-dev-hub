@@ -12,8 +12,8 @@ Ollama must be reachable (or OLLAMA_URL must point to a live instance).
 
 import argparse
 import json
-import sys
 import os
+import sys
 
 # Allow imports from project root
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
@@ -67,7 +67,7 @@ def run_eval(index_dir: str, eval_path: str):
 
         try:
             docs = engine.retrieve(query, top_k=TOP_K, repo=repo, bundle=bundle, rerank=use_rerank)
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001 -- per-query boundary: one failing query must not abort the whole eval run
             label = FAIL_MARKER
             matched = f"[ERROR] {e}"
             results.append({"query": query, "passed": False, "matched": matched, "expected": expected})

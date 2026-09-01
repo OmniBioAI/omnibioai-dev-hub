@@ -1,18 +1,15 @@
+import logging
 import os
 
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
-import logging
-
-from api.routes import rag
 from api.auth import validate_auth_config
-
-from index.vector_store import VectorStore
+from api.routes import rag
 from index.graph_store import GraphStore
 from index.plugin_index import PluginIndex
-
+from index.vector_store import VectorStore
 from rag.control_plane import CONTROL_PLANE
 
 logger = logging.getLogger(__name__)
@@ -153,11 +150,10 @@ def status():
 @app.middleware("http")
 async def guard_requests(request: Request, call_next):
 
-    if request.url.path.startswith("/rag"):
-        if CONTROL_PLANE.status()["status"] != "READY":
-            return JSONResponse(
-                status_code=503,
-                content={"detail": "Control plane not ready"}
-            )
+    if request.url.path.startswith("/rag") and CONTROL_PLANE.status()["status"] != "READY":
+        return JSONResponse(
+            status_code=503,
+            content={"detail": "Control plane not ready"}
+        )
 
     return await call_next(request)

@@ -1,7 +1,9 @@
-import pytest
-import time
 from unittest.mock import MagicMock, patch
-from rag.control_plane import ControlPlane, ControlPlaneState
+
+import pytest
+
+from rag.control_plane import ControlPlane
+
 
 @pytest.fixture
 def cp():

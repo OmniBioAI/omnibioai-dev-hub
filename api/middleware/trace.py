@@ -1,10 +1,10 @@
-import uuid
 import time
-from typing import Dict
+import uuid
+
 
 class TraceContext:
     def __init__(self):
-        self.store: Dict[str, dict] = {}
+        self.store: dict[str, dict] = {}
 
     def start(self, query: str):
         trace_id = str(uuid.uuid4())

@@ -1,11 +1,12 @@
+import json
+from unittest.mock import MagicMock, patch
+
 import pytest
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
-from unittest.mock import MagicMock, patch
-import json
 
 # Import the router and models from the target file
-from api.routes.rag import router, get_engine
+from api.routes.rag import get_engine, router
 
 # Create a dummy app to test the router
 app = FastAPI()

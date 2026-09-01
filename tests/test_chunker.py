@@ -1,12 +1,10 @@
 """Comprehensive tests for the markdown-aware chunker (processing/chunker.py)."""
-import pytest
 from processing.chunker import (
-    chunk_text,
-    _split_at_word_boundary,
-    _split_at_paragraphs,
     MAX_CHARS,
+    _split_at_paragraphs,
+    _split_at_word_boundary,
+    chunk_text,
 )
-
 
 # ---------------------------------------------------------------------------
 # _split_at_word_boundary
@@ -310,6 +308,7 @@ class TestChunkTextCodeBlocks:
         closing_count = sum(c.count("```") for c in chunks)
         # Opening appears exactly once; closing appears at least once (may be in same chunk)
         assert opening_count == 1
+        assert closing_count >= 1
 
     def test_multiple_code_blocks_each_preserved(self):
         block1 = "```python\nprint('hello')\n```"

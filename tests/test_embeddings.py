@@ -1,7 +1,8 @@
-import pytest
-import numpy as np
-from unittest.mock import MagicMock, patch
 import sys
+from unittest.mock import MagicMock, patch
+
+import numpy as np
+import pytest
 
 # Mock sentence_transformers
 mock_st = MagicMock()
@@ -9,6 +10,7 @@ mock_st.SentenceTransformer = MagicMock()
 sys.modules['sentence_transformers'] = mock_st
 
 from embeddings.embedder import Embedder
+
 
 @pytest.fixture
 def embedder():

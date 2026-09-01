@@ -1,6 +1,5 @@
 from collections import defaultdict, deque
-from typing import Dict, List, Tuple, Set, Any
-
+from typing import Any
 
 # =========================================================
 # GRAPH STORE V4 - OMNIBIOAI
@@ -21,7 +20,7 @@ class GraphStore:
 
     def __init__(self):
         # adjacency list: node -> [(neighbor, relation)]
-        self.edges: Dict[str, List[Tuple[str, str]]] = defaultdict(list)
+        self.edges: dict[str, list[tuple[str, str]]] = defaultdict(list)
 
     # =========================================================
     # ADD EDGE
@@ -39,7 +38,7 @@ class GraphStore:
     # =========================================================
     # MAIN SEARCH ENTRY
     # =========================================================
-    def search(self, query: str, max_depth: int = 2) -> List[Dict[str, Any]]:
+    def search(self, query: str, max_depth: int = 2) -> list[dict[str, Any]]:
         """
         Semantic graph expansion search (V4)
 
@@ -52,8 +51,8 @@ class GraphStore:
         if not query:
             return []
 
-        visited: Set[str] = set()
-        results: List[Dict[str, Any]] = []
+        visited: set[str] = set()
+        results: list[dict[str, Any]] = []
 
         seed_nodes = self._find_seed_nodes(query)
 
@@ -70,13 +69,13 @@ class GraphStore:
     # =========================================================
     # SEED NODE DETECTION
     # =========================================================
-    def _find_seed_nodes(self, query: str) -> List[str]:
+    def _find_seed_nodes(self, query: str) -> list[str]:
 
         seeds = []
 
         q_tokens = set(query.split())
 
-        for node in self.edges.keys():
+        for node in self.edges:
 
             node_l = node.lower()
             node_tokens = set(node_l.split())
@@ -100,8 +99,8 @@ class GraphStore:
         start: str,
         query: str,
         max_depth: int,
-        visited: Set[str]
-    ) -> List[Dict[str, Any]]:
+        visited: set[str]
+    ) -> list[dict[str, Any]]:
 
         queue = deque([(start, 0)])
         results = []
@@ -153,7 +152,7 @@ class GraphStore:
     # =========================================================
     # GRAPH STATS (FOR UI)
     # =========================================================
-    def size(self) -> Dict[str, int]:
+    def size(self) -> dict[str, int]:
 
         node_count = len(self.edges)
         edge_count = sum(len(v) for v in self.edges.values())
@@ -166,7 +165,7 @@ class GraphStore:
     # =========================================================
     # DEBUG EXPORT (UI GRAPH VISUALIZATION READY)
     # =========================================================
-    def export(self) -> Dict[str, Any]:
+    def export(self) -> dict[str, Any]:
 
         nodes = list(self.edges.keys())
         edges = []

@@ -1,7 +1,8 @@
-import pytest
-import numpy as np
-from unittest.mock import MagicMock, patch, mock_open
 import sys
+from unittest.mock import MagicMock, mock_open, patch
+
+import numpy as np
+import pytest
 
 # Mock faiss
 mock_faiss = MagicMock()
@@ -9,6 +10,7 @@ mock_faiss.IndexFlatIP = MagicMock()
 sys.modules['faiss'] = mock_faiss
 
 from index.vector_store import VectorStore
+
 
 @pytest.fixture
 def vs():
@@ -115,6 +117,7 @@ def test_save_success(vs):
 
     mock_mkdirs.assert_called_once_with("/tmp/vs_test", exist_ok=True)
     mock_faiss.write_index.assert_called_once()
+    mock_file.assert_called_once()
     mock_pdump.assert_called_once()
 
 
@@ -135,6 +138,7 @@ def test_load_success(vs):
         mock_faiss.read_index = MagicMock(return_value=mock_loaded_index)
         result = vs.load("/tmp/vs_test")
 
+    mock_pload.assert_called_once()
     assert result is True
     assert vs.dim == 768
     assert vs.metadata == saved_data["metadata"]

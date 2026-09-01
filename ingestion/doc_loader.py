@@ -41,7 +41,7 @@ def load_documents(repo_paths):
                                 "text": text,
                                 "source": fpath
                             })
-                    except Exception as e:
+                    except Exception as e:  # noqa: BLE001 -- one unreadable file must not abort the whole indexing walk
                         print(f"⚠️  Could not read {fpath}: {e}")
     print(f"📄 Loaded {len(docs)} documents")
     return docs

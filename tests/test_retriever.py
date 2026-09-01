@@ -1,6 +1,9 @@
-import pytest
 from unittest.mock import MagicMock, patch
+
+import pytest
+
 from retrieval.retriever import Retriever
+
 
 @pytest.fixture
 def mock_vs():

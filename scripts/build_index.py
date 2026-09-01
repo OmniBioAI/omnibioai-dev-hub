@@ -1,15 +1,16 @@
-import sys
-import os
 import hashlib
+import os
+import sys
+
 import numpy as np
 import yaml
 
 sys.path.append(os.path.abspath("."))
 
 from index.vector_store import VectorStore
-from rag.engine import ollama_embed   # SINGLE SOURCE OF TRUTH
 from ingestion.doc_loader import load_documents
 from processing.chunker import chunk_text
+from rag.engine import ollama_embed  # SINGLE SOURCE OF TRUTH
 
 MIN_CHUNK_CHARS = 10  # discard overflow tails from chunker.py's hard char-slice
 
@@ -164,7 +165,7 @@ def build_index():
                 try:
                     vec = ollama_embed(chunk)   # <<< SINGLE EMBEDDING SOURCE
                     vec = normalize_vector(vec)
-                except Exception as e:
+                except Exception as e:  # noqa: BLE001 -- per-chunk boundary: one bad chunk must not abort the whole indexing run
                     print(f"⚠️  Skipping chunk from {source}: {e}")
                     stats["embed_failed"] += 1
                     continue

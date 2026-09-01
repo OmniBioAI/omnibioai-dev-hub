@@ -1,5 +1,6 @@
 from index.plugin_index import PluginIndex
 
+
 def test_plugin_index():
     pi = PluginIndex([{"text": "t1", "plugin": "p1"}])
     assert len(pi.docs) == 1

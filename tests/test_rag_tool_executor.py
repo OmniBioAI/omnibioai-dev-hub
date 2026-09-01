@@ -1,6 +1,9 @@
-import pytest
 from unittest.mock import MagicMock, patch
+
+import pytest
+
 from rag.tool_executor import ToolExecutorV4
+
 
 @pytest.fixture
 def mock_vs():
