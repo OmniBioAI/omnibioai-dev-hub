@@ -27,9 +27,8 @@ jobs:
           if [ -f pyproject.toml ]; then
             pip install -e ".[dev]" 2>/dev/null || pip install -e .
           elif [ -f requirements.txt ]; then
-            pip install -r requirements.txt
+            pip install -r requirements.txt -r requirements-dev.txt
           fi
-          pip install ruff pytest
 
       - name: Lint with ruff
         run: ruff check .
