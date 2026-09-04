@@ -112,7 +112,14 @@ def chunk_text(text: str, chunk_size: int = 500) -> list[str]:
         body = body.strip()
         full = (prefix + body).strip()
 
-        if not full:
+        if not full:  # pragma: no cover
+            # Structurally unreachable given how `sections` is built above:
+            # a section only carries header_line=None with an empty body if
+            # it's the sole pre-first-header entry, and that's appended only
+            # when its body is non-whitespace; every other section has a
+            # non-empty header_line, which alone makes `prefix` (and so
+            # `full`) non-empty. Kept as a defensive guard in case that
+            # invariant ever changes.
             continue
 
         if len(full) <= MAX_CHARS:
@@ -128,8 +135,14 @@ def chunk_text(text: str, chunk_size: int = 500) -> list[str]:
                 chunk = (prefix + sb).strip()
                 if chunk:
                     all_chunks.append(chunk)
-        else:
-            all_chunks.append(full)  # fallback: emit as-is
+        else:  # pragma: no cover
+            # Structurally unreachable: `body` is always non-empty here
+            # (guarded by the `if not full` check above), and both branches
+            # of _split_at_paragraphs return at least one element for
+            # non-empty input -- verified empirically, including with a
+            # negative `budget`. Kept as a defensive fallback in case that
+            # invariant ever changes.
+            all_chunks.append(full)
 
     # Restore fenced code blocks in every chunk
     restored: list[str] = []

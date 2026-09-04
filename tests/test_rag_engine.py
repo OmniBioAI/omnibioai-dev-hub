@@ -2,9 +2,10 @@ from unittest.mock import MagicMock, patch
 
 import numpy as np
 import pytest
+import requests
 
 import rag.engine as _engine_mod
-from rag.engine import RAGEngine, cosine, ollama_embed, ollama_generate
+from rag.engine import RAGEngine, _load_llm_model, cosine, ollama_embed, ollama_generate
 
 # =========================================================
 # UNIT TESTS FOR ollama_embed
@@ -399,3 +400,103 @@ def test_retrieve_without_rerank_fetches_exact_top_k(mock_embed, engine, mock_ve
 
     call_args = mock_index.search.call_args
     assert call_args[0][1] == 5  # exact top_k, no multiplier
+
+
+# =========================================================
+# UNIT TESTS FOR _load_llm_model
+# =========================================================
+
+def test_load_llm_model_defaults_when_file_missing(tmp_path):
+    missing = tmp_path / "does-not-exist.yaml"
+    assert _load_llm_model(default="fallback-model", path=str(missing)) == "fallback-model"
+
+
+def test_load_llm_model_defaults_on_malformed_yaml(tmp_path):
+    bad = tmp_path / "bad.yaml"
+    bad.write_text("llm_model: [unterminated")
+    assert _load_llm_model(default="fallback-model", path=str(bad)) == "fallback-model"
+
+
+def test_load_llm_model_defaults_when_yaml_is_not_a_mapping(tmp_path):
+    not_a_map = tmp_path / "list.yaml"
+    not_a_map.write_text("- one\n- two\n")
+    assert _load_llm_model(default="fallback-model", path=str(not_a_map)) == "fallback-model"
+
+
+def test_load_llm_model_defaults_when_key_is_absent(tmp_path):
+    no_key = tmp_path / "no_key.yaml"
+    no_key.write_text("other_setting: true\n")
+    assert _load_llm_model(default="fallback-model", path=str(no_key)) == "fallback-model"
+
+
+def test_load_llm_model_reads_configured_value(tmp_path):
+    configured = tmp_path / "config.yaml"
+    configured.write_text("llm_model: mixtral\n")
+    assert _load_llm_model(default="fallback-model", path=str(configured)) == "mixtral"
+
+
+# =========================================================
+# UNIT TESTS FOR ollama_embed RETRY BEHAVIOR
+# =========================================================
+
+@patch("rag.engine.time.sleep")
+@patch("rag.engine.requests.post")
+def test_ollama_embed_retries_then_succeeds(mock_post, mock_sleep):
+    failure = requests.exceptions.ConnectionError("transient CUDA context failure")
+    success = MagicMock()
+    success.json.return_value = {"embedding": [0.1] * 768}
+    success.raise_for_status.return_value = None
+    mock_post.side_effect = [failure, success]
+
+    vec = ollama_embed("test text")
+
+    assert vec.shape == (768,)
+    assert mock_post.call_count == 2
+    mock_sleep.assert_called_once_with(2)  # 2 * attempt(1)
+
+
+@patch("rag.engine.time.sleep")
+@patch("rag.engine.requests.post")
+def test_ollama_embed_raises_after_exhausting_all_retries(mock_post, mock_sleep):
+    mock_post.side_effect = requests.exceptions.ConnectionError("still down")
+
+    with pytest.raises(requests.exceptions.ConnectionError):
+        ollama_embed("test text")
+
+    assert mock_post.call_count == 3
+    assert mock_sleep.call_count == 2  # slept between attempts 1->2 and 2->3, not after the last
+
+
+# =========================================================
+# UNIT TESTS FOR RAGEngine.stream_llm
+# =========================================================
+
+@patch("rag.engine.requests.post")
+def test_stream_llm_yields_tokens_and_stops_on_done(mock_post, engine):
+    response = MagicMock()
+    response.raise_for_status.return_value = None
+    response.iter_lines.return_value = [
+        b'{"response": "Hello"}',
+        b"",  # blank keep-alive line -- must be skipped, not yielded
+        b'{"response": " world"}',
+        b'{"response": "", "done": true}',
+        b'{"response": "unreachable after done"}',
+    ]
+    mock_post.return_value = response
+
+    tokens = list(engine.stream_llm("query", "context"))
+
+    assert tokens == ["Hello", " world"]
+    _, kwargs = mock_post.call_args
+    assert kwargs["stream"] is True
+
+
+@patch("rag.engine.requests.post")
+def test_stream_llm_yields_inline_error_token_on_failure(mock_post, engine):
+    mock_post.side_effect = requests.exceptions.RequestException("ollama unreachable")
+
+    tokens = list(engine.stream_llm("query", "context"))
+
+    assert len(tokens) == 1
+    assert tokens[0].startswith("[LLM_ERROR]")
+    assert "ollama unreachable" in tokens[0]

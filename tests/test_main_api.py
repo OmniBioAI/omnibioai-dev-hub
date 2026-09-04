@@ -1,3 +1,5 @@
+import importlib
+import logging
 import sys
 from unittest.mock import AsyncMock, MagicMock, patch
 
@@ -34,6 +36,44 @@ def test_status_endpoint():
         response = client.get("/status")
         assert response.status_code == 200
         assert response.json()["graph_edges"] == 4
+
+
+def test_status_endpoint_counts_distinct_omnibioai_repos():
+    with (
+        patch("api.main.CONTROL_PLANE.status", return_value={"status": "READY"}),
+        patch("api.main.graph_store") as mock_gs,
+        patch("api.main.vector_store") as mock_vs,
+    ):
+        mock_gs.size.return_value = {"nodes": 1, "edges": 2}
+        mock_vs.index = None
+        mock_vs.metadata = [
+            {"source": "/data/omnibioai-workbench/README.md"},
+            {"source": "/data/omnibioai-workbench/docs/notes.md"},  # same repo, deduped
+            {"source": "/data/omnibioai-auth/README.md"},
+            {"source": "/data/unrelated/notes.md"},  # no "omnibioai*" segment at all
+        ]
+        response = client.get("/status")
+        assert response.status_code == 200
+        assert response.json()["repos_loaded"] == 2
+
+
+def test_warns_when_no_persisted_faiss_index_is_found(caplog):
+    import api.main as main_module
+    from index.vector_store import VectorStore
+
+    try:
+        with (
+            patch.object(VectorStore, "load", return_value=False),
+            caplog.at_level(logging.WARNING, logger="api.main"),
+        ):
+            importlib.reload(main_module)
+        assert any(
+            "No persisted FAISS index found" in record.message for record in caplog.records
+        )
+    finally:
+        # Restore api.main to a normal (unpatched) import for any test that
+        # runs after this one and reaches for its module-level state.
+        importlib.reload(main_module)
 
 
 def test_guard_requests_middleware_ready():
