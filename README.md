@@ -131,7 +131,6 @@ omnibioai-dev-hub/
 │
 ├── scripts/
 │   ├── build_index.py       # Index builder entry point
-│   ├── ingest.py             # Standalone ingestion helper
 │   ├── run_eval.py           # Recall@K eval harness (tests/eval/)
 │   └── check_and_reindex.sh  # Rebuilds the index on new Studio releases (hourly cron)
 │
@@ -143,7 +142,10 @@ omnibioai-dev-hub/
 │
 ├── omnibioai-dev-hub-ui/     # Dev Hub UI (React + TypeScript) — see "Frontend" below
 │
-└── .env.example             # Environment variable template
+├── Dockerfile                # arm64 production image: nginx UI + FastAPI API
+├── requirements.txt          # Runtime Python dependencies
+├── requirements-dev.txt      # Test, coverage, and lint dependencies
+└── .env.example             # Environment variable template (source it before use)
 ```
 
 ---
@@ -256,11 +258,9 @@ pip install -r requirements.txt -r requirements-dev.txt
 pytest
 ```
 
-CI (`.github/workflows/ci.yml`) runs this same install + `ruff check .` +
-`pytest` combination in a `Lint & Test` job on every push/PR, alongside a
-separate `Frontend Build & Test` job (`npm ci`, `npm run build`, `npm
-test` in `omnibioai-dev-hub-ui/`) — both must pass before the tag-triggered
-Docker build job runs.
+The repository does not currently include CI workflow definitions. To perform
+the equivalent local checks, also run `ruff check .`, then in
+`omnibioai-dev-hub-ui/` run `npm ci`, `npm run build`, and `npm test`.
 
 ---
 
@@ -285,12 +285,61 @@ The indexer **exits immediately with a clear error** if no repos are found under
 
 In Docker the image sets `ENV REPO_BASE=/repos` automatically — no action needed.
 
-Copy `.env.example` to `.env` for local development:
+Copy `.env.example` to `.env` for local development, then load it into the
+shell before starting a command. The Python application does not load `.env`
+automatically.
 
 ```bash
 cp .env.example .env
 # edit REPO_BASE as needed
+set -a; source .env; set +a
 ```
+
+## Ollama endpoint
+
+`OLLAMA_URL` defaults to `http://ollama:11434/api`, which is appropriate for
+the container setup below. When running Python directly against a local Ollama
+installation, set it explicitly:
+
+```bash
+export OLLAMA_URL=http://127.0.0.1:11434/api
+```
+
+---
+
+# Docker deployment
+
+The supplied `Dockerfile` builds the Vite UI and serves it through nginx on
+port `5173`; FastAPI is available on port `8082`. It is explicitly targeted
+at `linux/arm64`. The container waits for an Ollama service named `ollama` and
+creates `data/faiss_index/` on first start, so the repositories and index must
+be mounted persistently.
+
+```bash
+docker network create devhub-net
+
+docker run -d --name ollama --network devhub-net \
+  -v ollama-data:/root/.ollama \
+  ollama/ollama
+
+docker exec ollama ollama pull nomic-embed-text
+docker exec ollama ollama pull llama3
+
+docker build -t omnibioai-dev-hub .
+docker run --rm --name devhub --network devhub-net \
+  -p 5173:5173 -p 8082:8082 \
+  -v /path/to/parent-of-omnibioai-repos:/repos:ro \
+  -v devhub-index:/app/data/faiss_index \
+  omnibioai-dev-hub
+```
+
+Open `http://localhost:5173` for the UI, or use `http://localhost:8082` for
+the API. The initial start blocks while the index is built; later starts reuse
+the named `devhub-index` volume. The image runs as a non-root `appuser`.
+
+To enable authentication in the container, add
+`-e AUTH_ENABLED=true -e JWT_SECRET=<strong-secret>` to the final `docker
+run`. The container fails fast if authentication is enabled without a secret.
 
 ---
 
