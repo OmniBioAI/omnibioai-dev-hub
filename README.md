@@ -2,6 +2,8 @@
 
 Production-grade Retrieval-Augmented Generation (RAG) system powering the OmniBioAI ecosystem documentation, architecture search, workflow discovery, and developer assistant APIs.
 
+![OmniBioAI Dev Hub overview dashboard](images/omnibioai-dev-hub.png)
+
 ---
 
 # Features
