@@ -78,7 +78,18 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONPATH=/app \
     REPO_BASE=/repos
 
-USER appuser
+# NOT `USER appuser` here (unlike before): /app/data is a host bind mount
+# (see docker-compose.yml), so it doesn't exist yet at build time and the
+# chown -R appuser:appuser /app above never actually reaches it -- it
+# gets whatever ownership the host directory has once mounted at runtime,
+# which was uid 1000 (the host user), not appuser's uid 10001, causing
+# build_index.py's index write to fail with Permission denied (see
+# docker-entrypoint.sh's own comment for the full incident). The image
+# now starts as root so the entrypoint can chown that specific bind
+# mount at container start, then drops to appuser itself before running
+# anything else -- see docker-entrypoint.sh.
+COPY docker-entrypoint.sh /app/docker-entrypoint.sh
+RUN chmod +x /app/docker-entrypoint.sh
 
 EXPOSE 8082 5173
 
@@ -100,35 +111,8 @@ EXPOSE 8082 5173
 #      build time since the secret is only known at container start
 #   5. Start nginx (serves UI on 5173)
 #   6. Start FastAPI (serves API on 8082)
-CMD ["bash", "-c", "\
-  _auth_enabled=$(printf '%s' \"${AUTH_ENABLED:-}\" | tr -d '[:space:]' | tr '[:upper:]' '[:lower:]'); \
-  if [ \"$_auth_enabled\" = 'true' ] && [ -z \"${JWT_SECRET:-}\" ]; then \
-    echo '❌ AUTH_ENABLED is true but JWT_SECRET is not set -- refusing to start with the internal UI-proxy auth header silently falling back to a placeholder.' >&2; \
-    echo '   Set JWT_SECRET before starting this container.' >&2; \
-    exit 1; \
-  fi && \
-  echo '⏳ Waiting for Ollama...' && \
-  until curl -sf http://ollama:11434/api/tags > /dev/null 2>&1; do \
-    echo '  ollama not ready, retrying in 3s...'; sleep 3; \
-  done && \
-  echo '✅ Ollama is ready' && \
-  if [ ! -f /app/data/faiss_index/index.faiss ]; then \
-    echo '🚀 Building FAISS index...' && \
-    python scripts/build_index.py; \
-  else \
-    echo '✅ Index already exists, skipping build'; \
-  fi && \
-  printf 'server {\n\
-    listen 5173;\n\
-    root /usr/share/nginx/html;\n\
-    index index.html;\n\
-    location / { try_files $uri $uri/ /index.html; }\n\
-    location /api/ { proxy_pass http://127.0.0.1:8082; proxy_set_header Host $host; }\n\
-    location /rag/ { proxy_pass http://127.0.0.1:8082; proxy_set_header X-Devhub-Internal \"%s\"; }\n\
-    location /health { proxy_pass http://127.0.0.1:8082; }\n\
-    location /status { proxy_pass http://127.0.0.1:8082; }\n\
-    location /docs   { proxy_pass http://127.0.0.1:8082; }\n\
-}\n' \"${JWT_SECRET:-}\" > /etc/nginx/conf.d/devhub.conf && \
-  nginx && \
-  echo '🌐 nginx started on port 5173' && \
-  uvicorn api.main:app --host 0.0.0.0 --port 8082"]
+# (Now lives in docker-entrypoint.sh, unchanged in order or behavior --
+# moved out of an inline CMD string so it could gain a root-first step
+# for the /app/data chown above, without nesting another layer of shell
+# quoting inside a Dockerfile CMD array.)
+CMD ["/app/docker-entrypoint.sh"]
