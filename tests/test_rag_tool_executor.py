@@ -1,3 +1,9 @@
+"""Unit tests for ToolExecutorV4 with mocked vector store, graph store, plugin index, and embedder:
+the search steps, per-step error isolation, and hybrid expansion.
+
+Developer: Manish Kumar <manish@omnibioai.org>
+"""
+
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -7,25 +13,31 @@ from rag.tool_executor import ToolExecutorV4
 
 @pytest.fixture
 def mock_vs():
+    """Provide a MagicMock standing in for the vector store."""
     return MagicMock()
 
 @pytest.fixture
 def mock_gs():
+    """Provide a MagicMock standing in for the graph store."""
     return MagicMock()
 
 @pytest.fixture
 def mock_pi():
+    """Provide a MagicMock standing in for the plugin index."""
     return MagicMock()
 
 @pytest.fixture
 def mock_emb():
+    """Provide a MagicMock standing in for the embedder."""
     return MagicMock()
 
 @pytest.fixture
 def executor(mock_vs, mock_gs, mock_pi, mock_emb):
+    """Build a ToolExecutorV4 wired to the mocked collaborators."""
     return ToolExecutorV4(mock_vs, mock_gs, mock_pi, mock_emb)
 
 def test_run_all_steps(executor, mock_vs, mock_gs, mock_pi, mock_emb):
+    """Run every planned step, including memory search, and return results from each source."""
     plan = {
         "steps": ["vector_search", "graph_search", "plugin_search", "memory_search", "hybrid_expand"]
     }
@@ -40,6 +52,7 @@ def test_run_all_steps(executor, mock_vs, mock_gs, mock_pi, mock_emb):
     assert any(r.get("source") == "memory" for r in results)
 
 def test_run_error_handling(executor):
+    """Return a vector_error result instead of raising when embedding fails during the vector step."""
     plan = {"steps": ["vector_search"]}
     executor.vector_store = MagicMock()
     executor.embedder.encode.side_effect = Exception("Embed fail")
@@ -49,6 +62,7 @@ def test_run_error_handling(executor):
     assert results[0]["source"] == "vector_error"
 
 def test_run_global_error(executor):
+    """Return a TOOL_ERROR result naming the step and error when a step raises unexpectedly."""
     # Test the broad try-except in the loop
     # We can trigger it by making _vector raise instead of returning a list
     with patch.object(executor, "_vector", side_effect=ValueError("Global fail")):
@@ -57,6 +71,8 @@ def test_run_global_error(executor):
         assert "[TOOL_ERROR] vector_search: Global fail" in results[0]["text"]
 
 def test_vector_search_failure(executor):
+    """Return a vector_error result when embedding fails and an empty list when no vector store is
+    configured."""
     executor.vector_store = MagicMock()
     executor.embedder.encode.side_effect = Exception("Embed fail")
     res = executor._vector("q")
@@ -66,6 +82,8 @@ def test_vector_search_failure(executor):
     assert executor._vector("q") == []
 
 def test_graph_search_failure(executor):
+    """Return a graph_error result when the graph search fails and an empty list when no graph store
+    is configured."""
     executor.graph_store = MagicMock()
     executor.graph_store.search.side_effect = Exception("Graph fail")
     res = executor._graph("q")
@@ -75,6 +93,8 @@ def test_graph_search_failure(executor):
     assert executor._graph("q") == []
 
 def test_plugin_search_failure(executor):
+    """Return a plugin_error result when the plugin search fails and an empty list when no plugin
+    index is configured."""
     executor.plugin_index = MagicMock()
     executor.plugin_index.search.side_effect = Exception("Plugin fail")
     res = executor._plugin("q")
@@ -84,6 +104,7 @@ def test_plugin_search_failure(executor):
     assert executor._plugin("q") == []
 
 def test_hybrid_expand(executor):
+    """Combine the vector and graph results into one hybrid expansion."""
     with patch.object(executor, "_vector", return_value=[{"text": "v"}]),          patch.object(executor, "_graph", return_value=[{"text": "g"}]):
         res = executor._hybrid_expand("q")
         assert len(res) == 2

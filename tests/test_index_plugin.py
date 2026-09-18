@@ -1,7 +1,14 @@
+"""Unit tests for the in-memory PluginIndex: construction, adding documents, and search.
+
+Developer: Manish Kumar <manish@omnibioai.org>
+"""
+
 from index.plugin_index import PluginIndex
 
 
 def test_plugin_index():
+    """Index plugin documents at construction and on add, return the matching document from search,
+    and return nothing for a non-matching query."""
     pi = PluginIndex([{"text": "t1", "plugin": "p1"}])
     assert len(pi.docs) == 1
     
