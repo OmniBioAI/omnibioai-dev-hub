@@ -1,3 +1,10 @@
+"""Unit tests for ControlPlane: initial state, initialization success, failure and re-
+initialization, seed builders, status, and readiness and engine guards, with the RAG engine
+mocked.
+
+Developer: Manish Kumar <manish@omnibioai.org>
+"""
+
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -7,14 +14,17 @@ from rag.control_plane import ControlPlane
 
 @pytest.fixture
 def cp():
+    """Provide a fresh, uninitialized ControlPlane."""
     return ControlPlane()
 
 def test_control_plane_init_state(cp):
+    """Start in INIT status, uninitialized, with no engine."""
     assert cp.state.status == "INIT"
     assert not cp._initialized
     assert cp.engine is None
 
 def test_control_plane_init_success(cp):
+    """Store the injected stores, build the engine from the vector store, and move to READY."""
     mock_vs = MagicMock()
     mock_gs = MagicMock()
     mock_pi = MagicMock()
@@ -31,6 +41,7 @@ def test_control_plane_init_success(cp):
         mock_engine_cls.assert_called_once_with(mock_vs)
 
 def test_control_plane_reinit(cp):
+    """Stay READY and keep the original vector store when initialized a second time."""
     mock_vs = MagicMock()
     with patch("rag.engine.RAGEngine"):
         cp.init(mock_vs, None, None)
@@ -41,6 +52,8 @@ def test_control_plane_reinit(cp):
         assert cp.vector_store == mock_vs  # still the original
 
 def test_control_plane_init_failure(cp):
+    """Mark the control plane FAILED, record the error, and re-raise when the engine cannot be
+    built."""
     mock_vs = MagicMock()
     with patch("rag.engine.RAGEngine") as mock_engine_cls:
         mock_engine_cls.side_effect = Exception("Engine failed")
@@ -52,12 +65,14 @@ def test_control_plane_init_failure(cp):
         assert cp.state.last_error == "Engine failed"
 
 def test_build_graph_seed(cp):
+    """Seed the control plane's graph store with its four starter edges."""
     mock_gs = MagicMock()
     cp.graph_store = mock_gs
     cp._build_graph_seed()
     assert mock_gs.add_edge.call_count == 4
 
 def test_build_plugin_seed(cp):
+    """Populate an empty plugin index with the three starter plugin documents."""
     mock_pi = MagicMock()
     mock_pi.docs = None
     cp.plugin_index = mock_pi
@@ -65,6 +80,7 @@ def test_build_plugin_seed(cp):
     assert len(mock_pi.docs) == 3
 
 def test_build_plugin_seed_existing(cp):
+    """Replace any existing plugin documents with the three starter documents."""
     mock_pi = MagicMock()
     mock_pi.docs = [{"text": "existing"}]
     cp.plugin_index = mock_pi
@@ -73,12 +89,14 @@ def test_build_plugin_seed_existing(cp):
     assert len(mock_pi.docs) == 3
 
 def test_status(cp):
+    """Report INIT status, not initialized, and an uptime field before initialization."""
     status = cp.status()
     assert status["status"] == "INIT"
     assert status["initialized"] is False
     assert "uptime_sec" in status
 
 def test_ensure_ready(cp):
+    """Raise until the control plane is READY, then allow the call."""
     with pytest.raises(RuntimeError, match="Control plane not ready"):
         cp.ensure_ready()
     
@@ -86,6 +104,7 @@ def test_ensure_ready(cp):
     cp.ensure_ready() # Should not raise
 
 def test_get_engine(cp):
+    """Raise until an engine exists, then return that engine."""
     with pytest.raises(RuntimeError, match="RAG engine not initialized"):
         cp.get_engine()
     

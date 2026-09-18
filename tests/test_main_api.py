@@ -1,3 +1,10 @@
+"""Tests for the Dev Hub FastAPI app (api.main): health and status endpoints, the readiness guard
+middleware, seed builders, and control-plane startup, with faiss and sentence_transformers mocked
+out.
+
+Developer: Manish Kumar <manish@omnibioai.org>
+"""
+
 import importlib
 import logging
 import sys
@@ -22,12 +29,14 @@ with patch("index.vector_store.VectorStore"),      patch("index.graph_store.Grap
 client = TestClient(app)
 
 def test_health_endpoint():
+    """Report an ok status from /health while the control plane is ready."""
     with patch("api.main.CONTROL_PLANE.status", return_value={"status": "READY"}):
         response = client.get("/health")
         assert response.status_code == 200
         assert response.json()["status"] == "ok"
 
 def test_status_endpoint():
+    """Report the control-plane status and the graph edge count from /status."""
     with (
         patch("api.main.CONTROL_PLANE.status", return_value={"status": "READY"}),
         patch("api.main.graph_store") as mock_gs,
@@ -39,6 +48,8 @@ def test_status_endpoint():
 
 
 def test_status_endpoint_counts_distinct_omnibioai_repos():
+    """Count each distinct omnibioai repository once in repos_loaded and ignore sources outside any
+    omnibioai directory."""
     with (
         patch("api.main.CONTROL_PLANE.status", return_value={"status": "READY"}),
         patch("api.main.graph_store") as mock_gs,
@@ -58,6 +69,7 @@ def test_status_endpoint_counts_distinct_omnibioai_repos():
 
 
 def test_warns_when_no_persisted_faiss_index_is_found(caplog):
+    """Log a warning at import time when no persisted FAISS index can be loaded."""
     import api.main as main_module
     from index.vector_store import VectorStore
 
@@ -77,6 +89,7 @@ def test_warns_when_no_persisted_faiss_index_is_found(caplog):
 
 
 def test_guard_requests_middleware_ready():
+    """Let RAG requests pass the guard middleware once the control plane is READY."""
     with (
         patch("api.main.CONTROL_PLANE.status", return_value={"status": "READY"}),
         patch("api.routes.rag.get_engine"),
@@ -85,12 +98,15 @@ def test_guard_requests_middleware_ready():
         assert response.status_code != 503
 
 def test_guard_requests_middleware_not_ready():
+    """Reject RAG requests with a 503 'Control plane not ready' while the control plane is not
+    READY."""
     with patch("api.main.CONTROL_PLANE.status", return_value={"status": "INIT"}):
         response = client.post("/rag/query", json={"query": "q"})
         assert response.status_code == 503
         assert response.json()["detail"] == "Control plane not ready"
 
 def test_build_graph_seed():
+    """Seed the application-level graph store with its four starter edges."""
     from api.main import build_graph_seed
     mock_gs = MagicMock()
     with patch("api.main.graph_store", mock_gs):
@@ -98,6 +114,7 @@ def test_build_graph_seed():
         assert mock_gs.add_edge.call_count == 4
 
 def test_build_plugin_index():
+    """Seed the plugin index with its three starter documents."""
     from api.main import build_plugin_index
     mock_pi = MagicMock()
     with patch("api.main.plugin_index", mock_pi):
@@ -106,6 +123,7 @@ def test_build_plugin_index():
 
 @pytest.mark.asyncio
 async def test_init_control_plane():
+    """Initialize the control plane exactly once."""
     from api.main import init_control_plane
     with patch("api.main.CONTROL_PLANE.init") as mock_init:
         await init_control_plane()
@@ -113,6 +131,7 @@ async def test_init_control_plane():
 
 @pytest.mark.asyncio
 async def test_startup_event():
+    """Initialize the control plane during application startup."""
     from api.main import startup_event
     with patch("api.main.init_control_plane", new_callable=AsyncMock) as mock_init:
         await startup_event()

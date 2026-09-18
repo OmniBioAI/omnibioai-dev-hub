@@ -1,3 +1,9 @@
+"""Tests for the RAG API routes (api.routes.rag) mounted on a throwaway FastAPI app with the control
+plane mocked: engine access, query, streaming, error reporting, and repo/bundle scoping.
+
+Developer: Manish Kumar <manish@omnibioai.org>
+"""
+
 import json
 from unittest.mock import MagicMock, patch
 
@@ -14,10 +20,12 @@ app.include_router(router)
 
 @pytest.fixture
 def client():
+    """Provide a TestClient for a throwaway app that mounts only the RAG router."""
     return TestClient(app)
 
 @pytest.fixture
 def mock_control_plane():
+    """Patch the routes module's CONTROL_PLANE with a mock so no real engine is built."""
     with patch("api.routes.rag.CONTROL_PLANE") as mock:
         yield mock
 
@@ -26,6 +34,7 @@ def mock_control_plane():
 # =========================================================
 
 def test_get_engine_success(mock_control_plane):
+    """Return the control plane's engine when it exposes a query method."""
     mock_engine = MagicMock()
     # Mock hasattr to return True for "query"
     mock_engine.query = MagicMock()
@@ -35,17 +44,21 @@ def test_get_engine_success(mock_control_plane):
     assert engine == mock_engine
 
 def test_get_engine_none(mock_control_plane):
+    """Raise 'RAG engine not initialized' when the control plane has no engine."""
     mock_control_plane.get_engine.return_value = None
     with pytest.raises(RuntimeError, match="RAG engine not initialized"):
         get_engine()
 
 def test_get_engine_missing_query(mock_control_plane):
+    """Raise an error when the engine lacks the V6 query method."""
     mock_engine = MagicMock(spec=[]) # No query method
     mock_control_plane.get_engine.return_value = mock_engine
     with pytest.raises(RuntimeError, match="Engine missing V6 query method"):
         get_engine()
 
 def test_get_engine_exception(mock_control_plane):
+    """Wrap an exception raised while fetching the engine in a RuntimeError that carries its
+    message."""
     mock_control_plane.get_engine.side_effect = Exception("Internal Error")
     with pytest.raises(RuntimeError, match="Engine access failed: Internal Error"):
         get_engine()
@@ -56,6 +69,7 @@ def test_get_engine_exception(mock_control_plane):
 # =========================================================
 
 def test_query_endpoint_success(client, mock_control_plane):
+    """Return the engine's answer from /query along with the v6 API version."""
     mock_engine = MagicMock()
     mock_engine.query.return_value = {"answer": "test answer"}
     mock_control_plane.get_engine.return_value = mock_engine
@@ -68,6 +82,7 @@ def test_query_endpoint_success(client, mock_control_plane):
     assert data["api_version"] == "v6"
 
 def test_query_endpoint_failure_traceback_enabled(client, mock_control_plane, monkeypatch):
+    """Return a 500 with the error message and a traceback when DEBUG_TRACEBACKS is enabled."""
     monkeypatch.setenv("DEBUG_TRACEBACKS", "true")
     mock_engine = MagicMock()
     mock_engine.query.side_effect = Exception("Query Failed")
@@ -82,6 +97,7 @@ def test_query_endpoint_failure_traceback_enabled(client, mock_control_plane, mo
     assert "trace" in data["detail"]
 
 def test_query_endpoint_failure_traceback_disabled(client, mock_control_plane, monkeypatch):
+    """Return a 500 with the error message but no traceback when DEBUG_TRACEBACKS is unset."""
     monkeypatch.delenv("DEBUG_TRACEBACKS", raising=False)
     mock_engine = MagicMock()
     mock_engine.query.side_effect = Exception("Query Failed")
@@ -101,6 +117,7 @@ def test_query_endpoint_failure_traceback_disabled(client, mock_control_plane, m
 # =========================================================
 
 def test_stream_endpoint_with_llm_streaming(client, mock_control_plane):
+    """Stream each LLM token as a server-sent event followed by a done event."""
     mock_engine = MagicMock()
     mock_engine.retrieve.return_value = [{"text": "context"}]
     mock_engine.build_context.return_value = "built context"
@@ -123,6 +140,7 @@ def test_stream_endpoint_with_llm_streaming(client, mock_control_plane):
     assert json.loads(lines[3].replace("data: ", "")) == {"type": "done"}
 
 def test_stream_endpoint_fallback_single_response(client, mock_control_plane):
+    """Fall back to one response event plus a done event when the engine cannot stream."""
     mock_engine = MagicMock()
     # Explicitly remove stream_llm to trigger fallback
     del mock_engine.stream_llm
@@ -142,6 +160,7 @@ def test_stream_endpoint_fallback_single_response(client, mock_control_plane):
     assert json.loads(lines[1].replace("data: ", "")) == {"type": "done"}
 
 def test_stream_endpoint_error(client, mock_control_plane):
+    """Report an engine failure as a single error event on the stream instead of an HTTP error."""
     with patch("api.routes.rag.get_engine") as mock_get_engine:
         mock_get_engine.side_effect = Exception("Stream Init Error")
         
@@ -157,6 +176,7 @@ def test_stream_endpoint_error(client, mock_control_plane):
 # =========================================================
 
 def test_query_request_validation(client):
+    """Reject a /query request that omits the required query field with a 422."""
     # Test Pydantic validation
     response = client.post("/query", json={}) # Missing 'query' field
     assert response.status_code == 422
@@ -167,6 +187,7 @@ def test_query_request_validation(client):
 # =========================================================
 
 def test_query_endpoint_with_bundle_scope(client, mock_control_plane):
+    """Pass the requested bundle scope through to the engine's query."""
     mock_engine = MagicMock()
     mock_engine.query.return_value = {"answer": "scoped answer"}
     mock_control_plane.get_engine.return_value = mock_engine
@@ -180,6 +201,7 @@ def test_query_endpoint_with_bundle_scope(client, mock_control_plane):
 
 
 def test_query_endpoint_with_repo_scope(client, mock_control_plane):
+    """Pass the requested repo scope through to the engine's query."""
     mock_engine = MagicMock()
     mock_engine.query.return_value = {"answer": "repo answer"}
     mock_control_plane.get_engine.return_value = mock_engine
@@ -193,6 +215,7 @@ def test_query_endpoint_with_repo_scope(client, mock_control_plane):
 
 
 def test_query_endpoint_unscoped_passes_none_filters(client, mock_control_plane):
+    """Pass None for both repo and bundle when the request is unscoped."""
     mock_engine = MagicMock()
     mock_engine.query.return_value = {"answer": "answer"}
     mock_control_plane.get_engine.return_value = mock_engine
@@ -203,6 +226,7 @@ def test_query_endpoint_unscoped_passes_none_filters(client, mock_control_plane)
 
 
 def test_stream_endpoint_with_bundle_scope(client, mock_control_plane):
+    """Pass the requested bundle scope through to the engine's retrieval when streaming."""
     mock_engine = MagicMock()
     mock_engine.retrieve.return_value = [{"text": "ctx"}]
     mock_engine.build_context.return_value = "ctx"
