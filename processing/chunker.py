@@ -4,6 +4,26 @@ MAX_CHARS = 2000
 
 _FENCE_RE = re.compile(r'```.*?```', re.DOTALL)
 _HEADER_RE = re.compile(r'^(#{1,3})\s+.+$', re.MULTILINE)
+_PLACEHOLDER_RE = re.compile(r'\x00FENCE(\d+)\x00')
+
+
+def _real_len(s: str, fences: list[str]) -> int:
+    """Length `s` would have once its fence placeholders are restored to their real content.
+
+    A fixed-width placeholder token undercounts a fence's real size. Used
+    unchecked, a section made of several individually-small fenced code
+    blocks would pass the MAX_CHARS budget check while still in placeholder
+    form and then balloon past it once fences are restored at the end. Every
+    MAX_CHARS decision in this module must compare against this, not len().
+    """
+    if not fences:
+        return len(s)
+    extra = 0
+    for m in _PLACEHOLDER_RE.finditer(s):
+        idx = int(m.group(1))
+        if idx < len(fences):
+            extra += len(fences[idx]) - len(m.group(0))
+    return len(s) + extra
 
 
 def _split_at_word_boundary(text: str, max_chars: int) -> list[str]:
@@ -22,11 +42,23 @@ def _split_at_word_boundary(text: str, max_chars: int) -> list[str]:
     return chunks
 
 
-def _split_at_paragraphs(text: str, max_chars: int) -> list[str]:
-    """Split at blank-line boundaries; fall back to word-boundary for oversize paragraphs."""
+def _split_at_paragraphs(text: str, max_chars: int, fences: list[str] | None = None) -> list[str]:
+    """Split at blank-line boundaries; fall back to word-boundary for oversize paragraphs.
+
+    `fences` (if given) makes every length decision here use each
+    paragraph's real, post-restoration size (see _real_len) instead of its
+    placeholder-substituted length, so paragraphs holding fenced code blocks
+    are packed/split against their true size. _split_at_word_boundary itself
+    is intentionally left operating on placeholder-space length: a paragraph
+    that's short in placeholder form but long once its fence is restored
+    already can't be split further without cutting into that fence, so it's
+    correctly emitted whole (real length may exceed MAX_CHARS -- fenced code
+    blocks are never fragmented, real length wins over the budget there).
+    """
+    fences = fences or []
     if max_chars <= 0:
         return _split_at_word_boundary(text, MAX_CHARS) if text.strip() else []
-    if len(text) <= max_chars:
+    if _real_len(text, fences) <= max_chars:
         return [text] if text.strip() else []
 
     paragraphs = [p for p in re.split(r'\n\n+', text) if p.strip()]
@@ -35,7 +67,8 @@ def _split_at_paragraphs(text: str, max_chars: int) -> list[str]:
     current_len = 0
 
     for para in paragraphs:
-        if len(para) > max_chars:
+        para_len = _real_len(para, fences)
+        if para_len > max_chars:
             if current_parts:
                 result.append('\n\n'.join(current_parts))
                 current_parts = []
@@ -43,13 +76,13 @@ def _split_at_paragraphs(text: str, max_chars: int) -> list[str]:
             result.extend(_split_at_word_boundary(para, max_chars))
         else:
             sep = 2 if current_parts else 0
-            if current_parts and current_len + sep + len(para) > max_chars:
+            if current_parts and current_len + sep + para_len > max_chars:
                 result.append('\n\n'.join(current_parts))
                 current_parts = [para]
-                current_len = len(para)
+                current_len = para_len
             else:
                 current_parts.append(para)
-                current_len += sep + len(para)
+                current_len += sep + para_len
 
     if current_parts:
         result.append('\n\n'.join(current_parts))
@@ -122,13 +155,13 @@ def chunk_text(text: str, chunk_size: int = 500) -> list[str]:
             # invariant ever changes.
             continue
 
-        if len(full) <= MAX_CHARS:
+        if _real_len(full, fences) <= MAX_CHARS:
             all_chunks.append(full)
             continue
 
         # Section too long — split body at paragraph boundaries
-        budget = MAX_CHARS - len(prefix)
-        sub_bodies = _split_at_paragraphs(body, budget)
+        budget = MAX_CHARS - _real_len(prefix, fences)
+        sub_bodies = _split_at_paragraphs(body, budget, fences)
 
         if sub_bodies:
             for sb in sub_bodies:

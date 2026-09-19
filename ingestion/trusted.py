@@ -159,6 +159,12 @@ class SourcePolicy:
     def should_walk_dir(self, root: Path, repo_path: Path, dirname: str) -> bool:
         if dirname in SKIP_DIRS:
             return False
+        # No legitimate documentation lives under a dot-directory. This also
+        # closes tool/agent scratch state (e.g. a `.claude/worktrees/` tree
+        # of duplicate repo checkouts) that a named-directory denylist can't
+        # anticipate up front.
+        if dirname.startswith("."):
+            return False
         rel = root.relative_to(repo_path).as_posix() if root != repo_path else ""
         parts = set(rel.split("/")) if rel else set()
         return not bool(parts & SKIP_PATH_SEGMENTS)

@@ -67,11 +67,16 @@ def _load_llm_model(default: str = _DEFAULT_LLM_MODEL, path: str = _INDEX_CONFIG
 LLM_MODEL = _load_llm_model()
 
 
-def ollama_embed(text: str, model: str = "nomic-embed-text"):
+def ollama_embed(text: str, model: str = "nomic-embed-text", *, on_attempt=None):
     # Ollama's llama-server subprocess can transiently fail CUDA context
     # init under host memory pressure on unified-memory GPUs (issue #12) —
     # a short retry recovers once pressure passes, without masking a
     # persistently broken Ollama.
+    #
+    # on_attempt(attempt_number, ok), if given, is called after every attempt
+    # (success or failure) so a caller doing sustained bulk embedding (e.g.
+    # the Phase 18 trusted-index builder) can measure retry pressure without
+    # changing this function's retry/backoff behavior for ordinary callers.
     attempts = 3
     for attempt in range(1, attempts + 1):
         try:
@@ -84,8 +89,12 @@ def ollama_embed(text: str, model: str = "nomic-embed-text"):
                 timeout=60
             )
             res.raise_for_status()
+            if on_attempt:
+                on_attempt(attempt, True)
             break
         except requests.exceptions.RequestException:
+            if on_attempt:
+                on_attempt(attempt, False)
             if attempt == attempts:
                 raise
             logger.warning(

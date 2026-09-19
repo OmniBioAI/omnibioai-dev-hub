@@ -5,7 +5,7 @@ import yaml
 
 sys.path.append(os.path.abspath("."))
 
-from scripts.build_trusted_index import build_candidate
+from scripts.build_trusted_index import DEFAULT_EMBED_BATCH_SIZE, DEFAULT_EMBED_COOLDOWN_SECONDS, build_candidate
 
 REPOS_CONFIG_PATH = os.path.join(
     os.path.dirname(os.path.abspath(__file__)), "..", "configs", "repos.yaml"
@@ -95,7 +95,12 @@ def build_index():
         os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "data", "faiss_candidates"),
     )
     build_id = os.environ.get("DEVHUB_BUILD_ID")
-    result = build_candidate(repo_base, staging_root, build_id=build_id, repo_names=repo_names)
+    embed_batch_size = int(os.environ.get("DEVHUB_EMBED_BATCH_SIZE", DEFAULT_EMBED_BATCH_SIZE))
+    embed_cooldown_seconds = float(os.environ.get("DEVHUB_EMBED_COOLDOWN_SECONDS", DEFAULT_EMBED_COOLDOWN_SECONDS))
+    result = build_candidate(
+        repo_base, staging_root, build_id=build_id, repo_names=repo_names,
+        batch_size=embed_batch_size, cooldown_seconds=embed_cooldown_seconds,
+    )
     manifest = result["manifest"]
     validation = result["validation"]
     print(f"💾 Candidate index saved to {result['candidate_dir']}")
@@ -113,6 +118,9 @@ def build_index():
         "embedding_failures": len(manifest.get("embedding_failures", [])),
         "ingestion_failures": len(manifest.get("ingestion_failures", [])),
         "skipped_documents": len(manifest.get("skipped_documents", [])),
+        "build_status": manifest["build_status"],
+        "build_elapsed_seconds": manifest.get("build_elapsed_seconds"),
+        "embedding_telemetry": manifest.get("embedding_telemetry"),
     })
 
 

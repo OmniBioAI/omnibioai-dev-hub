@@ -45,6 +45,24 @@ def test_app_repo_docs_default_internal_and_source_code_not_selected(tmp_path):
     assert {d["visibility"] for d in found} == {"INTERNAL"}
 
 
+def test_dot_directories_are_never_walked(tmp_path):
+    """A tool/agent scratch tree under a dot-directory (e.g. `.claude/worktrees/`
+    holding duplicate repo checkouts) must never be treated as a documentation
+    source, even though its files would otherwise match README.md/docs/ selection."""
+    repo = tmp_path / "omnibioai-workbench"
+    (repo / ".claude" / "worktrees" / "agent-1" / "plugins" / "foo").mkdir(parents=True)
+    (repo / ".claude" / "worktrees" / "agent-1" / "plugins" / "foo" / "README.md").write_text("# Foo\n\nDupe")
+    (repo / ".claude" / "worktrees" / "agent-1" / "README.md").write_text("# Agent 1\n\nScratch")
+    (repo / "plugins" / "foo").mkdir(parents=True)
+    (repo / "plugins" / "foo" / "README.md").write_text("# Foo\n\nReal")
+    (repo / "README.md").write_text("# Workbench\n\nReadme")
+
+    found, _ = discover_documents(str(tmp_path), SourcePolicy(repository_names=["omnibioai-workbench"]))
+
+    assert {d["relative_path"] for d in found} == {"README.md", "plugins/foo/README.md"}
+    assert not any(d["relative_path"].startswith(".claude") for d in found)
+
+
 def test_missing_docs_visibility_fails_closed_to_review_required(tmp_path):
     docs = tmp_path / "omnibioai-docs"
     docs.mkdir()

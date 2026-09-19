@@ -159,5 +159,43 @@
     "expected_source_contains": "omnibioai-workflow-bundles/metagenomics",
     "rerank": true,
     "notes": "unscoped rerank test — this query fails at rank 6+ without reranking; cross-encoder should promote metagenomics/README above microbiome/kraken sub-workflows"
+  },
+  {
+    "id": "leak-internal-ragbio",
+    "query": "what does the RAG-powered gene discovery assistant ragbio do and how do I run its bulk PubMed ingestion scripts",
+    "forbidden_visibilities": ["INTERNAL"],
+    "forbidden_source_contains": ["omnibioai-rag/README.md", "omnibioai-rag/scripts/README.md"],
+    "category": "visibility-leakage",
+    "notes": "omnibioai-rag docs are INTERNAL by default (non-docs repos default to INTERNAL); an ordinary caller (allowed_visibilities defaults to PUBLIC) must never see them even though the query directly matches their content"
+  },
+  {
+    "id": "leak-review-required-ml-tutorial",
+    "query": "walk me through the cancer subtype prediction AutoML tutorial notebook",
+    "forbidden_visibilities": ["REVIEW_REQUIRED"],
+    "forbidden_source_contains": ["omnibioai-docs/tutorials/ml"],
+    "category": "visibility-leakage",
+    "notes": "omnibioai-docs/tutorials/ml/* is not present in visibility/VISIBILITY-INVENTORY.json and fails closed to REVIEW_REQUIRED; an ordinary caller must never see it"
+  },
+  {
+    "id": "no-results-nonexistent-feature",
+    "query": "how do I configure the quantum-entanglement RNA folding scheduler's decoherence threshold parameter",
+    "expect_no_results": true,
+    "category": "negative",
+    "notes": "no such feature exists anywhere in the indexed corpus; retrieval must return nothing rather than a plausible-sounding nearest match"
+  },
+  {
+    "id": "citation-provenance-workflow-bundle",
+    "query": "what QC steps does the ATAC-seq pipeline run before peak calling",
+    "expected_source_contains": "omnibioai-workflow-bundles/atacseq",
+    "require_citation": true,
+    "category": "citation-correctness",
+    "notes": "the matched result's citation must carry repository/relative_path/source_revision/document_id/chunk_id, not just a source string, so an answer can be traced back to an exact file+revision"
+  },
+  {
+    "id": "pubmed-devhub-separation",
+    "query": "PMID abstract summary of a randomized controlled trial on statin efficacy in cardiovascular outcomes",
+    "expect_no_results": true,
+    "category": "index-separation",
+    "notes": "PubMed literature is a wholly separate index/service (omnibioai-rag's biomedical corpus); Dev Hub indexes engineering/repo documentation only and must never surface unrelated literature-style content, indexed or fabricated"
   }
 ]
