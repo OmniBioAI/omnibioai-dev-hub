@@ -76,7 +76,14 @@ class VectorStore:
         self.metadata.extend(metadata)
         logger.debug(f"VectorStore.add: +{len(vecs)} vectors, total={self.index.ntotal}")
 
-    def search(self, query_vec, top_k: int = 5):
+    def _result_from_meta(self, score, meta):
+        result = dict(meta)
+        result["score"] = float(score)
+        result.setdefault("text", meta.get("text", ""))
+        result.setdefault("source", meta.get("source", "unknown"))
+        return result
+
+    def search(self, query_vec, top_k: int = 5, allowed_visibilities: set[str] | None = None):
         if self.index is None or self.index.ntotal == 0:
             return []
 
@@ -96,15 +103,15 @@ class VectorStore:
         for s, i in zip(scores[0], indices[0]):
             if i < 0 or i >= len(self.metadata):
                 continue
-            results.append({
-                "score": float(s),
-                "text": self.metadata[i].get("text", ""),
-                "source": self.metadata[i].get("source", "unknown"),
-            })
+            meta = self.metadata[i]
+            if allowed_visibilities is not None and meta.get("visibility") not in allowed_visibilities:
+                continue
+            results.append(self._result_from_meta(s, meta))
 
         return results
 
-    def filter_search(self, query_vec, top_k: int = 5, field: str | None = None, value: str | None = None):
+    def filter_search(self, query_vec, top_k: int = 5, field: str | None = None, value: str | None = None,
+                      allowed_visibilities: set[str] | None = None):
         """FAISS search with post-filtering on a metadata field.
 
         Retrieves top_k * 3 candidates from FAISS then keeps only those whose
@@ -112,7 +119,7 @@ class VectorStore:
         plain search when no filter is specified.
         """
         if field is None or value is None:
-            return self.search(query_vec, top_k)
+            return self.search(query_vec, top_k, allowed_visibilities=allowed_visibilities)
 
         if self.index is None or self.index.ntotal == 0:
             return []
@@ -132,15 +139,11 @@ class VectorStore:
             if i < 0 or i >= len(self.metadata):
                 continue
             meta = self.metadata[i]
+            if allowed_visibilities is not None and meta.get("visibility") not in allowed_visibilities:
+                continue
             if meta.get(field) != value:
                 continue
-            results.append({
-                "score": float(s),
-                "text": meta.get("text", ""),
-                "source": meta.get("source", "unknown"),
-                "repo": meta.get("repo"),
-                "bundle": meta.get("bundle"),
-            })
+            results.append(self._result_from_meta(s, meta))
             if len(results) >= top_k:
                 break
 

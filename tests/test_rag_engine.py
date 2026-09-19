@@ -142,8 +142,8 @@ def test_engine_retrieve_success(mock_embed, engine, mock_vector_store):
     mock_vector_store.index = mock_index
     mock_vector_store.metadata = [
         {}, # 0
-        {"text": "text1", "source": "src1"}, # 1
-        {"text": "text2", "source": "src2"}  # 2
+        {"text": "text1", "source": "src1", "visibility": "PUBLIC"}, # 1
+        {"text": "text2", "source": "src2", "visibility": "PUBLIC"}  # 2
     ]
     
     results = engine.retrieve("query", top_k=2)
@@ -196,7 +196,7 @@ def test_engine_answer_success(mock_gen, engine, mock_vector_store):
     # Mock retrieve to return something
     with patch.object(engine, "retrieve", return_value=[{"source": "s1"}]) as mock_retrieve:
         res = engine.answer("query")
-        mock_retrieve.assert_called_once_with("query", repo=None, bundle=None)
+        mock_retrieve.assert_called_once_with("query", repo=None, bundle=None, allowed_visibilities=None)
         assert res["answer"] == "final answer"
         assert res["sources"] == ["s1"]
         assert res["version"] == "v6-faiss"
@@ -215,14 +215,14 @@ def test_engine_query(engine):
     with patch.object(engine, "answer", return_value={"ok": True}) as mock_answer:
         res = engine.query("q")
         assert res["ok"] is True
-        mock_answer.assert_called_once_with("q", repo=None, bundle=None)
+        mock_answer.assert_called_once_with("q", repo=None, bundle=None, allowed_visibilities=None)
 
 
 def test_engine_query_passes_scope(engine):
     """Pass the repo and bundle scope from query through to answer."""
     with patch.object(engine, "answer", return_value={"ok": True}) as mock_answer:
         engine.query("q", repo="my-repo", bundle="my-bundle")
-        mock_answer.assert_called_once_with("q", repo="my-repo", bundle="my-bundle")
+        mock_answer.assert_called_once_with("q", repo="my-repo", bundle="my-bundle", allowed_visibilities=None)
 
 
 @patch("rag.engine.ollama_embed")
@@ -295,7 +295,7 @@ def test_engine_answer_passes_scope(mock_embed, engine, mock_vector_store):
         patch("rag.engine.ollama_generate", return_value="ans"),
     ):
         engine.answer("q", repo="r", bundle="b")
-        mock_retrieve.assert_called_once_with("q", repo="r", bundle="b")
+        mock_retrieve.assert_called_once_with("q", repo="r", bundle="b", allowed_visibilities=None)
 
 
 # =========================================================
@@ -412,7 +412,7 @@ def test_retrieve_with_rerank_fetches_wider_set(mock_embed, engine, mock_vector_
     )
     mock_vector_store.index = mock_index
     mock_vector_store.metadata = [
-        {"text": f"t{i}", "source": f"s{i}"} for i in range(20)
+        {"text": f"t{i}", "source": f"s{i}", "visibility": "PUBLIC"} for i in range(20)
     ]
 
     mock_ce = MagicMock()
@@ -436,7 +436,7 @@ def test_retrieve_without_rerank_fetches_exact_top_k(mock_embed, engine, mock_ve
     mock_index.ntotal = 20
     mock_index.search.return_value = (np.array([[0.9] * 5]), np.array([[i for i in range(5)]]))
     mock_vector_store.index = mock_index
-    mock_vector_store.metadata = [{"text": f"t{i}", "source": f"s{i}"} for i in range(20)]
+    mock_vector_store.metadata = [{"text": f"t{i}", "source": f"s{i}", "visibility": "PUBLIC"} for i in range(20)]
 
     engine.retrieve("q", top_k=5, rerank=False)
 
@@ -551,3 +551,25 @@ def test_stream_llm_yields_inline_error_token_on_failure(mock_post, engine):
     assert len(tokens) == 1
     assert tokens[0].startswith("[LLM_ERROR]")
     assert "ollama unreachable" in tokens[0]
+
+
+@patch("rag.engine.ollama_embed")
+def test_engine_retrieve_excludes_internal_and_missing_visibility_by_default(mock_embed, engine, mock_vector_store):
+    """Ordinary retrieval returns PUBLIC chunks only and fails closed on missing visibility."""
+    mock_embed.return_value = np.array([0.1] * 768, dtype=np.float32)
+    mock_index = MagicMock()
+    mock_index.ntotal = 3
+    mock_index.search.return_value = (
+        np.array([[0.9, 0.8, 0.7]]),
+        np.array([[0, 1, 2]])
+    )
+    mock_vector_store.index = mock_index
+    mock_vector_store.metadata = [
+        {"text": "public", "source": "s1", "visibility": "PUBLIC"},
+        {"text": "internal", "source": "s2", "visibility": "INTERNAL"},
+        {"text": "missing", "source": "s3"},
+    ]
+
+    results = engine.retrieve("query", top_k=3)
+
+    assert [r["text"] for r in results] == ["public"]

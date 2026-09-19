@@ -15,7 +15,9 @@ mock_faiss = MagicMock()
 mock_faiss.IndexFlatIP = MagicMock()
 sys.modules['faiss'] = mock_faiss
 
-from index.vector_store import VectorStore
+import index.vector_store as vector_store_module
+vector_store_module.faiss = mock_faiss
+VectorStore = vector_store_module.VectorStore
 
 
 @pytest.fixture

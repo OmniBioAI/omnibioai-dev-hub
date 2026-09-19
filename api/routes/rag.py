@@ -60,7 +60,7 @@ def query(req: QueryRequest, actor: str = Depends(require_auth)):
         engine = get_engine()
 
         # V6 CONTRACT: only query() exists
-        result = engine.query(req.query, repo=req.repo, bundle=req.bundle)
+        result = engine.query(req.query, repo=req.repo, bundle=req.bundle, allowed_visibilities={"PUBLIC"})
 
         return {
             **result,
@@ -92,7 +92,7 @@ def stream(req: QueryRequest, actor: str = Depends(require_auth)):
             # V6: no hybrid_retrieve dependency anymore
             # fallback-safe: reuse query pipeline structure
 
-            result = engine.retrieve(req.query, repo=req.repo, bundle=req.bundle)
+            result = engine.retrieve(req.query, repo=req.repo, bundle=req.bundle, allowed_visibilities={"PUBLIC"})
             context = engine.build_context(result)
 
             # check optional LLM streaming support

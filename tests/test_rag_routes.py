@@ -196,7 +196,7 @@ def test_query_endpoint_with_bundle_scope(client, mock_control_plane):
 
     assert response.status_code == 200
     mock_engine.query.assert_called_once_with(
-        "metagenomics", repo=None, bundle="metagenomics"
+        "metagenomics", repo=None, bundle="metagenomics", allowed_visibilities={"PUBLIC"}
     )
 
 
@@ -210,7 +210,7 @@ def test_query_endpoint_with_repo_scope(client, mock_control_plane):
 
     assert response.status_code == 200
     mock_engine.query.assert_called_once_with(
-        "model versioning", repo="omnibioai-model-registry", bundle=None
+        "model versioning", repo="omnibioai-model-registry", bundle=None, allowed_visibilities={"PUBLIC"}
     )
 
 
@@ -222,7 +222,7 @@ def test_query_endpoint_unscoped_passes_none_filters(client, mock_control_plane)
 
     client.post("/query", json={"query": "hello"})
 
-    mock_engine.query.assert_called_once_with("hello", repo=None, bundle=None)
+    mock_engine.query.assert_called_once_with("hello", repo=None, bundle=None, allowed_visibilities={"PUBLIC"})
 
 
 def test_stream_endpoint_with_bundle_scope(client, mock_control_plane):
@@ -236,4 +236,4 @@ def test_stream_endpoint_with_bundle_scope(client, mock_control_plane):
     response = client.post("/stream", json={"query": "q", "bundle": "metagenomics"})
 
     assert response.status_code == 200
-    mock_engine.retrieve.assert_called_once_with("q", repo=None, bundle="metagenomics")
+    mock_engine.retrieve.assert_called_once_with("q", repo=None, bundle="metagenomics", allowed_visibilities={"PUBLIC"})

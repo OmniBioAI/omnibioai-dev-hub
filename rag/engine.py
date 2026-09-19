@@ -203,7 +203,10 @@ class RAGEngine:
     # RETRIEVAL (FAISS ONLY)
     # =====================================================
     def retrieve(self, query: str, top_k: int = 5, repo: str | None = None, bundle: str | None = None,
-                 rerank: bool = False):
+                 rerank: bool = False, allowed_visibilities: set[str] | None = None):
+
+        if allowed_visibilities is None:
+            allowed_visibilities = {"PUBLIC"}
 
         query_vec = self._embed(query).reshape(1, -1)
 
@@ -221,7 +224,7 @@ class RAGEngine:
         if (repo is not None or bundle is not None) and hasattr(vs, "filter_search"):
             field = "bundle" if bundle is not None else "repo"
             value = bundle if bundle is not None else repo
-            candidates = vs.filter_search(query_vec, fetch_k, field=field, value=value)
+            candidates = vs.filter_search(query_vec, fetch_k, field=field, value=value, allowed_visibilities=allowed_visibilities)
         else:
             k = min(fetch_k, index.ntotal)
             scores, indices = index.search(query_vec, k)
@@ -230,11 +233,13 @@ class RAGEngine:
             for score, idx in zip(scores[0], indices[0]):
                 if idx < 0 or idx >= len(metadata):
                     continue
-                candidates.append({
-                    "score": float(score),
-                    "text": metadata[idx].get("text", ""),
-                    "source": metadata[idx].get("source", "unknown")
-                })
+                if metadata[idx].get("visibility") not in allowed_visibilities:
+                    continue
+                candidate = dict(metadata[idx])
+                candidate["score"] = float(score)
+                candidate.setdefault("text", metadata[idx].get("text", ""))
+                candidate.setdefault("source", metadata[idx].get("source", "unknown"))
+                candidates.append(candidate)
 
         if rerank:
             return self.rerank(query, candidates, top_k=top_k)
@@ -276,9 +281,10 @@ Answer clearly, technically, and concisely:
     # =====================================================
     # MAIN PIPELINE
     # =====================================================
-    def answer(self, query: str, repo: str | None = None, bundle: str | None = None):
+    def answer(self, query: str, repo: str | None = None, bundle: str | None = None,
+               allowed_visibilities: set[str] | None = None):
 
-        docs = self.retrieve(query, repo=repo, bundle=bundle)
+        docs = self.retrieve(query, repo=repo, bundle=bundle, allowed_visibilities=allowed_visibilities)
         context = self.build_context(docs)
         prompt = self.build_prompt(query, context)
 
@@ -324,5 +330,6 @@ Answer clearly, technically, and concisely:
     # =====================================================
     # FASTAPI COMPATIBILITY
     # =====================================================
-    def query(self, question: str, repo: str | None = None, bundle: str | None = None):
-        return self.answer(question, repo=repo, bundle=bundle)
+    def query(self, question: str, repo: str | None = None, bundle: str | None = None,
+              allowed_visibilities: set[str] | None = None):
+        return self.answer(question, repo=repo, bundle=bundle, allowed_visibilities=allowed_visibilities)
