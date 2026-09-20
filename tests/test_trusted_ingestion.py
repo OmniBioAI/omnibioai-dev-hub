@@ -2,9 +2,13 @@
 
 import json
 
+import pytest
+
 from ingestion.trusted import (
     SourcePolicy,
+    bundle_for,
     chunks_for_document,
+    content_state_for,
     discover_documents,
     document_id,
 )
@@ -118,3 +122,44 @@ def test_default_repository_policy_adds_only_deliberate_phase18_repositories():
     assert "omnibioai-design-tokens" not in selected
     assert "omnibioai-launcher" not in selected
     assert "omnibioai-ecosystem-regression" not in selected
+
+
+@pytest.mark.parametrize("path,expected", [
+    ("proteomics/alphafold_structure/README.md", "CURRENT"),  # "alphafold" contains "old"
+    ("structural_genomics/fold_switching/README.md", "CURRENT"),
+    ("metabolomics/targeted_metabolomics_panel/README.md", "CURRENT"),  # "targeted" != "target"
+    ("funcgen/crispr_offtarget/README.md", "CURRENT"),
+    ("docs/archive/notes.md", "HISTORICAL"),
+    ("docs/legacy-auth.md", "HISTORICAL"),
+    ("docs/old_design.md", "HISTORICAL"),
+    ("docs/roadmap.md", "TARGET"),
+    ("docs/future-work.md", "TARGET"),
+    ("docs/design-intent.md", "TARGET"),
+    ("docs/target_architecture.md", "TARGET"),
+])
+def test_content_state_matches_whole_path_tokens_not_substrings(path, expected):
+    assert content_state_for(path) == expected
+
+
+@pytest.mark.parametrize("path,expected", [
+    ("README.md", None),
+    ("atacseq/README.md", "atacseq"),
+    ("rnaseq/count_matrix_qc/README.md", "rnaseq"),
+    ("docs/guide.md", "docs"),
+])
+def test_bundle_is_first_directory_or_none_for_root_files(path, expected):
+    assert bundle_for(path) == expected
+
+
+def test_chunk_metadata_carries_bundle_for_api_scope_filter(tmp_path):
+    repo = tmp_path / "omnibioai-workflow-bundles"
+    (repo / "atacseq").mkdir(parents=True)
+    (repo / "atacseq" / "README.md").write_text("# ATAC\n\nPipeline")
+    (repo / "README.md").write_text("# Bundles\n\nRoot")
+
+    found, _ = discover_documents(str(tmp_path), SourcePolicy(repository_names=["omnibioai-workflow-bundles"]))
+    by_path = {d["relative_path"]: d for d in found}
+    assert by_path["atacseq/README.md"]["bundle"] == "atacseq"
+    assert by_path["README.md"]["bundle"] is None
+    chunk = chunks_for_document(by_path["atacseq/README.md"], "b1", "nomic-embed-text")[0]
+    assert chunk["bundle"] == "atacseq"

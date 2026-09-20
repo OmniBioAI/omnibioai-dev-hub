@@ -10,6 +10,7 @@ from __future__ import annotations
 import hashlib
 import json
 import os
+import re
 import subprocess
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
@@ -121,13 +122,32 @@ def document_type_for(repo_name: str, rel_path: str) -> str:
     return "DOCUMENTATION"
 
 
+_HISTORICAL_TOKENS = {"historical", "archive", "archived", "obsolete", "deprecated", "legacy", "old"}
+_TARGET_TOKENS = {"roadmap", "target", "future"}
+
+
 def content_state_for(rel_path: str) -> str:
-    lowered = rel_path.lower()
-    if any(part in lowered for part in ("historical", "archive", "obsolete", "deprecated", "legacy", "old")):
+    # Whole-token match on path words, not substring: substring matching
+    # labelled "alphafold" (contains "old") HISTORICAL and
+    # "targeted_metabolomics" TARGET.
+    tokens = [t for t in re.split(r"[^a-z0-9]+", rel_path.lower()) if t]
+    if _HISTORICAL_TOKENS & set(tokens):
         return "HISTORICAL"
-    if any(part in lowered for part in ("roadmap", "target", "future", "design-intent")):
+    design_intent = any(a == "design" and b == "intent" for a, b in zip(tokens, tokens[1:], strict=False))
+    if _TARGET_TOKENS & set(tokens) or design_intent:
         return "TARGET"
     return "CURRENT"
+
+
+def bundle_for(rel_path: str) -> str | None:
+    """First directory under the repo root; None for root-level files.
+
+    Same semantics as the pre-Phase-18 indexer. The API/UI `bundle` scope
+    filter matches on this field, so dropping it silently empties every
+    bundle-scoped query.
+    """
+    parts = rel_path.split("/")
+    return parts[0] if len(parts) > 1 else None
 
 
 def authority_for(repo_name: str, rel_path: str) -> str:
@@ -272,6 +292,7 @@ def discover_documents(repo_base: str, policy: SourcePolicy | None = None) -> tu
                 "repository": repo_name,
                 "repo_path": str(repo_path),
                 "relative_path": rel_path,
+                "bundle": bundle_for(rel_path),
                 "source_revision": revision,
                 "content_hash": content_hash,
                 "title": title_from_markdown(text, Path(rel_path).stem),
