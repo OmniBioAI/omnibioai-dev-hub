@@ -11,6 +11,29 @@ from rag.control_plane import CONTROL_PLANE
 
 router = APIRouter()
 
+# Ordinary callers get PUBLIC content only, and only chunks genuinely relevant
+# to the question. Both are decided here, server-side; nothing in the request
+# body can widen visibility or lower the cutoff.
+PUBLIC_ONLY = {"PUBLIC"}
+
+# Cosine-similarity floor, calibrated on an independent 40+40 answerable /
+# unanswerable query set against the Phase 18 candidate (AUC 0.983; keeps
+# 39/40 answerable, rejects 38/40 unanswerable). See scripts/calibrate_relevance.py.
+# It rejects off-topic queries; it cannot reject plausible-sounding fabricated
+# features of the real product (those score like genuine answers).
+DEFAULT_MIN_RELEVANCE = 0.64
+
+
+def _min_relevance() -> float:
+    raw = os.getenv("DEVHUB_MIN_RELEVANCE", "").strip()
+    if not raw:
+        return DEFAULT_MIN_RELEVANCE
+    try:
+        value = float(raw)
+    except ValueError:
+        return DEFAULT_MIN_RELEVANCE  # fail safe: a typo must not silently disable the cutoff
+    return value if 0.0 <= value <= 1.0 else DEFAULT_MIN_RELEVANCE
+
 
 def _debug_tracebacks_enabled() -> bool:
     # Same shared-secret-style convention as api/auth.py's _auth_enabled():
@@ -60,7 +83,8 @@ def query(req: QueryRequest, actor: str = Depends(require_auth)):
         engine = get_engine()
 
         # V6 CONTRACT: only query() exists
-        result = engine.query(req.query, repo=req.repo, bundle=req.bundle, allowed_visibilities={"PUBLIC"})
+        result = engine.query(req.query, repo=req.repo, bundle=req.bundle,
+                              allowed_visibilities=PUBLIC_ONLY, min_relevance=_min_relevance())
 
         return {
             **result,
@@ -92,7 +116,8 @@ def stream(req: QueryRequest, actor: str = Depends(require_auth)):
             # V6: no hybrid_retrieve dependency anymore
             # fallback-safe: reuse query pipeline structure
 
-            result = engine.retrieve(req.query, repo=req.repo, bundle=req.bundle, allowed_visibilities={"PUBLIC"})
+            result = engine.retrieve(req.query, repo=req.repo, bundle=req.bundle,
+                                    allowed_visibilities=PUBLIC_ONLY, min_relevance=_min_relevance())
             context = engine.build_context(result)
 
             # check optional LLM streaming support
@@ -101,7 +126,8 @@ def stream(req: QueryRequest, actor: str = Depends(require_auth)):
                     yield f"data: {json.dumps({'type': 'token', 'content': token})}\n\n"
             else:
                 # fallback: single response
-                response = engine.answer(req.query)
+                response = engine.answer(req.query, repo=req.repo, bundle=req.bundle,
+                                       allowed_visibilities=PUBLIC_ONLY, min_relevance=_min_relevance())
                 yield f"data: {json.dumps({'type': 'response', 'content': response['answer']})}\n\n"
 
             yield f"data: {json.dumps({'type': 'done'})}\n\n"

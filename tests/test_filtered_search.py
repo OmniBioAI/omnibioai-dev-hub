@@ -24,6 +24,9 @@ class FakeIndex:
         self.ntotal = len(self.vectors)
         self.search_calls = []
 
+    def reconstruct(self, row):
+        return self.vectors[row]
+
     def search(self, q, k):
         self.search_calls.append(k)
         scores = self.vectors @ np.asarray(q, dtype=np.float32).reshape(-1)
@@ -62,7 +65,7 @@ def _store(index, meta):
 def test_search_allowed_widens_past_excluded_neighbours():
     q, index, meta = _corpus()
     hits = search_allowed(index, meta, q, 5, lambda m: m["visibility"] == "PUBLIC")
-    assert [meta[row]["text"] for _, row in hits] == [f"public-{i}" for i in range(5)]
+    assert [meta[row]["text"] for _, row, _rel in hits] == [f"public-{i}" for i in range(5)]
     assert index.search_calls[0] == 5 and index.search_calls[-1] > 5  # started narrow, widened
 
 
@@ -76,7 +79,7 @@ def test_search_allowed_returns_fewer_when_index_has_fewer_allowed():
 def test_search_allowed_never_admits_rejected_chunks():
     q, index, meta = _corpus()
     hits = search_allowed(index, meta, q, 50, lambda m: m["visibility"] == "PUBLIC")
-    assert all(meta[row]["visibility"] == "PUBLIC" for _, row in hits)
+    assert all(meta[row]["visibility"] == "PUBLIC" for _, row, _rel in hits)
 
 
 def test_search_allowed_empty_index_and_zero_want():
@@ -122,3 +125,75 @@ def test_engine_retrieve_internal_scope_only_when_explicitly_allowed():
     with patch("rag.engine.ollama_embed", return_value=q):
         results = engine.retrieve("anything", top_k=5, allowed_visibilities={"PUBLIC", "INTERNAL"})
     assert {r["visibility"] for r in results} == {"INTERNAL"}  # nearest are INTERNAL when permitted
+
+
+# ---- relevance cutoff (cosine) -------------------------------------------------
+
+def test_min_relevance_returns_nothing_when_no_allowed_chunk_is_relevant():
+    _q, index, meta = _corpus()
+    off_topic = np.zeros(DIM, dtype=np.float32)
+    off_topic[5] = 1.0  # orthogonal to every stored vector
+    accept = lambda m: m["visibility"] == "PUBLIC"
+    assert search_allowed(index, meta, off_topic, 5, accept)  # no cutoff: nearest neighbours always come back
+    assert search_allowed(index, meta, off_topic, 5, accept, min_relevance=0.5) == []
+
+
+def test_min_relevance_keeps_relevant_chunks_and_reports_cosine():
+    q, index, meta = _corpus()
+    hits = search_allowed(index, meta, q, 5, lambda m: m["visibility"] == "PUBLIC", min_relevance=0.6)
+    assert len(hits) == 5
+    assert all(rel is not None and 0.6 <= rel <= 1.0 for _, _, rel in hits)
+
+
+def test_min_relevance_fails_closed_when_relevance_cannot_be_computed():
+    q, index, meta = _corpus()
+    del FakeIndex.reconstruct  # index that cannot reconstruct vectors
+    try:
+        assert search_allowed(index, meta, q, 5, lambda m: True, min_relevance=0.1) == []
+        assert search_allowed(index, meta, q, 5, lambda m: True)  # without a cutoff it still works
+    finally:
+        def reconstruct(self, row):
+            return self.vectors[row]
+        FakeIndex.reconstruct = reconstruct
+
+
+def test_engine_min_relevance_drops_off_topic_and_keeps_visibility_filter():
+    q, index, meta = _corpus()
+    engine = RAGEngine(_store(index, meta))
+    off_topic = np.zeros(DIM, dtype=np.float32)
+    off_topic[5] = 1.0
+    with patch("rag.engine.ollama_embed", return_value=off_topic):
+        assert engine.retrieve("x", top_k=5, min_relevance=0.5) == []
+    with patch("rag.engine.ollama_embed", return_value=q):
+        results = engine.retrieve("x", top_k=5, min_relevance=0.5)
+    assert len(results) == 5 and {r["visibility"] for r in results} == {"PUBLIC"}
+
+
+def test_engine_scoped_retrieval_honours_min_relevance():
+    _q, index, meta = _corpus()
+    engine = RAGEngine(_store(index, meta))
+    off_topic = np.zeros(DIM, dtype=np.float32)
+    off_topic[5] = 1.0
+    with patch("rag.engine.ollama_embed", return_value=off_topic):
+        assert engine.retrieve("x", top_k=5, bundle="b", min_relevance=0.5) == []
+
+
+# ---- citation provenance ---------------------------------------------------------
+
+def test_retrieved_citation_carries_revision_ids_and_source_states():
+    q, index, meta = _corpus()
+    for m in meta:
+        m.update({"source_revision": "abc123", "document_id": "doc-1", "chunk_id": "chunk-1",
+                  "content_state": "TARGET", "verification_state": "CONFIGURED", "relative_path": "docs/x.md"})
+    engine = RAGEngine(_store(index, meta))
+    with patch("rag.engine.ollama_embed", return_value=q):
+        cite = engine.retrieve("x", top_k=1)[0]["citation"]
+    assert cite == {"repository": "r", "relative_path": "docs/x.md", "source_revision": "abc123",
+                    "document_id": "doc-1", "chunk_id": "chunk-1",
+                    "content_state": "TARGET", "verification_state": "CONFIGURED"}
+
+
+def test_citation_never_invents_missing_fields():
+    from rag.engine import with_full_citation
+    cite = with_full_citation({"repo": "r", "text": "t"})["citation"]
+    assert cite["repository"] == "r" and cite["source_revision"] is None and cite["content_state"] is None

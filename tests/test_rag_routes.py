@@ -196,7 +196,7 @@ def test_query_endpoint_with_bundle_scope(client, mock_control_plane):
 
     assert response.status_code == 200
     mock_engine.query.assert_called_once_with(
-        "metagenomics", repo=None, bundle="metagenomics", allowed_visibilities={"PUBLIC"}
+        "metagenomics", repo=None, bundle="metagenomics", allowed_visibilities={"PUBLIC"}, min_relevance=0.64
     )
 
 
@@ -210,7 +210,7 @@ def test_query_endpoint_with_repo_scope(client, mock_control_plane):
 
     assert response.status_code == 200
     mock_engine.query.assert_called_once_with(
-        "model versioning", repo="omnibioai-model-registry", bundle=None, allowed_visibilities={"PUBLIC"}
+        "model versioning", repo="omnibioai-model-registry", bundle=None, allowed_visibilities={"PUBLIC"}, min_relevance=0.64
     )
 
 
@@ -222,7 +222,7 @@ def test_query_endpoint_unscoped_passes_none_filters(client, mock_control_plane)
 
     client.post("/query", json={"query": "hello"})
 
-    mock_engine.query.assert_called_once_with("hello", repo=None, bundle=None, allowed_visibilities={"PUBLIC"})
+    mock_engine.query.assert_called_once_with("hello", repo=None, bundle=None, allowed_visibilities={"PUBLIC"}, min_relevance=0.64)
 
 
 def test_stream_endpoint_with_bundle_scope(client, mock_control_plane):
@@ -236,4 +236,39 @@ def test_stream_endpoint_with_bundle_scope(client, mock_control_plane):
     response = client.post("/stream", json={"query": "q", "bundle": "metagenomics"})
 
     assert response.status_code == 200
-    mock_engine.retrieve.assert_called_once_with("q", repo=None, bundle="metagenomics", allowed_visibilities={"PUBLIC"})
+    mock_engine.retrieve.assert_called_once_with("q", repo=None, bundle="metagenomics", allowed_visibilities={"PUBLIC"}, min_relevance=0.64)
+
+
+# ---- PUBLIC-only + relevance cutoff are server-side policy, not client input ----
+
+def test_client_cannot_widen_visibility_or_lower_relevance_via_request_body(client, mock_control_plane):
+    mock_engine = MagicMock()
+    mock_engine.query.return_value = {"answer": "a"}
+    mock_control_plane.get_engine.return_value = mock_engine
+
+    client.post("/query", json={
+        "query": "q", "allowed_visibilities": ["PUBLIC", "INTERNAL", "REVIEW_REQUIRED"],
+        "min_relevance": 0.0, "visibility": "INTERNAL",
+    })
+
+    mock_engine.query.assert_called_once_with("q", repo=None, bundle=None, allowed_visibilities={"PUBLIC"}, min_relevance=0.64)
+
+
+def test_stream_fallback_path_is_also_public_only_with_cutoff(client, mock_control_plane):
+    mock_engine = MagicMock()
+    del mock_engine.stream_llm
+    mock_engine.retrieve.return_value = []
+    mock_engine.build_context.return_value = "c"
+    mock_engine.answer.return_value = {"answer": "x"}
+    mock_control_plane.get_engine.return_value = mock_engine
+
+    client.post("/stream", json={"query": "q", "allowed_visibilities": ["INTERNAL"]})
+
+    mock_engine.answer.assert_called_once_with("q", repo=None, bundle=None, allowed_visibilities={"PUBLIC"}, min_relevance=0.64)
+
+
+@pytest.mark.parametrize("env,expected", [("", 0.64), ("0.7", 0.7), ("0", 0.0), ("abc", 0.64), ("1.5", 0.64), ("-1", 0.64)])
+def test_min_relevance_env_override_and_fail_safe(monkeypatch, env, expected):
+    from api.routes.rag import _min_relevance
+    monkeypatch.setenv("DEVHUB_MIN_RELEVANCE", env)
+    assert _min_relevance() == expected

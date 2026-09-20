@@ -78,7 +78,8 @@ def _as_list(value: Any) -> list[str]:
     return [value] if isinstance(value, str) else list(value)
 
 
-def evaluate_case(engine: RAGEngine, case: dict[str, Any], *, top_k: int = TOP_K) -> dict[str, Any]:
+def evaluate_case(engine: RAGEngine, case: dict[str, Any], *, top_k: int = TOP_K,
+                  min_relevance: float | None = None) -> dict[str, Any]:
     query = case["query"]
     allowed = set(case.get("allowed_visibilities", ["PUBLIC"]))
     scope = "internal" if "INTERNAL" in allowed else "public"
@@ -90,6 +91,7 @@ def evaluate_case(engine: RAGEngine, case: dict[str, Any], *, top_k: int = TOP_K
         bundle=case.get("bundle"),
         rerank=case.get("rerank", False),
         allowed_visibilities=allowed,
+        **({"min_relevance": min_relevance} if min_relevance is not None else {}),
     )
     expected = case.get("expected_source_contains")
     expected_metadata = case.get("expected_metadata") or {}
@@ -201,7 +203,7 @@ def _error_result(case: dict[str, Any], exc: Exception) -> dict[str, Any]:
     }
 
 
-def run_eval(index_dir: str, eval_path: str) -> dict[str, Any]:
+def run_eval(index_dir: str, eval_path: str, min_relevance: float | None = None) -> dict[str, Any]:
     vs = VectorStore()
     if not vs.load(index_dir):
         print(f"[ERROR] Could not load FAISS index from {index_dir}", file=sys.stderr)
@@ -216,7 +218,7 @@ def run_eval(index_dir: str, eval_path: str) -> dict[str, Any]:
     print("-" * (col_q + 100))
     for case in cases:
         try:
-            result = evaluate_case(engine, case, top_k=TOP_K)
+            result = evaluate_case(engine, case, top_k=TOP_K, min_relevance=min_relevance)
         except Exception as e:  # noqa: BLE001 -- per-query boundary: one failing case is reported, not hidden
             result = _error_result(case, e)
         results.append(result)
@@ -264,14 +266,18 @@ def main() -> int:
     parser.add_argument("--index-dir", default="data/faiss_index", help="Path to saved FAISS index directory")
     parser.add_argument("--eval", default="tests/eval/retrieval_eval.json", help="Path to eval JSON file")
     parser.add_argument("--json-out", help="Optional path for machine-readable evaluation output")
+    parser.add_argument("--min-relevance", type=float, default=None,
+                        help="Apply the production cosine relevance cutoff. Omitted = the frozen gate configuration; "
+                             "gate thresholds are unchanged either way.")
     args = parser.parse_args()
 
-    result = run_eval(args.index_dir, args.eval)
+    result = run_eval(args.index_dir, args.eval, args.min_relevance)
     manifest_path = os.path.join(args.index_dir, "manifest.json")
     result["provenance"] = {
         "eval_file": args.eval,
         "eval_file_sha256": _sha256(args.eval),
         "index_build_id": _read_build_id(manifest_path),
+        "min_relevance": args.min_relevance,
         "thresholds": {"min_recall_at_k": MIN_RECALL_AT_K, "min_positive_cases_per_scope": MIN_POSITIVE_CASES_PER_SCOPE, "top_k": TOP_K},
     }
     if args.json_out:

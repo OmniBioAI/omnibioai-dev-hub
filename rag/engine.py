@@ -153,6 +153,33 @@ def cosine(a, b):
 
 
 # =========================================================
+# CITATION PROVENANCE
+# =========================================================
+CITATION_FIELDS = (
+    ("repository", "repo"),
+    ("relative_path", "relative_path"),
+    ("source_revision", "source_revision"),
+    ("document_id", "document_id"),
+    ("chunk_id", "chunk_id"),
+    ("content_state", "content_state"),
+    ("verification_state", "verification_state"),
+)
+
+
+def with_full_citation(doc: dict[str, Any]) -> dict[str, Any]:
+    """Guarantee `citation` carries repository, path, revision, document/chunk id and the
+    content_state / verification_state of the source.
+
+    The state fields live on the chunk metadata; without this a caller holding
+    only `citation` could present a TARGET-state or merely CONFIGURED source as
+    current or verified. Missing fields stay None (never invented).
+    """
+    existing = doc.get("citation") or {}
+    citation = {key: existing.get(key, doc.get(meta_key)) for key, meta_key in CITATION_FIELDS}
+    return {**doc, "citation": citation}
+
+
+# =========================================================
 # RAG ENGINE (V6 FAISS-NATIVE)
 # =========================================================
 class RAGEngine:
@@ -214,7 +241,8 @@ class RAGEngine:
     # RETRIEVAL (FAISS ONLY)
     # =====================================================
     def retrieve(self, query: str, top_k: int = 5, repo: str | None = None, bundle: str | None = None,
-                 rerank: bool = False, allowed_visibilities: set[str] | None = None):
+                 rerank: bool = False, allowed_visibilities: set[str] | None = None,
+                 min_relevance: float | None = None):
 
         if allowed_visibilities is None:
             allowed_visibilities = {"PUBLIC"}
@@ -235,19 +263,25 @@ class RAGEngine:
         if (repo is not None or bundle is not None) and hasattr(vs, "filter_search"):
             field = "bundle" if bundle is not None else "repo"
             value = bundle if bundle is not None else repo
-            candidates = vs.filter_search(query_vec, fetch_k, field=field, value=value, allowed_visibilities=allowed_visibilities)
+            extra = {"min_relevance": min_relevance} if min_relevance is not None else {}
+            candidates = vs.filter_search(query_vec, fetch_k, field=field, value=value,
+                                          allowed_visibilities=allowed_visibilities, **extra)
         else:
             hits = search_allowed(
                 index, metadata, query_vec, fetch_k,
                 lambda meta: meta.get("visibility") in allowed_visibilities,
+                min_relevance=min_relevance,
             )
             candidates = []
-            for score, idx in hits:
+            for score, idx, relevance in hits:
                 candidate = dict(metadata[idx])
                 candidate["score"] = score
+                candidate["relevance"] = relevance
                 candidate.setdefault("text", metadata[idx].get("text", ""))
                 candidate.setdefault("source", metadata[idx].get("source", "unknown"))
                 candidates.append(candidate)
+
+        candidates = [with_full_citation(c) for c in candidates]
 
         if rerank:
             return self.rerank(query, candidates, top_k=top_k)
@@ -290,9 +324,10 @@ Answer clearly, technically, and concisely:
     # MAIN PIPELINE
     # =====================================================
     def answer(self, query: str, repo: str | None = None, bundle: str | None = None,
-               allowed_visibilities: set[str] | None = None):
+               allowed_visibilities: set[str] | None = None, min_relevance: float | None = None):
 
-        docs = self.retrieve(query, repo=repo, bundle=bundle, allowed_visibilities=allowed_visibilities)
+        extra = {"min_relevance": min_relevance} if min_relevance is not None else {}
+        docs = self.retrieve(query, repo=repo, bundle=bundle, allowed_visibilities=allowed_visibilities, **extra)
         context = self.build_context(docs)
         prompt = self.build_prompt(query, context)
 
@@ -339,5 +374,6 @@ Answer clearly, technically, and concisely:
     # FASTAPI COMPATIBILITY
     # =====================================================
     def query(self, question: str, repo: str | None = None, bundle: str | None = None,
-              allowed_visibilities: set[str] | None = None):
-        return self.answer(question, repo=repo, bundle=bundle, allowed_visibilities=allowed_visibilities)
+              allowed_visibilities: set[str] | None = None, min_relevance: float | None = None):
+        extra = {"min_relevance": min_relevance} if min_relevance is not None else {}
+        return self.answer(question, repo=repo, bundle=bundle, allowed_visibilities=allowed_visibilities, **extra)

@@ -78,14 +78,16 @@ class VectorStore:
         self.metadata.extend(metadata)
         logger.debug(f"VectorStore.add: +{len(vecs)} vectors, total={self.index.ntotal}")
 
-    def _result_from_meta(self, score, meta):
+    def _result_from_meta(self, score, meta, relevance=None):
         result = dict(meta)
         result["score"] = float(score)
+        result["relevance"] = relevance
         result.setdefault("text", meta.get("text", ""))
         result.setdefault("source", meta.get("source", "unknown"))
         return result
 
-    def search(self, query_vec, top_k: int = 5, allowed_visibilities: set[str] | None = None):
+    def search(self, query_vec, top_k: int = 5, allowed_visibilities: set[str] | None = None,
+               min_relevance: float | None = None):
         if self.index is None or self.index.ntotal == 0:
             return []
 
@@ -101,11 +103,12 @@ class VectorStore:
         def accept(meta):
             return allowed_visibilities is None or meta.get("visibility") in allowed_visibilities
 
-        hits = search_allowed(self.index, self.metadata, q, top_k, accept)
-        return [self._result_from_meta(score, self.metadata[row]) for score, row in hits]
+        hits = search_allowed(self.index, self.metadata, q, top_k, accept, min_relevance=min_relevance)
+        return [self._result_from_meta(score, self.metadata[row], rel) for score, row, rel in hits]
 
     def filter_search(self, query_vec, top_k: int = 5, field: str | None = None, value: str | None = None,
-                      allowed_visibilities: set[str] | None = None):
+                      allowed_visibilities: set[str] | None = None,
+                      min_relevance: float | None = None):
         """FAISS search with post-filtering on a metadata field.
 
         Retrieves top_k * 3 candidates from FAISS then keeps only those whose
@@ -113,7 +116,7 @@ class VectorStore:
         plain search when no filter is specified.
         """
         if field is None or value is None:
-            return self.search(query_vec, top_k, allowed_visibilities=allowed_visibilities)
+            return self.search(query_vec, top_k, allowed_visibilities=allowed_visibilities, min_relevance=min_relevance)
 
         if self.index is None or self.index.ntotal == 0:
             return []
@@ -130,8 +133,8 @@ class VectorStore:
                 return False
             return meta.get(field) == value
 
-        hits = search_allowed(self.index, self.metadata, q, top_k, accept, initial_k=top_k * 3)
-        return [self._result_from_meta(score, self.metadata[row]) for score, row in hits]
+        hits = search_allowed(self.index, self.metadata, q, top_k, accept, initial_k=top_k * 3, min_relevance=min_relevance)
+        return [self._result_from_meta(score, self.metadata[row], rel) for score, row, rel in hits]
 
     def save(self, directory: str):
         os.makedirs(directory, exist_ok=True)
