@@ -107,6 +107,12 @@ def main() -> int:
                 gate(f"[{c['index']}]" in answer or re.search(rf"\[[\d,\s]*\b{c['index']}\b[\d,\s]*\]", answer) is not None, f"{case_id}: citation [{c['index']}] not in the answer text")
             if body.get("grounded"):
                 gate(bool(body.get("citations")), f"{case_id}: grounded answer without citations")
+                # Independent faithfulness audit (does not trust the app's own verdict): no name/number in the
+                # answer may be absent from the chunks supplied, and no prompt-example wording may appear.
+                invented = unsupported_answer_terms(answer, ctx, body.get("query", ""))
+                gate(not invented, f"{case_id}: grounded answer states terms found in no supplied excerpt: {invented}")
+                leaked = [t for t in EXAMPLE_ONLY_TERMS if t in answer.lower()]
+                gate(not leaked, f"{case_id}: grounded answer contains prompt-example wording {leaked}")
             return rec
 
         # ---- supported questions (PUBLIC eval cases)
