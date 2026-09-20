@@ -43,7 +43,7 @@ vector_store = VectorStore()
 _INDEX_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "data", "faiss_index")
 loaded = vector_store.load(_INDEX_DIR)
 if not loaded:
-    logger.warning("No persisted FAISS index found; will build from scratch on startup")
+    logger.warning("No FAISS index loaded; retrieval will return nothing. Index construction and promotion are explicit lifecycle operations, never startup side effects.")
 graph_store = GraphStore()
 plugin_index = PluginIndex([])
 

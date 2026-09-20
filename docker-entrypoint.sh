@@ -40,6 +40,31 @@ if [ "$_auth_enabled" = 'true' ] && [ -z "${JWT_SECRET:-}" ]; then
   exit 1
 fi
 
+# Production serves a pre-built, explicitly promoted, PUBLIC-only index. Startup
+# NEVER builds, rebuilds or promotes one: construction and promotion are explicit
+# lifecycle operations (index.lifecycle), not side effects of a restart. It used
+# to run build_index.py inline here when index.faiss was missing, which blocked
+# the service for ~110 minutes and, since Phase 18, produced a staging candidate
+# that was never served anyway.
+#   valid index present     -> start normally
+#   index absent            -> fail fast, clear error
+#   index invalid/incomplete-> fail fast (legacy, tampered, non-PUBLIC-only, rejected...)
+#   unpromoted candidate    -> ignored; only /app/data/faiss_index is ever served
+# NB: with a restart policy of on-failure a failing start will loop, so freeze
+# restarts before any index maintenance (see the promotion runbook).
+_index_dir="${DEVHUB_INDEX_DIR:-/app/data/faiss_index}"
+if [ ! -f "$_index_dir/index.faiss" ]; then
+  echo "❌ No production index at $_index_dir (index.faiss missing)." >&2
+  echo '   Refusing to start: the service never builds or promotes an index implicitly.' >&2
+  echo '   Promote a validated PUBLIC-only candidate with index.lifecycle.promote_candidate.' >&2
+  exit 1
+fi
+if ! python scripts/verify_index.py "$_index_dir" --require-public-only; then
+  echo "❌ $_index_dir failed validation (see INDEX INVALID above). Refusing to start." >&2
+  echo '   Roll back with index.lifecycle.rollback, or promote a valid PUBLIC-only candidate.' >&2
+  exit 1
+fi
+
 echo '⏳ Waiting for Ollama...'
 until curl -sf http://ollama:11434/api/tags > /dev/null 2>&1; do
   echo '  ollama not ready, retrying in 3s...'
@@ -47,24 +72,6 @@ until curl -sf http://ollama:11434/api/tags > /dev/null 2>&1; do
 done
 echo '✅ Ollama is ready'
 
-if [ ! -f /app/data/faiss_index/index.faiss ]; then
-  echo '🚀 Building FAISS index...'
-  python scripts/build_index.py
-else
-  echo '✅ Index already exists, skipping build'
-fi
-
-# Single line, deliberately: this used to be a Dockerfile CMD JSON
-# string, where a trailing `\` before a newline is Docker's own
-# line-continuation syntax for the string literal -- Docker's parser
-# strips it before bash ever runs, so the multi-line-looking version in
-# the old Dockerfile was actually always one line by the time bash saw
-# it. A real script file has no such collapsing: bash's single quotes
-# preserve a trailing `\` + real newline byte-for-byte, which landed
-# straight in devhub.conf and made nginx choke on a stray `\` (confirmed
-# live 2026-09-13: "unknown directive \"\\\" ... devhub.conf:3", crash-
-# looped the container). Keeping this on one line reproduces the
-# original, correct, single-line-with-\n-escapes output exactly.
 printf 'server {\n    listen 5173;\n    root /usr/share/nginx/html;\n    index index.html;\n    location / { try_files $uri $uri/ /index.html; }\n    location /api/ { proxy_pass http://127.0.0.1:8082; proxy_set_header Host $host; }\n    location /rag/ { proxy_pass http://127.0.0.1:8082; proxy_set_header X-Devhub-Internal "%s"; }\n    location /health { proxy_pass http://127.0.0.1:8082; }\n    location /status { proxy_pass http://127.0.0.1:8082; }\n    location /docs   { proxy_pass http://127.0.0.1:8082; }\n}\n' "${JWT_SECRET:-}" > /etc/nginx/conf.d/devhub.conf
 
 nginx

@@ -80,7 +80,7 @@ def test_warns_when_no_persisted_faiss_index_is_found(caplog):
         ):
             importlib.reload(main_module)
         assert any(
-            "No persisted FAISS index found" in record.message for record in caplog.records
+            "No FAISS index loaded" in record.message for record in caplog.records
         )
     finally:
         # Restore api.main to a normal (unpatched) import for any test that
