@@ -9,6 +9,8 @@ import numpy as np
 import requests
 import yaml
 
+from index.filtered_search import search_allowed
+
 logger = logging.getLogger(__name__)
 
 # =========================================================
@@ -235,17 +237,14 @@ class RAGEngine:
             value = bundle if bundle is not None else repo
             candidates = vs.filter_search(query_vec, fetch_k, field=field, value=value, allowed_visibilities=allowed_visibilities)
         else:
-            k = min(fetch_k, index.ntotal)
-            scores, indices = index.search(query_vec, k)
-
+            hits = search_allowed(
+                index, metadata, query_vec, fetch_k,
+                lambda meta: meta.get("visibility") in allowed_visibilities,
+            )
             candidates = []
-            for score, idx in zip(scores[0], indices[0]):
-                if idx < 0 or idx >= len(metadata):
-                    continue
-                if metadata[idx].get("visibility") not in allowed_visibilities:
-                    continue
+            for score, idx in hits:
                 candidate = dict(metadata[idx])
-                candidate["score"] = float(score)
+                candidate["score"] = score
                 candidate.setdefault("text", metadata[idx].get("text", ""))
                 candidate.setdefault("source", metadata[idx].get("source", "unknown"))
                 candidates.append(candidate)

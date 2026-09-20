@@ -5,6 +5,8 @@ import pickle
 import faiss
 import numpy as np
 
+from index.filtered_search import search_allowed
+
 logger = logging.getLogger(__name__)
 
 # Single canonical dimension for nomic-embed-text.
@@ -96,19 +98,11 @@ class VectorStore:
                 f"Ensure nomic-embed-text is used for both indexing and querying."
             )
 
-        k = min(top_k, self.index.ntotal)
-        scores, indices = self.index.search(q, k)
+        def accept(meta):
+            return allowed_visibilities is None or meta.get("visibility") in allowed_visibilities
 
-        results = []
-        for s, i in zip(scores[0], indices[0]):
-            if i < 0 or i >= len(self.metadata):
-                continue
-            meta = self.metadata[i]
-            if allowed_visibilities is not None and meta.get("visibility") not in allowed_visibilities:
-                continue
-            results.append(self._result_from_meta(s, meta))
-
-        return results
+        hits = search_allowed(self.index, self.metadata, q, top_k, accept)
+        return [self._result_from_meta(score, self.metadata[row]) for score, row in hits]
 
     def filter_search(self, query_vec, top_k: int = 5, field: str | None = None, value: str | None = None,
                       allowed_visibilities: set[str] | None = None):
@@ -131,23 +125,13 @@ class VectorStore:
                 f"query is {q.shape[1]}-d."
             )
 
-        k = min(top_k * 3, self.index.ntotal)
-        scores, indices = self.index.search(q, k)
-
-        results = []
-        for s, i in zip(scores[0], indices[0]):
-            if i < 0 or i >= len(self.metadata):
-                continue
-            meta = self.metadata[i]
+        def accept(meta):
             if allowed_visibilities is not None and meta.get("visibility") not in allowed_visibilities:
-                continue
-            if meta.get(field) != value:
-                continue
-            results.append(self._result_from_meta(s, meta))
-            if len(results) >= top_k:
-                break
+                return False
+            return meta.get(field) == value
 
-        return results
+        hits = search_allowed(self.index, self.metadata, q, top_k, accept, initial_k=top_k * 3)
+        return [self._result_from_meta(score, self.metadata[row]) for score, row in hits]
 
     def save(self, directory: str):
         os.makedirs(directory, exist_ok=True)
