@@ -26,3 +26,5 @@ perf_baseline.json
 **/node_modules
 **/dist
 **/build
+data/
+data_staging/
