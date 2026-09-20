@@ -18,8 +18,10 @@ from rag.answering import (
     STATUS_UNSUPPORTED_CLAIM,
     STATUS_UNSUPPORTED_TERM,
     build_grounded_prompt,
+    build_judge_prompt,
     dedupe_chunks,
     generate_grounded_answer,
+    judge_says_supported,
     parse_citation_markers,
     unsupported_answer_terms,
     unsupported_terms,
@@ -87,6 +89,7 @@ def test_prompt_contains_the_rules_the_sentinel_and_only_the_supplied_excerpts()
     assert "ALPHA excerpt text" in prompt and "BETA excerpt text" in prompt and "my question?" in prompt
     assert "If excerpts disagree, say so and cite each" in prompt  # conflicting evidence rule
     assert "content_state=CURRENT, verification_state=CONFIGURED" in prompt
+    assert "never reuse their content" in prompt
 
 
 def test_prompt_never_contains_text_that_was_not_supplied():
@@ -275,3 +278,57 @@ def test_step_numbers_and_single_digits_are_not_claims_but_multi_digit_numbers_a
     steps = "1. Back up nightly [1]\n2. Restore with the recovery tool [1]\nUse it 3 times [1]."
     assert unsupported_answer_terms(steps, docs, "q") == []
     assert set(unsupported_answer_terms("Retention is 90 days [1] and 2.5 GB.", docs, "q")) >= {"90", "2.5"}
+
+
+def test_prompt_examples_use_invented_vocabulary_that_cannot_be_mistaken_for_documentation():
+    prompt = build_grounded_prompt("q", [chunk(1)])
+    for term in ("zorblax", "quuxctl", "glimmerfrost", "4471"):
+        assert term in prompt  # the examples are present ...
+    for domain_word in ("backup", "nightly", "object storage", "recovery tool", "database"):
+        example_block = prompt.split("EXAMPLES")[1].split("EXCERPTS")[0]
+        assert domain_word not in example_block.lower()  # ... and share no vocabulary with the platform docs
+
+
+def test_an_answer_that_repeats_the_prompt_examples_is_refused_as_leakage():
+    r = generate_grounded_answer("What runs on a port?", [chunk(1, text="Services expose health endpoints.")],
+                                 MagicMock(return_value="The zorblax service listens on port 4471 [1]."))
+    assert not r["grounded"] and r["answer_status"] == STATUS_UNSUPPORTED_CLAIM and "zorblax" in r["unsupported_claim_terms"]
+
+
+def test_example_terms_are_fine_when_the_excerpts_or_question_really_contain_them():
+    docs = [chunk(1, text="The zorblax service listens on port 4471 in this deployment.")]
+    r = generate_grounded_answer("Which port does zorblax use?", docs, MagicMock(return_value="It listens on port 4471 [1]."))
+    assert r["grounded"]
+
+
+# ---- entailment judge (unit level) ---------------------------------------------------------------------
+
+def test_judge_verdict_fails_closed():
+    assert judge_says_supported("SUPPORTED") and judge_says_supported(" supported. ")
+    for bad in ("UNSUPPORTED", "unsupported", "Probably supported", "SUPPORTED, mostly", "", None, "NOT SUPPORTED"):
+        assert not judge_says_supported(bad), bad
+
+
+def test_judge_prompt_shows_only_the_supplied_excerpts_and_the_answer_without_citation_markers():
+    docs = [chunk(1, text="ALPHA fact"), chunk(2, text="BETA fact")]
+    prompt = build_judge_prompt("It is ALPHA [1][2].", docs)
+    assert "[1] ALPHA fact" in prompt and "[2] BETA fact" in prompt and "It is ALPHA ." in prompt
+    assert "Reply with exactly one word: SUPPORTED or UNSUPPORTED" in prompt
+
+
+def test_judge_runs_last_and_only_after_the_cheaper_checks_pass():
+    calls = []
+    judge = MagicMock(side_effect=lambda p: calls.append(p) or "SUPPORTED")
+    docs = [chunk(1)]
+    ok = generate_grounded_answer("q?", docs, MagicMock(return_value="Back up nightly [1]."), judge=judge)
+    assert ok["grounded"] and ok["entailment_checked"] and len(calls) == 1
+    for bad in (SENTINEL, "uncited", "bad [9]", "The zorblax service listens on port 4471 [1]."):
+        judge.reset_mock()
+        r = generate_grounded_answer("q?", docs, MagicMock(return_value=bad), judge=judge)
+        assert not r["grounded"]
+        judge.assert_not_called()
+
+
+def test_judge_rejection_yields_unsupported_claim_with_no_citations():
+    r = generate_grounded_answer("q?", [chunk(1)], MagicMock(return_value="Back up nightly [1]."), judge=MagicMock(return_value="UNSUPPORTED"))
+    assert (r["grounded"], r["answer_status"], r["citations"], r["entailment"]) == (False, STATUS_UNSUPPORTED_CLAIM, [], "UNSUPPORTED")

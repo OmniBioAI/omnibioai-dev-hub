@@ -326,9 +326,12 @@ Answer clearly, technically, and concisely:
         passes the deterministic pre-check; its text is shown only if it verifies.
         Both /query and /stream go through this one function so they cannot diverge.
         """
-        return generate_grounded_answer(
-            query, docs, lambda prompt: ollama_generate(prompt, options=GENERATION_OPTIONS)
-        )
+        def call(prompt):
+            return ollama_generate(prompt, options=GENERATION_OPTIONS)
+
+        # The entailment fact-check is ON unless explicitly disabled (DEVHUB_ENTAILMENT_CHECK=off).
+        judge = None if os.environ.get("DEVHUB_ENTAILMENT_CHECK", "on").strip().lower() in {"off", "0", "false", "no"} else call
+        return generate_grounded_answer(query, docs, call, judge=judge)
 
     def answer(self, query: str, repo: str | None = None, bundle: str | None = None,
                allowed_visibilities: set[str] | None = None, min_relevance: float | None = None):

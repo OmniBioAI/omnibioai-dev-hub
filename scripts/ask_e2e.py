@@ -145,9 +145,12 @@ def main() -> int:
                     bad = [d["repo"] for d in body.get("context", []) if d.get("repo") not in c["forbid_repos_not"]]
                     gate(not bad, f"{cid}: content from non-PUBLIC-corpus repos retrieved: {bad}")
             if cat == "bypass":
+                # The invariant is about RETRIEVAL (visibility + cutoff), not about LLM wording: the same
+                # question with and without the client's policy fields must retrieve exactly the same chunks.
                 _plain_status, plain, _ = ask("/rag/query", {"query": c["question"]})
-                rec["same_as_plain"] = (plain.get("context_used"), plain.get("answer_status")) == (body.get("context_used"), body.get("answer_status"))
-                gate(rec["same_as_plain"], f"{cid}: bypass fields changed the outcome ({body.get('answer_status')} vs {plain.get('answer_status')})")
+                ids = lambda b: sorted(d.get("chunk_id") for d in b.get("context", []))
+                rec["same_retrieval_as_plain"] = ids(plain) == ids(body)
+                gate(rec["same_retrieval_as_plain"], f"{cid}: client policy fields changed what was retrieved")
             records.append(rec)
 
         # ---- streaming: same contract, same guarantees

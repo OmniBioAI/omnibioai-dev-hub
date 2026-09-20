@@ -16,6 +16,8 @@ CONTRACT (answer_contract "ask.v1")
          is not a refusal, cites at least one supplied excerpt, cites no
          excerpt number that was not supplied, and states no name or number
          that appears in none of the supplied excerpts (invented specifics)
+      -> entailment: a second, strict fact-check pass must answer exactly
+         SUPPORTED (anything else, including an error, is a refusal)
       -> otherwise a deterministic no-answer; the model's text is discarded
 
     A response is `grounded: true` only in the GROUNDED status. In every other
@@ -48,6 +50,8 @@ STATUS_INVALID_CITATIONS = "INVALID_CITATIONS"
 STATUS_UNSUPPORTED_CLAIM = "UNSUPPORTED_CLAIM"
 STATUS_LLM_UNAVAILABLE = "LLM_UNAVAILABLE"
 
+JUDGE_SUPPORTED = "SUPPORTED"
+
 NO_CONTEXT_MESSAGE = (
     "No sufficiently relevant trusted OmniBioAI documentation was found for this question, "
     "so no answer is given. Ask OmniBioAI only answers from its published documentation."
@@ -72,12 +76,16 @@ NO_ANSWER_MESSAGES = {
 
 # Deterministic, and explicit about the context window: Ollama's default is too
 # small for five excerpts and would silently truncate the instructions.
-GENERATION_OPTIONS = {"temperature": 0, "num_ctx": 8192}
+GENERATION_OPTIONS = {"temperature": 0, "num_ctx": 8192, "seed": 7}  # fixed seed: same prompt, same output
 
 CITATION_FIELDS = (
     "repository", "relative_path", "source_revision", "document_id", "chunk_id",
     "content_state", "verification_state",
 )
+
+# Words that exist only in the prompt's few-shot examples. If one shows up in an answer it came
+# from the prompt, not the documentation, however plausible it reads.
+EXAMPLE_ONLY_TERMS = ("zorblax", "quuxctl", "glimmerfrost", "4471")
 
 _BRAND_PREFIX = "omnibioai"
 _MARKER_RE = re.compile(r"\[(\d+(?:\s*,\s*\d+)*)\]")
@@ -134,13 +142,13 @@ RULES
 5. Do not describe something as verified, supported or operational unless an excerpt says so; respect each excerpt's content_state and verification_state.
 6. Be concise and technical.
 
-EXAMPLES (unrelated to the excerpts below)
-Excerpt [1] backups.md: Databases are backed up nightly to object storage. Restore with the recovery tool.
-Question: How do I back up the database?
-Answer: Databases are backed up nightly to object storage [1]. To restore, use the recovery tool [1].
+EXAMPLES (invented, unrelated to OmniBioAI; never reuse their content)
+Excerpt [1] zorblax.md: The zorblax service listens on port 4471. Restart it with the quuxctl command.
+Question: Which port does the zorblax service use?
+Answer: The zorblax service listens on port 4471 [1].
 
-Excerpt [1] backups.md: Databases are backed up nightly to object storage. Restore with the recovery tool.
-Question: How do I use the hologram viewer for backups?
+Excerpt [1] zorblax.md: The zorblax service listens on port 4471. Restart it with the quuxctl command.
+Question: How do I use the glimmerfrost viewer for zorblax?
 Answer: {SENTINEL}
 
 EXCERPTS
@@ -150,6 +158,28 @@ QUESTION
 {query}
 
 ANSWER (cited, or exactly {SENTINEL}):"""
+
+
+def build_judge_prompt(answer: str, chunks: list[dict[str, Any]]) -> str:
+    """Strict fact-check prompt: is every claim of `answer` stated in the supplied excerpts?"""
+    excerpts = "\n\n".join(f"[{i}] {c.get('text', '')}" for i, c in enumerate(chunks, 1))
+    cleaned = _MARKER_RE.sub("", answer)
+    return f"""You are a strict fact checker. Decide whether an ANSWER is fully supported by the EXCERPTS.
+
+EXCERPTS
+{excerpts}
+
+ANSWER
+{cleaned}
+
+Is EVERY factual claim in the ANSWER (each number, name, frequency, mechanism, step or property) directly stated in the EXCERPTS? Ignore citation markers and differences in wording. If any claim is not stated in the excerpts, it is UNSUPPORTED.
+Reply with exactly one word: SUPPORTED or UNSUPPORTED."""
+
+
+def judge_says_supported(raw: str) -> bool:
+    """Fail closed: only a bare SUPPORTED passes; UNSUPPORTED, hedging, or empty output does not."""
+    verdict = re.sub(r"[^A-Z]", "", (raw or "").strip().upper())
+    return verdict == JUDGE_SUPPORTED
 
 
 def unsupported_terms(query: str, chunks: list[dict[str, Any]]) -> list[str]:
@@ -281,8 +311,13 @@ def no_answer(query: str, status: str, *, context_used: int = 0, llm_invoked: bo
                    context_used=context_used, llm_invoked=llm_invoked, context=context or [], extra=extra)
 
 
-def generate_grounded_answer(query: str, docs: list[dict[str, Any]], generate: Callable[[str], str]) -> dict[str, Any]:
-    """Apply the whole contract to already-retrieved, already-policy-filtered `docs`."""
+def generate_grounded_answer(query: str, docs: list[dict[str, Any]], generate: Callable[[str], str],
+                             judge: Callable[[str], str] | None = None) -> dict[str, Any]:
+    """Apply the whole contract to already-retrieved, already-policy-filtered `docs`.
+
+    `judge`, when given, is the entailment fact-check LLM call. It runs only after
+    every cheaper check has passed, and it fails closed.
+    """
     chunks = dedupe_chunks(docs)
     if not chunks:
         return no_answer(query, STATUS_NO_TRUSTED_CONTEXT)  # the LLM is never reached
@@ -302,8 +337,21 @@ def generate_grounded_answer(query: str, docs: list[dict[str, Any]], generate: C
     if status != STATUS_GROUNDED:
         return no_answer(query, status, context_used=len(chunks), llm_invoked=True, context=chunks)
     invented = unsupported_answer_terms(raw, chunks, query)
+    haystack = " ".join(str(c.get("text", "")) for c in chunks).lower() + " " + query.lower()
+    invented += [t for t in EXAMPLE_ONLY_TERMS if t in raw.lower() and t not in haystack and t not in invented]
     if invented:
         return no_answer(query, STATUS_UNSUPPORTED_CLAIM, context_used=len(chunks), llm_invoked=True, context=chunks,
                          extra={"unsupported_claim_terms": invented})
+
+    if judge is not None:
+        try:
+            supported = judge_says_supported(judge(build_judge_prompt(raw, chunks)))
+        except Exception as exc:  # noqa: BLE001 -- a failed fact-check is never treated as a pass
+            return no_answer(query, STATUS_LLM_UNAVAILABLE, context_used=len(chunks), llm_invoked=True,
+                             context=chunks, extra={"error_class": type(exc).__name__})
+        if not supported:
+            return no_answer(query, STATUS_UNSUPPORTED_CLAIM, context_used=len(chunks), llm_invoked=True,
+                             context=chunks, extra={"entailment": "UNSUPPORTED"})
     return _result(query, answer=raw.strip(), status=STATUS_GROUNDED, grounded=True,
-                   citations=build_citations(chunks, cited), context_used=len(chunks), llm_invoked=True, context=chunks)
+                   citations=build_citations(chunks, cited), context_used=len(chunks), llm_invoked=True, context=chunks,
+                   extra={"entailment_checked": judge is not None})

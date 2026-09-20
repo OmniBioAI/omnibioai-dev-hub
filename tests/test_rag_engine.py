@@ -194,7 +194,8 @@ def test_engine_answer_success(mock_gen, engine, mock_vector_store):
     mock_gen.return_value = "final answer [1]"
     doc = {"source": "s1", "text": "the text", "chunk_id": "c1", "repo": "r", "relative_path": "p.md"}
 
-    with patch.object(engine, "retrieve", return_value=[doc]) as mock_retrieve:
+    with patch.object(engine, "retrieve", return_value=[doc]) as mock_retrieve, \
+            patch.dict("os.environ", {"DEVHUB_ENTAILMENT_CHECK": "off"}):
         res = engine.answer("query")
         mock_retrieve.assert_called_once_with("query", repo=None, bundle=None, allowed_visibilities=None)
         assert res["answer"] == "final answer [1]" and res["grounded"] is True
