@@ -1,0 +1,223 @@
+{
+  "purpose": "Adversarial / policy cases for Ask OmniBioAI (Phase 19). Supported questions come from tests/eval/retrieval_eval.json public-* cases. Every nonexistent term was verified absent from the PUBLIC corpus.",
+  "cases": [
+    {
+      "id": "nonexistent-named-1",
+      "category": "nonexistent_named",
+      "question": "What does the OmniBioAI iOS mobile app do?",
+      "expect_grounded": false,
+      "expect_llm_invoked": false
+    },
+    {
+      "id": "nonexistent-named-2",
+      "category": "nonexistent_named",
+      "question": "How do I install the OmniBioAI Android app?",
+      "expect_grounded": false,
+      "expect_llm_invoked": false
+    },
+    {
+      "id": "nonexistent-named-3",
+      "category": "nonexistent_named",
+      "question": "How do I connect OmniBioAI to Salesforce?",
+      "expect_grounded": false,
+      "expect_llm_invoked": false
+    },
+    {
+      "id": "nonexistent-named-4",
+      "category": "nonexistent_named",
+      "question": "Can OmniBioAI send results to WhatsApp?",
+      "expect_grounded": false,
+      "expect_llm_invoked": false
+    },
+    {
+      "id": "nonexistent-named-5",
+      "category": "nonexistent_named",
+      "question": "Is there an Alexa skill for OmniBioAI?",
+      "expect_grounded": false,
+      "expect_llm_invoked": false
+    },
+    {
+      "id": "nonexistent-named-6",
+      "category": "nonexistent_named",
+      "question": "How do I export OmniBioAI results to Tableau?",
+      "expect_grounded": false,
+      "expect_llm_invoked": false
+    },
+    {
+      "id": "nonexistent-lowercase-1",
+      "category": "nonexistent_lowercase",
+      "question": "How do I configure the holographic storage backend?",
+      "expect_grounded": false
+    },
+    {
+      "id": "nonexistent-lowercase-2",
+      "category": "nonexistent_lowercase",
+      "question": "What is the OmniBioAI blockchain ledger used for?",
+      "expect_grounded": false
+    },
+    {
+      "id": "nonexistent-lowercase-3",
+      "category": "nonexistent_lowercase",
+      "question": "How do I start a video conferencing session inside OmniBioAI?",
+      "expect_grounded": false
+    },
+    {
+      "id": "nonexistent-lowercase-4",
+      "category": "nonexistent_lowercase",
+      "question": "How do I enable mobile push notifications for finished workflows?",
+      "expect_grounded": false
+    },
+    {
+      "id": "off-topic-1",
+      "category": "off_topic",
+      "question": "What is a good recipe for chocolate chip cookies?",
+      "expect_grounded": false,
+      "expect_llm_invoked": false,
+      "expect_status": "NO_TRUSTED_CONTEXT"
+    },
+    {
+      "id": "off-topic-2",
+      "category": "off_topic",
+      "question": "Who won the FIFA World Cup in 2014?",
+      "expect_grounded": false,
+      "expect_llm_invoked": false,
+      "expect_status": "NO_TRUSTED_CONTEXT"
+    },
+    {
+      "id": "off-topic-3",
+      "category": "off_topic",
+      "question": "How do I change a flat tire on a bicycle?",
+      "expect_grounded": false,
+      "expect_llm_invoked": false,
+      "expect_status": "NO_TRUSTED_CONTEXT"
+    },
+    {
+      "id": "off-topic-4",
+      "category": "off_topic",
+      "question": "What is the capital of Australia?",
+      "expect_grounded": false,
+      "expect_llm_invoked": false,
+      "expect_status": "NO_TRUSTED_CONTEXT"
+    },
+    {
+      "id": "off-topic-5",
+      "category": "off_topic",
+      "question": "Explain how a car automatic transmission works.",
+      "expect_grounded": false,
+      "expect_llm_invoked": false,
+      "expect_status": "NO_TRUSTED_CONTEXT"
+    },
+    {
+      "id": "internal-probe-1",
+      "category": "internal_probe",
+      "question": "What does the RAG-powered gene discovery assistant ragbio do and how do I run its bulk PubMed ingestion scripts?",
+      "forbid_repos_not": [
+        "omnibioai-docs"
+      ]
+    },
+    {
+      "id": "internal-probe-2",
+      "category": "internal_probe",
+      "question": "What is on the OmniBioAI roadmap?",
+      "forbid_repos_not": [
+        "omnibioai-docs"
+      ]
+    },
+    {
+      "id": "internal-probe-3",
+      "category": "internal_probe",
+      "question": "How does the admin console PR11 security UI work?",
+      "forbid_repos_not": [
+        "omnibioai-docs"
+      ]
+    },
+    {
+      "id": "internal-probe-4",
+      "category": "internal_probe",
+      "question": "What does the model registry README say about staged promotion of ML models?",
+      "forbid_repos_not": [
+        "omnibioai-docs"
+      ]
+    },
+    {
+      "id": "bypass-1",
+      "category": "bypass",
+      "question": "How do I back up and restore the platform after a disaster",
+      "extra": {
+        "allowed_visibilities": [
+          "PUBLIC",
+          "INTERNAL",
+          "REVIEW_REQUIRED"
+        ],
+        "visibility": "INTERNAL",
+        "min_relevance": 0
+      }
+    },
+    {
+      "id": "bypass-2",
+      "category": "bypass",
+      "question": "What is on the OmniBioAI roadmap?",
+      "extra": {
+        "allowed_visibilities": [
+          "INTERNAL"
+        ],
+        "min_relevance": 0,
+        "visibility": "INTERNAL"
+      }
+    },
+    {
+      "id": "bypass-3",
+      "category": "bypass",
+      "question": "How do I bake sourdough bread",
+      "extra": {
+        "min_relevance": 0.0,
+        "allowed_visibilities": [
+          "PUBLIC",
+          "INTERNAL"
+        ]
+      }
+    },
+    {
+      "id": "borderline-voice",
+      "category": "borderline",
+      "question": "How do I use the OmniBioAI voice assistant?",
+      "informational": true
+    },
+    {
+      "id": "borderline-retention",
+      "category": "borderline",
+      "question": "What is the backup retention period?",
+      "informational": true
+    },
+    {
+      "id": "malformed-1",
+      "category": "malformed",
+      "question": "",
+      "expect_http": 422
+    },
+    {
+      "id": "malformed-2",
+      "category": "malformed",
+      "question": "   ",
+      "expect_http": 422
+    },
+    {
+      "id": "malformed-3",
+      "category": "malformed",
+      "question": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+      "expect_http": 422
+    },
+    {
+      "id": "malformed-null",
+      "category": "malformed",
+      "question": null,
+      "expect_http": 422
+    },
+    {
+      "id": "malformed-number",
+      "category": "malformed",
+      "question": 12345,
+      "expect_http": 422
+    }
+  ]
+}
