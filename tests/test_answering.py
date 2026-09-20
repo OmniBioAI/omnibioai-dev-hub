@@ -15,11 +15,13 @@ from rag.answering import (
     STATUS_LLM_UNAVAILABLE,
     STATUS_NO_TRUSTED_CONTEXT,
     STATUS_UNCITED_ANSWER,
+    STATUS_UNSUPPORTED_CLAIM,
     STATUS_UNSUPPORTED_TERM,
     build_grounded_prompt,
     dedupe_chunks,
     generate_grounded_answer,
     parse_citation_markers,
+    unsupported_answer_terms,
     unsupported_terms,
     verify_answer,
 )
@@ -78,7 +80,9 @@ def test_prompt_contains_the_rules_the_sentinel_and_only_the_supplied_excerpts()
     prompt = build_grounded_prompt("my question?", docs)
     assert "ONLY from the numbered documentation excerpts" in prompt
     assert "Do not use outside knowledge" in prompt and "do not infer that a feature exists" in prompt
-    assert f"reply with exactly: {SENTINEL}" in prompt
+    assert f"Reply exactly {SENTINEL} only when the excerpts contain nothing relevant" in prompt
+    assert "a similar-sounding feature does not count" in prompt
+    assert "say plainly which part of the question they do not cover" in prompt
     assert "[1] site/docs/admin/doc1.md" in prompt and "[2] site/docs/admin/doc2.md" in prompt
     assert "ALPHA excerpt text" in prompt and "BETA excerpt text" in prompt and "my question?" in prompt
     assert "If excerpts disagree, say so and cite each" in prompt  # conflicting evidence rule
@@ -114,10 +118,15 @@ def test_ungrounded_model_output_is_never_shown(text, status):
     assert text.strip() == "" or text not in r["answer"]
 
 
-def test_a_long_answer_with_one_caveat_is_not_treated_as_a_refusal():
-    text = ("Back up nightly [1]. " * 30) + "The documentation does not specify the retention period."
-    assert len(text) > 400
-    assert verify_answer(text, 1)[0] == STATUS_GROUNDED
+def test_a_trailing_caveat_on_a_supported_answer_is_not_treated_as_a_refusal():
+    long_text = ("Back up nightly [1]. " * 30) + "The documentation does not specify the retention period."
+    assert verify_answer(long_text, 1)[0] == STATUS_GROUNDED
+    short = "Every service exposes a basic health endpoint. [1]\n\nNote: this answer does not mention any other features."
+    assert verify_answer(short, 1)[0] == STATUS_GROUNDED  # real-model output that an earlier version wrongly refused
+
+
+def test_a_refusal_that_leads_the_answer_is_still_refused_even_with_later_content():
+    assert verify_answer("The excerpts do not mention an iOS app. They describe backups [1].", 1)[0] == STATUS_INSUFFICIENT_CONTEXT
 
 
 def test_citation_markers_accept_comma_lists():
@@ -229,3 +238,40 @@ def test_weak_evidence_is_refused_not_guessed():
     r = generate_grounded_answer("What is the retention period?", [chunk(1, text="Backups run nightly.")],
                                 MagicMock(return_value=SENTINEL))
     assert not r["grounded"] and r["answer"] == NO_SUPPORT_MESSAGE
+
+
+# ---- answer-side check: invented names / numbers ------------------------------------------------------
+
+def test_invented_numbers_and_names_in_a_cited_answer_are_refused():
+    docs = [chunk(1, text="Backups run nightly to object storage.")]
+    for invented in ("Backups are kept for 30 days [1].", "Backups run nightly on AWS Lambda [1].", "Backups use Veeam [1]."):
+        r = generate_grounded_answer("How are backups done?", docs, MagicMock(return_value=invented))
+        assert not r["grounded"] and r["answer_status"] == STATUS_UNSUPPORTED_CLAIM and r["citations"] == [], invented
+        assert r["unsupported_claim_terms"]
+
+
+def test_specifics_that_are_in_the_excerpts_or_the_question_are_not_flagged():
+    docs = [chunk(1, text="Backups run nightly to S3. Retention is 30 days. Use the REDCap importer.")]
+    ok = "Backups run nightly to S3 [1]; retention is 30 days [1]. The REDCap importer restores them [1]."
+    r = generate_grounded_answer("How are backups done?", docs, MagicMock(return_value=ok))
+    assert r["grounded"], r
+    assert unsupported_answer_terms("For Zenodo it is 30 days [1].", docs, "What about Zenodo?") == []  # named in the question
+
+
+def test_capitalised_sentence_and_bullet_starts_are_not_treated_as_invented_names():
+    docs = [chunk(1, text="backups run nightly. restore uses the recovery tool.")]
+    text = "Backups run nightly [1].\n- Restore uses the recovery tool [1]\n- Verify afterwards [1]\nTherefore, use the tool [1]."
+    assert unsupported_answer_terms(text, docs, "how do I back up?") == []
+
+
+def test_markdown_links_code_and_urls_are_ignored_by_the_answer_check():
+    docs = [chunk(1, text="Read the deployment page for details.")]
+    text = "See [Deployment](./deployment.md) and https://example.org/Docs for `Details` [1]."
+    assert unsupported_answer_terms(text, docs, "q") == []
+
+
+def test_step_numbers_and_single_digits_are_not_claims_but_multi_digit_numbers_are():
+    docs = [chunk(1, text="Backups run nightly. Restore uses the recovery tool.")]
+    steps = "1. Back up nightly [1]\n2. Restore with the recovery tool [1]\nUse it 3 times [1]."
+    assert unsupported_answer_terms(steps, docs, "q") == []
+    assert set(unsupported_answer_terms("Retention is 90 days [1] and 2.5 GB.", docs, "q")) >= {"90", "2.5"}

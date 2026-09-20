@@ -1,6 +1,76 @@
 {
-  "purpose": "Adversarial / policy cases for Ask OmniBioAI (Phase 19). Supported questions come from tests/eval/retrieval_eval.json public-* cases. Every nonexistent term was verified absent from the PUBLIC corpus.",
+  "purpose": "Adversarial / policy cases for Ask OmniBioAI (Phase 19). Supported questions come from tests/eval/retrieval_eval.json public-* cases. Every nonexistent term was verified absent from the PUBLIC corpus. Cases named nonexistent-with-context-* retrieve real context above the 0.64 cutoff, so retrieval alone does not refuse them.",
   "cases": [
+    {
+      "id": "nonexistent-with-context-10",
+      "category": "nonexistent_lowercase",
+      "question": "How do I configure the CAPTCHA on the OmniBioAI login page?",
+      "expect_grounded": false,
+      "note": "'captcha' is absent from the PUBLIC corpus yet this question retrieves context above the cutoff, so it exercises the answer layer"
+    },
+    {
+      "id": "nonexistent-with-context-9",
+      "category": "nonexistent_lowercase",
+      "question": "How do I join the OmniBioAI metaverse lab space?",
+      "expect_grounded": false,
+      "note": "'metaverse' is absent from the PUBLIC corpus yet this question retrieves context above the cutoff, so it exercises the answer layer"
+    },
+    {
+      "id": "nonexistent-with-context-8",
+      "category": "nonexistent_lowercase",
+      "question": "How do I enable telepathy mode in the OmniBioAI project workspace?",
+      "expect_grounded": false,
+      "note": "'telepathy' is absent from the PUBLIC corpus yet this question retrieves context above the cutoff, so it exercises the answer layer"
+    },
+    {
+      "id": "nonexistent-with-context-7",
+      "category": "nonexistent_lowercase",
+      "question": "How do I project workflow results as a hologram from the OmniBioAI dashboard?",
+      "expect_grounded": false,
+      "note": "'hologram' is absent from the PUBLIC corpus yet this question retrieves context above the cutoff, so it exercises the answer layer"
+    },
+    {
+      "id": "nonexistent-with-context-6",
+      "category": "nonexistent_lowercase",
+      "question": "How do I turn on dark mode in the OmniBioAI web interface?",
+      "expect_grounded": false,
+      "note": "'dark mode' is absent from the PUBLIC corpus yet this question retrieves context above the cutoff, so it exercises the answer layer"
+    },
+    {
+      "id": "nonexistent-with-context-5",
+      "category": "nonexistent_lowercase",
+      "question": "How do I pay for OmniBioAI usage with cryptocurrency?",
+      "expect_grounded": false,
+      "note": "'cryptocurrency' is absent from the PUBLIC corpus yet this question retrieves context above the cutoff, so it exercises the answer layer"
+    },
+    {
+      "id": "nonexistent-with-context-4",
+      "category": "nonexistent_lowercase",
+      "question": "How do I schedule a drone delivery of samples through OmniBioAI?",
+      "expect_grounded": false,
+      "note": "'drone' is absent from the PUBLIC corpus yet this question retrieves context above the cutoff, so it exercises the answer layer"
+    },
+    {
+      "id": "nonexistent-with-context-3",
+      "category": "nonexistent_lowercase",
+      "question": "How do I connect OmniBioAI to a 3D printer for lab automation?",
+      "expect_grounded": false,
+      "note": "'3d print' is absent from the PUBLIC corpus yet this question retrieves context above the cutoff, so it exercises the answer layer"
+    },
+    {
+      "id": "nonexistent-with-context-2",
+      "category": "nonexistent_lowercase",
+      "question": "How do I enable the augmented reality genome viewer in OmniBioAI?",
+      "expect_grounded": false,
+      "note": "'augmented reality' is absent from the PUBLIC corpus yet this question retrieves context above the cutoff, so it exercises the answer layer"
+    },
+    {
+      "id": "nonexistent-with-context-1",
+      "category": "nonexistent_lowercase",
+      "question": "How do I use virtual reality to explore workflow results in OmniBioAI?",
+      "expect_grounded": false,
+      "note": "'virtual reality' is absent from the PUBLIC corpus yet this question retrieves context above the cutoff, so it exercises the answer layer"
+    },
     {
       "id": "nonexistent-named-1",
       "category": "nonexistent_named",

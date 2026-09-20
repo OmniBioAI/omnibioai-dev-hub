@@ -13,8 +13,9 @@ CONTRACT (answer_contract "ask.v1")
       -> LLM, constrained to the numbered excerpts, told to cite [n] or reply
          INSUFFICIENT_CONTEXT
       -> verification: the answer is GROUNDED only if it is not the sentinel,
-         is not a refusal, cites at least one supplied excerpt, and cites no
-         excerpt number that was not supplied
+         is not a refusal, cites at least one supplied excerpt, cites no
+         excerpt number that was not supplied, and states no name or number
+         that appears in none of the supplied excerpts (invented specifics)
       -> otherwise a deterministic no-answer; the model's text is discarded
 
     A response is `grounded: true` only in the GROUNDED status. In every other
@@ -44,6 +45,7 @@ STATUS_INSUFFICIENT_CONTEXT = "INSUFFICIENT_CONTEXT"
 STATUS_UNSUPPORTED_TERM = "UNSUPPORTED_TERM"
 STATUS_UNCITED_ANSWER = "UNCITED_ANSWER"
 STATUS_INVALID_CITATIONS = "INVALID_CITATIONS"
+STATUS_UNSUPPORTED_CLAIM = "UNSUPPORTED_CLAIM"
 STATUS_LLM_UNAVAILABLE = "LLM_UNAVAILABLE"
 
 NO_CONTEXT_MESSAGE = (
@@ -64,6 +66,7 @@ NO_ANSWER_MESSAGES = {
     STATUS_UNSUPPORTED_TERM: NO_SUPPORT_MESSAGE,
     STATUS_UNCITED_ANSWER: NO_SUPPORT_MESSAGE,
     STATUS_INVALID_CITATIONS: NO_SUPPORT_MESSAGE,
+    STATUS_UNSUPPORTED_CLAIM: NO_SUPPORT_MESSAGE,
     STATUS_LLM_UNAVAILABLE: LLM_UNAVAILABLE_MESSAGE,
 }
 
@@ -87,7 +90,12 @@ _REFUSAL_RE = re.compile(
     r"|(?:is|are|isn't|aren't) not (?:mentioned|documented|described|covered|available))",
     re.IGNORECASE,
 )
-_REFUSAL_MAX_CHARS = 400  # refusals are short; a long answer with one caveat is not a refusal
+
+
+def _lead_sentence(text: str) -> str:
+    """A refusal LEADS the answer ("The excerpts do not mention X"); a trailing caveat
+    ("Note: this does not mention Y") on an otherwise supported answer is not a refusal."""
+    return re.split(r"(?<=[.!?])\s+|\n", text.strip(), maxsplit=1)[0][:300]
 
 
 def dedupe_chunks(docs: list[dict[str, Any]]) -> list[dict[str, Any]]:
@@ -121,10 +129,19 @@ def build_grounded_prompt(query: str, chunks: list[dict[str, Any]]) -> str:
 RULES
 1. Use only facts stated in the excerpts. Do not use outside knowledge, do not guess, do not extrapolate, and do not infer that a feature exists because something similar does.
 2. Cite every claim with the number of the excerpt that states it, in square brackets, e.g. [1] or [2][3]. Never cite a number that is not listed below.
-3. If the excerpts do not explicitly answer the question -- including when the question asks about a product, feature, app or capability that the excerpts do not mention -- reply with exactly: {SENTINEL}
+3. If the excerpts contain relevant information, answer using only what they state and say plainly which part of the question they do not cover. Reply exactly {SENTINEL} only when the excerpts contain nothing relevant, or when the question is about a specific product, feature, app or capability that the excerpts never mention -- a similar-sounding feature does not count.
 4. If excerpts disagree, say so and cite each.
 5. Do not describe something as verified, supported or operational unless an excerpt says so; respect each excerpt's content_state and verification_state.
 6. Be concise and technical.
+
+EXAMPLES (unrelated to the excerpts below)
+Excerpt [1] backups.md: Databases are backed up nightly to object storage. Restore with the recovery tool.
+Question: How do I back up the database?
+Answer: Databases are backed up nightly to object storage [1]. To restore, use the recovery tool [1].
+
+Excerpt [1] backups.md: Databases are backed up nightly to object storage. Restore with the recovery tool.
+Question: How do I use the hologram viewer for backups?
+Answer: {SENTINEL}
 
 EXCERPTS
 {body}
@@ -150,8 +167,10 @@ def unsupported_terms(query: str, chunks: list[dict[str, Any]]) -> list[str]:
     missing: list[str] = []
     for m in _TOKEN_RE.finditer(query):
         token = m.group(0)
-        between = query[: m.start()].rstrip()
-        sentence_start = (not between) or between[-1] in ".?!:;"
+        prefix = query[: m.start()]
+        between = prefix.rstrip()
+        # a capitalised word starting a sentence, bullet or line is not evidence of a name
+        sentence_start = (not between) or between[-1] in ".?!:;-*>#" or "\n" in prefix[len(between):]
         low = token.lower()
         if low.startswith(_BRAND_PREFIX) or len(token) < 2:
             continue
@@ -167,6 +186,33 @@ def unsupported_terms(query: str, chunks: list[dict[str, Any]]) -> list[str]:
         mentioned = any(re.search(rf"(?<![a-z0-9]){re.escape(v)}(?![a-z0-9])", haystack) for v in variants if v)
         if not mentioned and low not in missing:
             missing.append(low)
+    return missing
+
+
+_NUMBER_RE = re.compile(r"(?<![A-Za-z0-9._-])\d+(?:[.,]\d+)*(?![A-Za-z0-9])")
+_MARKUP_RE = re.compile(r"\[\d+(?:\s*,\s*\d+)*\]|`+|\*+|_{2,}|\]\([^)]*\)|https?://\S+")
+
+
+def unsupported_answer_terms(answer: str, chunks: list[dict[str, Any]], query: str) -> list[str]:
+    """Names and numbers the ANSWER states that appear in none of the supplied excerpts (or the question).
+
+    Citations prove the model pointed at an excerpt, not that what it said is in
+    it. A name or number found nowhere in the supplied text is outside knowledge
+    or invention ("retention is 30 days", "runs on AWS Lambda"), so the answer is
+    refused. Same name-like rules as unsupported_terms; markdown and citation
+    markers are stripped first.
+    """
+    cleaned = _MARKUP_RE.sub(" ", answer)
+    support = [*chunks, {"text": query}]
+    missing = unsupported_terms(cleaned, support)
+    haystack = " ".join(f"{c.get('text', '')} {c.get('title', '')}" for c in support).lower()
+    body = re.sub(r"(?m)^\s*\d+[.)]\s", " ", cleaned)  # "1. step" list markers are not claims
+    for num in _NUMBER_RE.findall(body):
+        stated = num.rstrip(".,")
+        if len(stated) < 2 and "." not in stated:  # single digits are step numbers / ordinals, not claims
+            continue
+        if not re.search(rf"(?<![0-9]){re.escape(stated)}(?![0-9])", haystack) and stated not in missing:
+            missing.append(stated)
     return missing
 
 
@@ -186,7 +232,7 @@ def verify_answer(raw: str, n_chunks: int) -> tuple[str, list[int]]:
     text = (raw or "").strip()
     if not text or SENTINEL in text.upper().replace(" ", "_"):
         return STATUS_INSUFFICIENT_CONTEXT, []
-    if len(text) <= _REFUSAL_MAX_CHARS and _REFUSAL_RE.search(text):
+    if _REFUSAL_RE.search(_lead_sentence(text)):
         return STATUS_INSUFFICIENT_CONTEXT, []
     cited = parse_citation_markers(text)
     if not cited:
@@ -255,5 +301,9 @@ def generate_grounded_answer(query: str, docs: list[dict[str, Any]], generate: C
     status, cited = verify_answer(raw, len(chunks))
     if status != STATUS_GROUNDED:
         return no_answer(query, status, context_used=len(chunks), llm_invoked=True, context=chunks)
+    invented = unsupported_answer_terms(raw, chunks, query)
+    if invented:
+        return no_answer(query, STATUS_UNSUPPORTED_CLAIM, context_used=len(chunks), llm_invoked=True, context=chunks,
+                         extra={"unsupported_claim_terms": invented})
     return _result(query, answer=raw.strip(), status=STATUS_GROUNDED, grounded=True,
                    citations=build_citations(chunks, cited), context_used=len(chunks), llm_invoked=True, context=chunks)
