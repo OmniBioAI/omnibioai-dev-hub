@@ -8,8 +8,8 @@ import shutil
 from pathlib import Path
 from typing import Any
 
-from ingestion.trusted import sha256_file, utc_now_iso
 from index.vector_store import CANONICAL_DIM, VectorStore
+from ingestion.trusted import sha256_file, utc_now_iso
 
 INDEX_FILE = "index.faiss"
 METADATA_FILE = "metadata.pkl"

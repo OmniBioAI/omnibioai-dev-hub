@@ -16,6 +16,7 @@ mock_faiss.IndexFlatIP = MagicMock()
 sys.modules['faiss'] = mock_faiss
 
 import index.vector_store as vector_store_module
+
 vector_store_module.faiss = mock_faiss
 VectorStore = vector_store_module.VectorStore
 

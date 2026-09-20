@@ -5,7 +5,11 @@ import yaml
 
 sys.path.append(os.path.abspath("."))
 
-from scripts.build_trusted_index import DEFAULT_EMBED_BATCH_SIZE, DEFAULT_EMBED_COOLDOWN_SECONDS, build_candidate
+from scripts.build_trusted_index import (
+    DEFAULT_EMBED_BATCH_SIZE,
+    DEFAULT_EMBED_COOLDOWN_SECONDS,
+    build_candidate,
+)
 
 REPOS_CONFIG_PATH = os.path.join(
     os.path.dirname(os.path.abspath(__file__)), "..", "configs", "repos.yaml"

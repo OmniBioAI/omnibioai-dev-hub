@@ -1,10 +1,7 @@
 """Tests for Phase 18 staging, integrity, promotion and rollback helpers."""
 
-import json
 import sys
 from unittest.mock import MagicMock, patch
-
-import pytest
 
 mock_faiss = MagicMock()
 sys.modules["faiss"] = mock_faiss

@@ -28,7 +28,12 @@ import numpy as np
 
 sys.path.append(os.path.abspath("."))
 
-from index.lifecycle import artifact_hashes, candidate_dir, validate_index_directory, write_manifest
+from index.lifecycle import (
+    artifact_hashes,
+    candidate_dir,
+    validate_index_directory,
+    write_manifest,
+)
 from index.vector_store import CANONICAL_DIM, VectorStore
 from ingestion.trusted import (
     SourcePolicy,
@@ -95,7 +100,7 @@ def embed_metadata(
     total_attempts = 0
     retry_count = 0
 
-    def on_attempt(attempt_number: int, ok: bool) -> None:  # noqa: ARG001 -- ok kept for signature clarity
+    def on_attempt(attempt_number: int, ok: bool) -> None:
         nonlocal total_attempts, retry_count
         total_attempts += 1
         if attempt_number > 1:
@@ -106,16 +111,14 @@ def embed_metadata(
         pass_indexed: list[dict] = []
         pass_failures: list[dict] = []
         total = len(metas)
-        processed = 0
         start = time.monotonic()
-        for meta in metas:
+        for processed, meta in enumerate(metas, 1):
             try:
                 vec = normalize_vector(embed_fn(meta["text"], model=model, on_attempt=on_attempt))
                 pass_vectors.append(vec)
                 pass_indexed.append(meta)
             except Exception as exc:  # noqa: BLE001 -- one failed chunk must not corrupt the candidate
                 pass_failures.append({"chunk_id": meta["chunk_id"], "source": meta["source"], "error": str(exc)})
-            processed += 1
 
             batch_boundary = processed % batch_size == 0
             finished = processed == total

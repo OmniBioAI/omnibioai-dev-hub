@@ -14,6 +14,7 @@ import re
 import subprocess
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
+from itertools import pairwise
 from pathlib import Path
 from typing import Any
 
@@ -134,7 +135,7 @@ def content_state_for(rel_path: str) -> str:
     tokens = [t for t in re.split(r"[^a-z0-9]+", rel_path.lower()) if t]
     if _HISTORICAL_TOKENS & set(tokens):
         return "HISTORICAL"
-    design_intent = any(a == "design" and b == "intent" for a, b in zip(tokens, tokens[1:], strict=False))
+    design_intent = any(a == "design" and b == "intent" for a, b in pairwise(tokens))
     if _TARGET_TOKENS & set(tokens) or design_intent:
         return "TARGET"
     return "CURRENT"

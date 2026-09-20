@@ -19,7 +19,7 @@ def _meta(chunk_id: str, source: str = "repo:README.md@abc") -> dict:
 
 
 def _ok_embed_fn(dim: int = 768):
-    def _embed(text, model=None, on_attempt=None):  # noqa: ARG001
+    def _embed(text, model=None, on_attempt=None):
         if on_attempt:
             on_attempt(1, True)
         return [0.1] * dim
@@ -55,7 +55,7 @@ def test_embed_metadata_counts_retries_without_swallowing_eventual_failure():
     another chunk) must be counted."""
     calls = {"n": 0}
 
-    def flaky_then_fail(text, model=None, on_attempt=None):  # noqa: ARG001
+    def flaky_then_fail(text, model=None, on_attempt=None):
         calls["n"] += 1
         if calls["n"] == 1:
             # First chunk: fails attempt 1, succeeds attempt 2.
@@ -91,7 +91,7 @@ def test_embed_metadata_second_chance_recovers_a_transient_failure():
     second-chance retry must end up counted as successful, not failed."""
     calls = {"n": 0}
 
-    def fails_first_pass_only(text, model=None, on_attempt=None):  # noqa: ARG001
+    def fails_first_pass_only(text, model=None, on_attempt=None):
         calls["n"] += 1
         if calls["n"] == 1:
             if on_attempt:
@@ -123,7 +123,7 @@ def test_embed_metadata_second_chance_gives_up_after_one_retry():
     """A chunk that fails both the first pass and the second chance is a
     final, reported failure -- it is never retried a third time."""
 
-    def always_fails(text, model=None, on_attempt=None):  # noqa: ARG001
+    def always_fails(text, model=None, on_attempt=None):
         if on_attempt:
             on_attempt(1, False)
             on_attempt(2, False)
@@ -143,7 +143,7 @@ def test_embed_metadata_second_chance_gives_up_after_one_retry():
 
 
 def test_embed_metadata_second_chance_disabled_reports_pass1_failure_immediately():
-    def always_fails(text, model=None, on_attempt=None):  # noqa: ARG001
+    def always_fails(text, model=None, on_attempt=None):
         if on_attempt:
             on_attempt(1, False)
         raise RuntimeError("down")
@@ -159,7 +159,7 @@ def test_embed_metadata_second_chance_disabled_reports_pass1_failure_immediately
 
 
 def test_embed_metadata_rejects_wrong_dimension_without_corrupting_other_chunks():
-    def wrong_dim_for_one(text, model=None, on_attempt=None):  # noqa: ARG001
+    def wrong_dim_for_one(text, model=None, on_attempt=None):
         if on_attempt:
             on_attempt(1, True)
         if "bad" in text:
