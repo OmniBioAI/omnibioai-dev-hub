@@ -17,7 +17,7 @@ describe("App", () => {
 
   it("switches between all user-visible application pages", () => {
     render(<App />);
-    fireEvent.click(screen.getByText("Query Assistant"));
+    fireEvent.click(screen.getByText("Ask OmniBioAI"));
     expect(screen.getByText("Chat page")).toBeInTheDocument();
     fireEvent.click(screen.getByText("Vector Search"));
     expect(screen.getByText("Search page")).toBeInTheDocument();

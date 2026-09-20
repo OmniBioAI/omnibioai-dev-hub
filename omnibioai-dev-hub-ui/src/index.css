@@ -321,3 +321,10 @@ input:focus, textarea:focus, select:focus { border-color: var(--accent); }
 .citation-item { color:var(--color-text-muted); }
 .citation-index { color:var(--accent); font-weight:600; }
 .citation-path { color:var(--text); }
+.citation-count { color:var(--color-text-muted); }
+.chat-bubble.bot a { color:var(--blue); text-decoration:underline; text-underline-offset:2px; }
+.chat-bubble.bot a:visited { color:var(--blue); }
+.chat-bubble.bot a:hover, .chat-bubble.bot a:focus-visible { color:var(--accent); }
+.chat-bubble.bot .unlinked-doc { color:var(--text); font-style:italic; }
+.chat-bubble.bot.error { background:var(--red-dim); border:1px solid rgba(239,68,68,.35); }
+.chat-bubble.bot.error .no-answer-title { color:var(--red); }

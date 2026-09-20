@@ -1,9 +1,10 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { AskError } from "../api/client";
 import SearchPage from "./SearchPage";
 
 const { getStatus, ragQuery } = vi.hoisted(() => ({ getStatus: vi.fn(), ragQuery: vi.fn() }));
-vi.mock("../api/client", () => ({ getStatus, ragQuery }));
+vi.mock("../api/client", async (orig) => ({ ...(await orig<typeof import("../api/client")>()), getStatus, ragQuery }));
 
 describe("SearchPage", () => {
   beforeEach(() => { getStatus.mockResolvedValue({ index_vectors: 12 }); ragQuery.mockReset(); });
@@ -21,14 +22,41 @@ describe("SearchPage", () => {
     expect(screen.getByText("chunk text")).toBeInTheDocument();
   });
 
-  it("ignores blank searches and displays query errors", async () => {
-    ragQuery.mockRejectedValue(new Error("offline"));
+  it("ignores blank searches and displays a concise query error", async () => {
+    vi.spyOn(console, "warn").mockImplementation(() => {});
+    ragQuery.mockRejectedValue(new AskError("network"));
     render(<SearchPage />);
     fireEvent.click(screen.getByRole("button", { name: "Search" }));
     expect(ragQuery).not.toHaveBeenCalled();
     fireEvent.change(screen.getByPlaceholderText(/Search embeddings/), { target: { value: "bad" } });
     fireEvent.click(screen.getByRole("button", { name: "Search" }));
-    await waitFor(() => expect(screen.getByText("Error: offline")).toBeInTheDocument());
+    await waitFor(() => expect(screen.getByText(/Couldn't reach Ask OmniBioAI/)).toBeInTheDocument());
+    expect(screen.queryByText(/Error:|TypeError|Failed to fetch|HTTP/)).not.toBeInTheDocument();
+  });
+
+  it("never shows a raw exception or HTTP status for an unexpected failure", async () => {
+    vi.spyOn(console, "warn").mockImplementation(() => {});
+    ragQuery.mockRejectedValue(new Error("Request failed (HTTP 500) at /srv/x.py"));
+    render(<SearchPage />);
+    fireEvent.change(screen.getByPlaceholderText(/Search embeddings/), { target: { value: "bad" } });
+    fireEvent.click(screen.getByRole("button", { name: "Search" }));
+    await waitFor(() => expect(screen.getByRole("alert")).toBeInTheDocument());
+    expect(document.body.textContent).not.toMatch(/HTTP 500|x\.py|Request failed/);
+  });
+
+  it("does not render private revision SHAs, ids, or raw chunk objects in retrieved chunks", async () => {
+    const sha = "217b75ad0c7aa3e0fc505b31711ba946d6fc4dd5";
+    ragQuery.mockResolvedValue({ query: "q", context: [
+      { source: `omnibioai-docs:site/docs/a.md@${sha}`, repository: "omnibioai-docs", chunk_id: "chunk-secret", document_id: "doc-secret", text: "body text" },
+      { source: `omnibioai-rag:README.md@${sha}`, chunk_id: "chunk-secret-2" },
+    ] });
+    const { container } = render(<SearchPage />);
+    fireEvent.change(screen.getByPlaceholderText(/Search embeddings/), { target: { value: "q" } });
+    fireEvent.click(screen.getByRole("button", { name: "Search" }));
+    await waitFor(() => expect(screen.getByText("omnibioai-docs:site/docs/a.md")).toBeInTheDocument());
+    expect(container.innerHTML).not.toContain(sha);
+    expect(container.innerHTML).not.toContain("217b75ad");
+    expect(container.innerHTML).not.toMatch(/chunk-secret|doc-secret/);
   });
 
   it("renders string context results and optional metadata branches", async () => {

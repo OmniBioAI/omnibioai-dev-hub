@@ -20,7 +20,7 @@ const NAV = [
   {
     section: "Playground",
     items: [
-      { id: "chat",   label: "Query Assistant", icon: "✦" },
+      { id: "chat",   label: "Ask OmniBioAI", icon: "✦" },
       { id: "search", label: "Vector Search",   icon: "⌕" },
       { id: "graph",  label: "Knowledge Graph", icon: "◎" },
     ],

@@ -18,7 +18,7 @@ describe("DashboardPage", () => {
     await waitFor(() => expect(screen.getAllByText("128").length).toBeGreaterThan(0));
     expect(screen.getAllByText("READY").length).toBeGreaterThan(0);
     expect(screen.getAllByText("1.0h").length).toBeGreaterThan(0);
-    fireEvent.click(screen.getByText("Try Query →"));
+    fireEvent.click(screen.getByText("Ask OmniBioAI →"));
     expect(onNavigate).toHaveBeenCalledWith("chat");
   });
 

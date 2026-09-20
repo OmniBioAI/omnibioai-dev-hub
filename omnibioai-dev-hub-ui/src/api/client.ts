@@ -23,13 +23,70 @@ export interface AskResult {
   llm_invoked?: boolean;
 }
 
+// ------------------ ERRORS ------------------
+// One error type for every Ask request, so the UI never shows a raw browser or
+// exception string ("TypeError: Failed to fetch", "Error: Error: ...").
+export type AskErrorKind = "network" | "auth" | "invalid" | "busy" | "server";
+
+export class AskError extends Error {
+  readonly kind: AskErrorKind;
+  readonly status?: number;
+  readonly code?: string;
+
+  constructor(kind: AskErrorKind, status?: number, code?: string) {
+    super(ASK_ERROR_MESSAGES[kind]);
+    this.name = "AskError";
+    this.kind = kind;
+    this.status = status;
+    this.code = code;
+  }
+}
+
+export const ASK_ERROR_MESSAGES: Record<AskErrorKind, string> = {
+  network: "Couldn't reach Ask OmniBioAI. Check your connection and try again.",
+  auth: "You're not signed in, or your session has expired. Sign in again and retry.",
+  invalid: "That question couldn't be processed. Try rewording it.",
+  busy: "Ask OmniBioAI is busy right now. Please try again in a moment.",
+  server: "Ask OmniBioAI hit a problem answering that. Please try again in a moment.",
+};
+
+export const errorFromStatus = (status: number): AskError => {
+  if (status === 401 || status === 403) return new AskError("auth", status);
+  if (status === 400 || status === 422) return new AskError("invalid", status);
+  if (status === 429) return new AskError("busy", status);
+  return new AskError("server", status);
+};
+
+/** Normalise anything thrown/reported into an AskError. A rejected fetch() is a TypeError => network. */
+export const toAskError = (e: unknown): AskError => {
+  if (e instanceof AskError) return e;
+  if (e instanceof TypeError || (e instanceof Error && e.name === "AbortError")) return new AskError("network");
+  return new AskError("server");
+};
+
+/**
+ * The concise message to show the user. Diagnostics (kind, HTTP status, server error code -- never message
+ * text, stack traces or response bodies) go to the developer console only.
+ */
+export const describeAskError = (e: unknown): string => {
+  const err = toAskError(e);
+  console.warn("[ask-omnibioai] request failed", { kind: err.kind, status: err.status, code: err.code });
+  return err.message;
+};
+
 // ------------------ RAG QUERY ------------------
 export const ragQuery = async (query: string) => {
-  const res = await fetch(`${API_BASE}/rag/query`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ query }),
-  });
+  let res: Response;
+  try {
+    res = await fetch(`${API_BASE}/rag/query`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ query }),
+    });
+  } catch (e) {
+    throw toAskError(e);
+  }
+  if (res.ok === false) throw errorFromStatus(res.status);
 
   return res.json();
 };
@@ -39,7 +96,7 @@ export const ragStream = async (
   query: string,
   onToken: (t: string) => void,
   onDone?: (fullContent?: string) => void,
-  onError?: (e: any) => void,
+  onError?: (e: unknown) => void,
   onResult?: (result: AskResult) => void
 ) => {
   try {
@@ -49,12 +106,12 @@ export const ragStream = async (
       body: JSON.stringify({ query }),
     });
 
-    if (res.ok === false) throw new Error(`Request failed (HTTP ${res.status})`);
+    if (res.ok === false) throw errorFromStatus(res.status);
 
     const reader = res.body?.getReader();
     const decoder = new TextDecoder();
 
-    if (!reader) throw new Error("No stream");
+    if (!reader) throw new AskError("server");
 
     let buffer = "";
 
@@ -78,7 +135,8 @@ export const ragStream = async (
               if (json.content) onDone?.(json.content);
             }
             if (json.type === "done") onDone?.();
-            if (json.type === "error") onError?.(json.message);
+            // The server sends a stable code and a generic message; never forward its text to the user.
+            if (json.type === "error") onError?.(new AskError("server", undefined, typeof json.code === "string" ? json.code : undefined));
           } catch {
             onToken(match[1]);
           }
@@ -88,7 +146,7 @@ export const ragStream = async (
 
     onDone?.();
   } catch (e) {
-    onError?.(e);
+    onError?.(toAskError(e));
   }
 };
 

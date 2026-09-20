@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from "react";
-import ReactMarkdown from "react-markdown";
-import { ragStream } from "../api/client";
+import { describeAskError, ragStream } from "../api/client";
 import type { AskResult } from "../api/client";
+import AnswerMarkdown from "../components/AnswerMarkdown";
 import Citations from "../components/Citations";
 
 interface Message {
@@ -9,6 +9,7 @@ interface Message {
   text: string;
   result?: AskResult;
   streaming?: boolean;
+  error?: boolean;
 }
 
 export default function ChatPage() {
@@ -54,7 +55,7 @@ export default function ChatPage() {
       (err) => {
         setMessages((prev) => {
           const updated = [...prev];
-          updated[updated.length - 1] = { role: "bot", text: `Error: ${err}`, streaming: false };
+          updated[updated.length - 1] = { role: "bot", text: describeAskError(err), streaming: false, error: true };
           return updated;
         });
         setLoading(false);
@@ -91,9 +92,14 @@ export default function ChatPage() {
           {messages.map((msg, i) => {
             const noAnswer = msg.role === "bot" && msg.result && !msg.result.grounded;
             return (
-              <div key={i} className={`chat-bubble ${msg.role}${noAnswer ? " no-answer" : ""}`}>
+              <div key={i} className={`chat-bubble ${msg.role}${noAnswer ? " no-answer" : ""}${msg.error ? " error" : ""}`}>
                 {msg.role === "bot" ? (
-                  noAnswer ? (
+                  msg.error ? (
+                    <div style={{ fontSize: 13 }} role="alert">
+                      <div className="no-answer-title">Ask OmniBioAI couldn't answer</div>
+                      {msg.text}
+                    </div>
+                  ) : noAnswer ? (
                     <div style={{ fontSize: 13 }} role="status" data-answer-status={msg.result!.answer_status}>
                       <div className="no-answer-title">No trusted documentation answer</div>
                       {msg.text}
@@ -103,7 +109,7 @@ export default function ChatPage() {
                       {msg.streaming && !msg.text ? (
                         <span className="searching">Searching the documentation…</span>
                       ) : (
-                        <ReactMarkdown>{msg.text}</ReactMarkdown>
+                        <AnswerMarkdown text={msg.text} citations={msg.result?.citations} />
                       )}
                       {msg.streaming && <span className="cursor-blink" />}
                     </div>

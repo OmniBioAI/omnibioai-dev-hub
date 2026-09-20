@@ -1,9 +1,10 @@
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { act, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { AskError, ASK_ERROR_MESSAGES } from "../api/client";
 import ChatPage from "./ChatPage";
 
 const { ragStream } = vi.hoisted(() => ({ ragStream: vi.fn() }));
-vi.mock("../api/client", () => ({ ragStream }));
+vi.mock("../api/client", async (orig) => ({ ...(await orig<typeof import("../api/client")>()), ragStream }));
 vi.mock("react-markdown", () => ({ default: ({ children }: { children: string }) => <div>{children}</div> }));
 
 const citation = {
@@ -38,7 +39,7 @@ describe("Ask OmniBioAI (ChatPage)", () => {
     expect(ragStream).toHaveBeenCalledWith("How do I back up?", expect.any(Function), expect.any(Function), expect.any(Function), expect.any(Function));
   });
 
-  it("renders a grounded answer with its numbered citations and full provenance available", async () => {
+  it("renders a grounded answer with its numbered citations", async () => {
     respondWith({ content: "Back up nightly [1].", grounded: true, answer_status: "GROUNDED", citations: [citation], context_used: 1 });
     render(<ChatPage />);
     ask("How do I back up?");
@@ -49,10 +50,8 @@ describe("Ask OmniBioAI (ChatPage)", () => {
     expect(sources).toHaveTextContent("current");
     expect(sources).toHaveTextContent("not verified · configured"); // CONFIGURED must not read as verified
     const item = sources.querySelector("li")!;
-    expect(item.getAttribute("data-document-id")).toBe("doc-1");
-    expect(item.getAttribute("data-chunk-id")).toBe("chunk-1");
-    expect(item.getAttribute("data-revision")).toBe("217b75ad0c7aa3e0fc505b31711ba946d6fc4dd5");
-    expect(item.getAttribute("title")).toContain("217b75ad0c7aa3e0fc505b31711ba946d6fc4dd5");
+    expect(item.getAttribute("data-excerpts")).toBe("1");
+    expect(item.getAttribute("title")).toContain("omnibioai-docs/site/docs/admin/disaster-recovery.md");
     expect(screen.queryByText("No trusted documentation answer")).not.toBeInTheDocument();
   });
 
@@ -90,12 +89,61 @@ describe("Ask OmniBioAI (ChatPage)", () => {
     expect(screen.queryByText(/UNVERIFIED HALLUCINATION/)).not.toBeInTheDocument();
   });
 
-  it("does not submit blank input and renders streaming errors", async () => {
+  it("does not submit blank input", () => {
     render(<ChatPage />);
     fireEvent.click(screen.getByRole("button", { name: /ask/i }));
     expect(ragStream).not.toHaveBeenCalled();
-    ragStream.mockImplementation(async (_q: string, _t: unknown, _d: unknown, onError: (e: unknown) => void) => onError("backend failed"));
+  });
+
+  it("renders a stream failure as a concise alert, not 'Error: ...' or raw exception text", async () => {
+    vi.spyOn(console, "warn").mockImplementation(() => {});
+    ragStream.mockImplementation(async (_q: string, _t: unknown, _d: unknown, onError: (e: unknown) => void) => onError(new AskError("server")));
+    render(<ChatPage />);
     ask("query");
-    await waitFor(() => expect(screen.getByText("Error: backend failed")).toBeInTheDocument());
+    const alert = await screen.findByRole("alert");
+    expect(alert).toHaveTextContent(ASK_ERROR_MESSAGES.server);
+    expect(alert.closest(".chat-bubble")).toHaveClass("error");
+    expect(document.body.textContent).not.toMatch(/Error: Error|HTTP \d{3}|TypeError|Failed to fetch|Request failed/);
+  });
+
+  it("maps a raw browser fetch failure to the network message", async () => {
+    vi.spyOn(console, "warn").mockImplementation(() => {});
+    ragStream.mockImplementation(async (_q: string, _t: unknown, _d: unknown, onError: (e: unknown) => void) => onError(new TypeError("Failed to fetch")));
+    render(<ChatPage />);
+    ask("query");
+    expect(await screen.findByRole("alert")).toHaveTextContent(ASK_ERROR_MESSAGES.network);
+    expect(document.body.textContent).not.toMatch(/TypeError|Failed to fetch/);
+  });
+
+  it("shows the searching state while the answer is pending", async () => {
+    let finish: () => void = () => {};
+    ragStream.mockImplementation((_q: string, _t: unknown, onDone: (v?: string) => void) => new Promise<void>((r) => { finish = () => { onDone("x"); r(); }; }));
+    render(<ChatPage />);
+    ask("q");
+    expect(await screen.findByText("Searching the documentation…")).toBeInTheDocument();
+    await act(async () => { finish(); });
+  });
+
+  it("groups several excerpts of one document into one source row, keeps distinct documents separate, and never renders private revisions or ids", async () => {
+    const sha = citation.source_revision;
+    const c = (over: object) => ({ ...citation, ...over });
+    respondWith({ content: "A [1] B [2] C [3].", grounded: true, answer_status: "GROUNDED", context_used: 3, citations: [
+      c({ index: 1, chunk_id: "chunk-A1" }), c({ index: 2, chunk_id: "chunk-A2" }),
+      c({ index: 3, document_id: "doc-2", chunk_id: "chunk-B", relative_path: "site/docs/admin/backup.md" }),
+    ] });
+    const { container } = render(<ChatPage />);
+    ask("q");
+    const sources = await screen.findByRole("list", { name: "Sources" });
+    const rows = sources.querySelectorAll("li");
+    expect(rows).toHaveLength(2);
+    expect(rows[0]).toHaveTextContent("[1] [2]");
+    expect(rows[0]).toHaveTextContent("2 excerpts");
+    expect(rows[1]).toHaveTextContent("[3]");
+    expect(rows[1]).toHaveTextContent("omnibioai-docs/site/docs/admin/backup.md");
+    const html = container.innerHTML;
+    expect(html).not.toContain(sha);
+    expect(html).not.toContain(sha.slice(0, 10));
+    expect(html).not.toMatch(/chunk-A1|chunk-A2|chunk-B|doc-1|doc-2/);
+    expect(html).not.toMatch(/data-(document-id|chunk-id|revision)/);
   });
 });
