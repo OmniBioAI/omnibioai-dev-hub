@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { ragQuery, getStatus } from "../api/client";
+import Citations from "../components/Citations";
 
 export default function SearchPage() {
   const [q, setQ] = useState("");
@@ -63,14 +64,24 @@ export default function SearchPage() {
         </div>
       )}
 
-      {result?.answer && (
+      {result?.answer && result.grounded === false && (
+        <div className="surface no-answer-card" role="status" data-answer-status={result.answer_status} style={{ marginBottom: 12 }}>
+          <div className="section-header" style={{ marginBottom: 8 }}>
+            <div className="section-title">No trusted documentation answer</div>
+          </div>
+          <div style={{ fontSize: 13, color: "var(--text-primary)", lineHeight: 1.7 }}>{result.answer}</div>
+        </div>
+      )}
+
+      {result?.answer && result.grounded !== false && (
         <div className="surface" style={{ marginBottom: 12 }}>
           <div className="section-header" style={{ marginBottom: 8 }}>
-            <div className="section-title">Generated Answer</div>
+            <div className="section-title">{result.grounded ? "Answer (grounded in documentation)" : "Generated Answer"}</div>
           </div>
           <div style={{ fontSize: 13, color: "var(--text-primary)", lineHeight: 1.7, whiteSpace: "pre-wrap" }}>
             {result.answer}
           </div>
+          {result.grounded && <Citations citations={result.citations} />}
         </div>
       )}
 

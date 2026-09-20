@@ -39,4 +39,23 @@ describe("SearchPage", () => {
     await waitFor(() => expect(screen.getByText("plain result")).toBeInTheDocument());
     expect(screen.getByText("Retrieved Chunks (1)")).toBeInTheDocument();
   });
+
+  it("labels a grounded answer, shows its citations, and never labels an ungrounded one as an answer", async () => {
+    ragQuery.mockResolvedValue({ query: "q", answer: "Do X [1].", grounded: true, answer_status: "GROUNDED", context_used: 1,
+      citations: [{ index: 1, repository: "omnibioai-docs", relative_path: "a.md", source_revision: "r", document_id: "d", chunk_id: "c", content_state: "CURRENT", verification_state: "CONFIGURED" }],
+      context: [{ source: "a.md", text: "t" }] });
+    render(<SearchPage />);
+    fireEvent.change(screen.getByPlaceholderText(/Search embeddings/), { target: { value: "q" } });
+    fireEvent.click(screen.getByRole("button", { name: "Search" }));
+    await waitFor(() => expect(screen.getByText("Answer (grounded in documentation)")).toBeInTheDocument());
+    expect(screen.getByRole("list", { name: "Sources" })).toHaveTextContent("omnibioai-docs/a.md");
+
+    ragQuery.mockResolvedValue({ query: "q2", answer: "No sufficiently relevant trusted OmniBioAI documentation was found.", grounded: false, answer_status: "NO_TRUSTED_CONTEXT", context_used: 0, citations: [], context: [] });
+    fireEvent.click(screen.getByRole("button", { name: "Search" }));
+    await waitFor(() => expect(screen.getByText("No trusted documentation answer")).toBeInTheDocument());
+    expect(screen.queryByText("Generated Answer")).not.toBeInTheDocument();
+    expect(screen.queryByText("Answer (grounded in documentation)")).not.toBeInTheDocument();
+    expect(screen.queryByRole("list", { name: "Sources" })).not.toBeInTheDocument();
+  });
 });
+
