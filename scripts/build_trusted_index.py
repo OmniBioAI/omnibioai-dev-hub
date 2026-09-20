@@ -186,12 +186,38 @@ def embed_metadata(
     }
 
 
+def _check_staging_root_writable(staging_root: str) -> None:
+    """Fail fast, before spending any time on discovery or embedding, if the
+    staging root can't actually be written to.
+
+    This project already hit this exact failure mode once (see commit
+    e673652): build_index.py ran to full completion -- every document
+    loaded and embedded -- and only failed at the very last step,
+    VectorStore.save()'s write, with a permission error, silently discarding
+    the entire run. Checking upfront turns a wasted multi-hour embedding run
+    into an immediate, actionable error.
+    """
+    path = Path(staging_root)
+    path.mkdir(parents=True, exist_ok=True)
+    probe = path / f".write-check-{uuid.uuid4().hex[:8]}"
+    try:
+        probe.write_text("")
+    except OSError as exc:
+        raise RuntimeError(
+            f"staging root {staging_root!r} is not writable ({exc}); "
+            "refusing to start an embedding run that can't be saved"
+        ) from exc
+    finally:
+        probe.unlink(missing_ok=True)
+
+
 def build_candidate(repo_base: str, staging_root: str, build_id: str | None = None, repo_names: list[str] | None = None,
                      *, batch_size: int = DEFAULT_EMBED_BATCH_SIZE, cooldown_seconds: float = DEFAULT_EMBED_COOLDOWN_SECONDS) -> dict:
     build_id = build_id or f"devhub-{uuid.uuid4().hex[:12]}"
     out_dir = candidate_dir(staging_root, build_id)
     if out_dir.exists():
         raise RuntimeError(f"candidate directory already exists: {out_dir}")
+    _check_staging_root_writable(staging_root)
     build_start = time.monotonic()
 
     policy = SourcePolicy(repository_names=repo_names) if repo_names is not None else SourcePolicy()

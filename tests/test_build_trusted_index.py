@@ -6,11 +6,12 @@ telemetry, and per-vector dimension validation are all pure logic here and
 don't need the network or faiss.
 """
 
+import os
 from unittest.mock import patch
 
 import pytest
 
-from scripts.build_trusted_index import embed_metadata
+from scripts.build_trusted_index import _check_staging_root_writable, embed_metadata
 
 
 def _meta(chunk_id: str, source: str = "repo:README.md@abc") -> dict:
@@ -189,3 +190,21 @@ def test_embed_metadata_cooldown_count_matches_batch_boundaries(total, batch_siz
     with patch("scripts.build_trusted_index.time.sleep") as mock_sleep:
         embed_metadata(metadata, batch_size=batch_size, cooldown_seconds=1.0, embed_fn=_ok_embed_fn(), progress=False)
     assert mock_sleep.call_count == expected_cooldowns
+
+
+def test_check_staging_root_writable_passes_for_writable_dir(tmp_path):
+    staging_root = tmp_path / "candidates"
+    _check_staging_root_writable(str(staging_root))  # must not raise
+    assert staging_root.is_dir()
+    assert list(staging_root.iterdir()) == []  # the write-probe file is cleaned up
+
+
+def test_check_staging_root_writable_raises_on_permission_denied(tmp_path):
+    staging_root = tmp_path / "candidates"
+    staging_root.mkdir()
+    os.chmod(staging_root, 0o500)  # read+execute only, no write
+    try:
+        with pytest.raises(RuntimeError, match="not writable"):
+            _check_staging_root_writable(str(staging_root))
+    finally:
+        os.chmod(staging_root, 0o700)  # restore so tmp_path cleanup can remove it

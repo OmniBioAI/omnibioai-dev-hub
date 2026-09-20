@@ -1,5 +1,7 @@
 __pycache__/
 data/faiss_index/
+data/faiss_candidates/
+data_staging/
 *.pyc
 .coverage
 coverage.json
