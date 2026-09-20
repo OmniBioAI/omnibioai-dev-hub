@@ -134,3 +134,20 @@ def test_shipped_dataset_is_well_formed_and_covers_both_scopes():
     assert any(c.get("unsupported_terms") for c in cases)
     assert any(c.get("forbidden_visibilities") for c in cases)
     assert not any(c.get("expect_no_results") for c in cases)  # unsatisfiable without a relevance cutoff
+
+
+def test_production_profile_drops_the_internal_recall_gate_and_reports_a_probe():
+    n = MIN_POSITIVE_CASES_PER_SCOPE
+    results = [_res("public", True) for _ in range(n)] + [_res("public", True, negative=True)]
+    probes = [{**_res("internal-probe", None), "matched": "(no results)"} for _ in range(3)]
+    full = summarize(results + probes, "full")
+    prod = summarize(results + probes, "production")
+    assert not full["gates"]["internal_recall_at_k"] and not full["threshold_passed"]
+    assert "internal_recall_at_k" not in prod["gates"] and prod["threshold_passed"]
+    assert prod["internal_probe"] == {"cases": 3, "expected_source_found": 0, "leaks": 0}
+
+
+def test_production_profile_still_fails_on_leakage_and_public_recall():
+    n = MIN_POSITIVE_CASES_PER_SCOPE
+    assert not summarize([_res("public", True) for _ in range(n)] + [_res("public", False, negative=True, leaks=1)], "production")["threshold_passed"]
+    assert not summarize([_res("public", False) for _ in range(n)], "production")["gates"]["public_recall_at_k"]

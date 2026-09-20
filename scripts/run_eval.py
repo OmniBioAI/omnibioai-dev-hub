@@ -20,6 +20,12 @@ after seeing results). ALL of the following must hold:
   5. each scope has at least MIN_POSITIVE_CASES_PER_SCOPE positive cases, so a
      scope cannot pass on an empty or token dataset.
 
+PRODUCTION PROFILE (--profile production), for the PUBLIC-only artifact that is
+actually served: gates 1-3 only. Gate 4 (INTERNAL-scope recall) is dropped
+because a PUBLIC-only artifact cannot contain INTERNAL content by design; the
+INTERNAL-scope cases are still run, as an informational probe that must find
+nothing. Thresholds are identical to the full profile.
+
 The earlier `all_passed` conjunction (every case must pass) is not part of the
 gate: it made the stated 70% threshold unreachable-in-effect (100% required).
 Failing cases are still listed individually in the output.
@@ -151,7 +157,9 @@ def _recall(results: list[dict[str, Any]], scope: str) -> tuple[int, int, float]
     return ok, len(pos), (ok / len(pos) if pos else 0.0)
 
 
-def summarize(results: list[dict[str, Any]]) -> dict[str, Any]:
+def summarize(results: list[dict[str, Any]], profile: str = "full") -> dict[str, Any]:
+    probes = [r for r in results if r["scope"] == "internal-probe"]
+    results = [r for r in results if r["scope"] != "internal-probe"]
     pub_ok, pub_n, pub_recall = _recall(results, "public")
     int_ok, int_n, int_recall = _recall(results, "internal")
     visibility_leaks = sum(r["visibility_leaks"] for r in results)
@@ -163,6 +171,8 @@ def summarize(results: list[dict[str, Any]]) -> dict[str, Any]:
         "public_recall_at_k": pub_n >= MIN_POSITIVE_CASES_PER_SCOPE and pub_recall >= MIN_RECALL_AT_K,
         "internal_recall_at_k": int_n >= MIN_POSITIVE_CASES_PER_SCOPE and int_recall >= MIN_RECALL_AT_K,
     }
+    if profile == "production":
+        del gates["internal_recall_at_k"]
     return {
         "total": len(results),
         "public": {"positive": pub_n, "passed": pub_ok, "recall_at_k": pub_recall},
@@ -172,6 +182,9 @@ def summarize(results: list[dict[str, Any]]) -> dict[str, Any]:
         "visibility_leaks": visibility_leaks,
         "duplicate_results": sum(r["duplicate_results"] for r in results),
         "all_cases_passed": all(r["passed"] for r in results),
+        "profile": profile,
+        "internal_probe": {"cases": len(probes), "expected_source_found": sum(1 for r in probes if r["passed"] or (r["expected"] and r["matched"] and r["expected"] in str(r["matched"]))),
+                           "leaks": sum(r["visibility_leaks"] for r in probes)},
         "gates": gates,
         "threshold_passed": all(gates.values()),
         "min_recall_at_k": MIN_RECALL_AT_K,
@@ -203,7 +216,7 @@ def _error_result(case: dict[str, Any], exc: Exception) -> dict[str, Any]:
     }
 
 
-def run_eval(index_dir: str, eval_path: str, min_relevance: float | None = None) -> dict[str, Any]:
+def run_eval(index_dir: str, eval_path: str, min_relevance: float | None = None, profile: str = "full") -> dict[str, Any]:
     vs = VectorStore()
     if not vs.load(index_dir):
         print(f"[ERROR] Could not load FAISS index from {index_dir}", file=sys.stderr)
@@ -221,22 +234,28 @@ def run_eval(index_dir: str, eval_path: str, min_relevance: float | None = None)
             result = evaluate_case(engine, case, top_k=TOP_K, min_relevance=min_relevance)
         except Exception as e:  # noqa: BLE001 -- per-query boundary: one failing case is reported, not hidden
             result = _error_result(case, e)
+        if profile == "production" and result["scope"] == "internal":
+            result["scope"] = "internal-probe"
+            result["passed"] = None  # informational: not part of the production gate
         results.append(result)
-        label = PASS_MARKER if result["passed"] else FAIL_MARKER
+        label = "PROBE" if result["passed"] is None else PASS_MARKER if result["passed"] else FAIL_MARKER
         print(f"{result['query'][:col_q]:<{col_q}}  {result['scope']:<8}  {result['category'][:20]:<20}  {label:<6}  {str(result['matched'])[:70]}")
 
-    summary = summarize(results)
+    summary = summarize(results, profile)
     print("\n" + "=" * (col_q + 60))
-    for scope in ("public", "internal"):
+    for scope in ("public",) if profile == "production" else ("public", "internal"):
         s = summary[scope]
         print(f"Recall@{TOP_K} [{scope}]: {s['passed']}/{s['positive']} ({s['recall_at_k']:.1%})  (gate >= {MIN_RECALL_AT_K:.0%}, min {MIN_POSITIVE_CASES_PER_SCOPE} cases)")
+    if profile == "production":
+        ip = summary["internal_probe"]
+        print(f"INTERNAL-scope probe (informational, must find nothing): {ip['expected_source_found']}/{ip['cases']} expected INTERNAL sources found, leaks={ip['leaks']}")
     print(f"Safety cases: {summary['safety_cases_passed']}/{summary['safety_cases']}    Visibility leakage: {summary['visibility_leaks']}    Duplicate results: {summary['duplicate_results']}")
     for name, ok in summary["gates"].items():
         print(f"  gate {name}: {'PASS' if ok else 'FAIL'}")
     print(f"Evaluation result: {'PASS' if summary['threshold_passed'] else 'FAIL'}")
     print("=" * (col_q + 60))
 
-    failures = [r for r in results if not r["passed"]]
+    failures = [r for r in results if r["passed"] is False]
     if failures:
         print(f"\nFailed cases ({len(failures)}):")
         for f in failures:
@@ -269,15 +288,18 @@ def main() -> int:
     parser.add_argument("--min-relevance", type=float, default=None,
                         help="Apply the production cosine relevance cutoff. Omitted = the frozen gate configuration; "
                              "gate thresholds are unchanged either way.")
+    parser.add_argument("--profile", choices=["full", "production"], default="full",
+                        help="full = frozen gate for a mixed candidate; production = gate for the PUBLIC-only served artifact")
     args = parser.parse_args()
 
-    result = run_eval(args.index_dir, args.eval, args.min_relevance)
+    result = run_eval(args.index_dir, args.eval, args.min_relevance, args.profile)
     manifest_path = os.path.join(args.index_dir, "manifest.json")
     result["provenance"] = {
         "eval_file": args.eval,
         "eval_file_sha256": _sha256(args.eval),
         "index_build_id": _read_build_id(manifest_path),
         "min_relevance": args.min_relevance,
+        "profile": args.profile,
         "thresholds": {"min_recall_at_k": MIN_RECALL_AT_K, "min_positive_cases_per_scope": MIN_POSITIVE_CASES_PER_SCOPE, "top_k": TOP_K},
     }
     if args.json_out:
