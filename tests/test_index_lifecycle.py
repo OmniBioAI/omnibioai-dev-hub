@@ -3,6 +3,8 @@
 import sys
 from unittest.mock import MagicMock, patch
 
+import pytest
+
 mock_faiss = MagicMock()
 sys.modules["faiss"] = mock_faiss
 
@@ -117,3 +119,25 @@ def test_validate_index_directory_rejects_non_clean_build_status(tmp_path):
 
     assert not result["ok"]
     assert "EMBEDDING_FAILURES" in result["reason"]
+
+
+def test_rejected_candidate_is_refused_and_current_is_untouched(tmp_path):
+    current = _index_dir(tmp_path / "current", build_id="old")
+    candidate = _index_dir(tmp_path / "candidate", build_id="bad")
+    (candidate / "REJECTED").write_text("incomplete metadata (no bundle field)\n")
+    before = read_manifest(current)
+
+    result = validate_index_directory(candidate)
+    assert not result["ok"] and "REJECTED" in result["reason"] and "incomplete metadata" in result["reason"]
+    with pytest.raises(RuntimeError, match="REJECTED"):
+        promote_candidate(candidate, current, tmp_path / "previous")
+    assert read_manifest(current) == before and candidate.exists()
+
+
+def test_rejected_marker_also_blocks_use_as_rollback_target(tmp_path):
+    current = _index_dir(tmp_path / "current", build_id="new")
+    previous = _index_dir(tmp_path / "previous", build_id="rejected-one")
+    (previous / "REJECTED").write_text("do not use\n")
+    with pytest.raises(RuntimeError, match="REJECTED"):
+        rollback(current, previous, tmp_path / "rolled")
+    assert current.exists() and previous.exists()

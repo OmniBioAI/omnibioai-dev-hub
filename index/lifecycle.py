@@ -15,6 +15,7 @@ INDEX_FILE = "index.faiss"
 METADATA_FILE = "metadata.pkl"
 MANIFEST_FILE = "manifest.json"
 POINTER_FILE = "CURRENT"
+REJECTED_MARKER = "REJECTED"
 
 
 def artifact_hashes(directory: str | Path) -> dict[str, str]:
@@ -39,6 +40,10 @@ def read_manifest(directory: str | Path) -> dict[str, Any]:
 
 def validate_index_directory(directory: str | Path, *, require_public_only: bool = False) -> dict[str, Any]:
     directory = Path(directory)
+    rejected = directory / REJECTED_MARKER
+    if rejected.exists():
+        reason = rejected.read_text(encoding="utf-8").strip().splitlines()[:1]
+        return {"ok": False, "reason": f"candidate is marked {REJECTED_MARKER}: {reason[0] if reason else 'no reason recorded'}"}
     missing = [name for name in (INDEX_FILE, METADATA_FILE, MANIFEST_FILE) if not (directory / name).exists()]
     if missing:
         return {"ok": False, "reason": f"missing artifacts: {missing}"}
@@ -92,6 +97,22 @@ def candidate_dir(staging_root: str | Path, build_id: str) -> Path:
 
 
 def promote_candidate(candidate: str | Path, current_dir: str | Path, previous_root: str | Path) -> dict[str, Any]:
+    """Validate, then swap `candidate` in as `current_dir`, retaining the previous index.
+
+    NOT ATOMIC. Each os.replace is atomic on its own, but the swap is two of
+    them (current -> previous, candidate -> current), so:
+      * there is a brief moment with no `current_dir`;
+      * a crash between the renames leaves no `current_dir` (the old index is
+        intact under `previous_root`, the candidate intact where it was) and
+        nothing here detects or repairs that -- an operator must finish or undo
+        it by hand;
+      * the manifest is rewritten after the swap, so a crash there leaves a
+        promoted directory still labelled CANDIDATE.
+    A loaded process is unaffected (the index is read into memory at startup),
+    but anything that starts inside the window sees no index. Both source and
+    destination must be on one filesystem. Run it with the service stopped or
+    with restarts frozen.
+    """
     candidate = Path(candidate)
     current_dir = Path(current_dir)
     previous_root = Path(previous_root)
