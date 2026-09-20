@@ -332,3 +332,85 @@ def test_judge_runs_last_and_only_after_the_cheaper_checks_pass():
 def test_judge_rejection_yields_unsupported_claim_with_no_citations():
     r = generate_grounded_answer("q?", [chunk(1)], MagicMock(return_value="Back up nightly [1]."), judge=MagicMock(return_value="UNSUPPORTED"))
     assert (r["grounded"], r["answer_status"], r["citations"], r["entailment"]) == (False, STATUS_UNSUPPORTED_CLAIM, [], "UNSUPPORTED")
+
+
+# ---- Phase 19.1: the "ANSWER:" protocol label is not an invented name ------------------------------
+
+# Real model output that was wrongly refused in production: faithful document content, plus a trailing
+# echo of the prompt's closing "ANSWER (...):" label.
+DR_EXCERPT_1 = ("No subsystem currently has a fully proven, off-site or off-primary-disk backup. Most backups that do exist "
+                "are stored on the same physical disk as the data they protect. A tool exists to check backup freshness for "
+                "the primary database, but it is not yet running on a schedule; detecting a failed backup currently depends "
+                "on someone checking manually.")
+DR_EXCERPT_2 = ("A restore having succeeded once does not mean it will succeed automatically or repeatedly. "
+                "No formal recovery-time or recovery-point objectives are defined. A failed component is restarted in place.")
+DR_ANSWER = ("No subsystem currently has a fully proven, off-site or off-primary-disk backup [1]. Most backups that do exist are "
+             "stored on the same physical disk as the data they protect [1].\n\nA restore having succeeded once does not mean it "
+             "will succeed repeatedly [2].\n\nANSWER: No subsystem currently has a fully proven, off-site or off-primary-disk "
+             "backup. Most backups that do exist are stored on the same physical disk as the data they protect [1].")
+
+
+def _dr_docs():
+    return [chunk(1, text=DR_EXCERPT_1, path="site/docs/admin/disaster-recovery.md"),
+            chunk(2, text=DR_EXCERPT_2, path="site/docs/admin/disaster-recovery.md")]
+
+
+def test_the_answer_label_is_protocol_syntax_not_an_unsupported_name():
+    docs = [chunk(1, text="Backups are stored on the same disk.")]
+    assert unsupported_answer_terms("Backups are stored on the same disk [1].\n\nANSWER: Backups are stored on the same disk [1].", docs, "q") == []
+    assert unsupported_answer_terms("ANSWER (cited, or exactly INSUFFICIENT_CONTEXT): Backups are stored on the same disk [1].", docs, "q") == []
+
+
+def test_only_the_defined_label_forms_are_exempt_at_line_start():
+    docs = [chunk(1, text="Backups are stored on the same disk.")]
+    # not at the start of a line -> still a name-like token that is absent from the excerpts
+    assert unsupported_answer_terms("The ANSWER is that backups are stored on the same disk [1].", docs, "q") == ["answer"]
+    # other colon-terminated / all-caps labels are NOT exempt
+    for label in ("NOTE", "WARNING", "SUMMARY", "IMPORTANT", "RESULT"):
+        assert unsupported_answer_terms(f"Backups are stored on the same disk [1].\n{label}: see above [1].", docs, "q") == [label.lower()], label
+    # a parenthetical other than the exact echoed hint is not swallowed by the label rule (it could hide a name)
+    assert set(unsupported_answer_terms("ANSWER (Veeam): Backups are stored on the same disk [1].", docs, "q")) >= {"veeam"}
+
+
+def test_unsupported_names_are_still_rejected_after_the_label():
+    docs = [chunk(1, text="Backups are stored on the same disk.")]
+    assert unsupported_answer_terms("ANSWER: Backups use Veeam [1].", docs, "q") == ["veeam"]
+    r = generate_grounded_answer("q?", docs, MagicMock(return_value="ANSWER: Backups use Veeam [1]."))
+    assert not r["grounded"] and r["answer_status"] == STATUS_UNSUPPORTED_CLAIM and "veeam" in r["unsupported_claim_terms"]
+
+
+def test_the_known_disaster_recovery_answer_now_reaches_the_normal_grounding_checks():
+    judge = MagicMock(return_value="SUPPORTED")
+    r = generate_grounded_answer("how do I back up and restore the platform after a disaster", _dr_docs(),
+                                 MagicMock(return_value=DR_ANSWER), judge=judge)
+    assert r["grounded"] and r["answer_status"] == STATUS_GROUNDED and r["entailment_checked"]
+    judge.assert_called_once()  # it went THROUGH the fact-check rather than being refused before it
+    assert unsupported_answer_terms(DR_ANSWER, _dr_docs(), "how do I back up and restore the platform after a disaster") == []
+
+
+def test_the_fact_check_stays_active_for_label_bearing_answers():
+    r = generate_grounded_answer("q?", _dr_docs(), MagicMock(return_value=DR_ANSWER), judge=MagicMock(return_value="UNSUPPORTED"))
+    assert not r["grounded"] and r["answer_status"] == STATUS_UNSUPPORTED_CLAIM and r["entailment"] == "UNSUPPORTED" and r["citations"] == []
+
+
+def test_citations_stay_constrained_to_supplied_excerpts_for_label_bearing_answers():
+    r = generate_grounded_answer("q?", _dr_docs(), MagicMock(return_value=DR_ANSWER), judge=MagicMock(return_value="SUPPORTED"))
+    assert [c["chunk_id"] for c in r["citations"]] == ["chunk1", "chunk2"]
+    bad = generate_grounded_answer("q?", _dr_docs(), MagicMock(return_value="ANSWER: Backups are on disk [7]."), judge=MagicMock(return_value="SUPPORTED"))
+    assert not bad["grounded"] and bad["answer_status"] == STATUS_INVALID_CITATIONS and bad["citations"] == []
+
+
+@pytest.mark.parametrize("question", [
+    "What does the OmniBioAI iOS mobile app do?",
+    "How do I install the OmniBioAI Android app?",
+    "How do I export OmniBioAI results to Tableau?",
+    "Can OmniBioAI send results to WhatsApp?",
+    "Is there an Alexa skill for OmniBioAI?",
+    "How do I connect OmniBioAI to Salesforce?",
+])
+def test_nonexistent_named_capabilities_remain_refused_before_the_llm(question):
+    docs = [chunk(1, text="OmniBioAI runs on Linux. Mobile users can open the web UI. Backups run nightly.")]
+    llm = MagicMock(return_value="ANSWER: Yes, OmniBioAI has that [1].")
+    r = generate_grounded_answer(question, docs, llm, judge=MagicMock(return_value="SUPPORTED"))
+    llm.assert_not_called()
+    assert not r["grounded"] and r["answer_status"] == STATUS_UNSUPPORTED_TERM and r["citations"] == []

@@ -158,7 +158,7 @@ def test_stream_endpoint_error(client, mock_control_plane):
         response = client.post("/stream", json={"query": "hello"})
 
         assert response.status_code == 200
-        assert _events(response) == [{"type": "error", "message": "Stream Init Error"}]
+        assert _events(response) == [{"type": "error", "code": "internal_error", "message": "Ask OmniBioAI could not complete this request."}]
 
 
 # =========================================================
@@ -264,3 +264,17 @@ def test_query_text_is_stripped_before_use(client, mock_control_plane):
     mock_control_plane.get_engine.return_value = engine
     client.post("/query", json={"query": "   hello   "})
     assert engine.retrieve.call_args.args[0] == "hello"
+
+
+def test_stream_error_event_never_leaks_exception_text_but_logs_it_server_side(client, mock_control_plane, caplog):
+    engine = _engine()
+    engine.retrieve.side_effect = ConnectionError("internal-host-7:11434 refused, password=hunter2 /srv/app/secret.py")
+    mock_control_plane.get_engine.return_value = engine
+
+    with caplog.at_level("ERROR", logger="api.routes.rag"):
+        response = client.post("/stream", json={"query": "hello"})
+
+    body = response.text
+    assert "internal-host-7" not in body and "hunter2" not in body and "secret.py" not in body and "Traceback" not in body
+    assert _events(response)[0]["code"] == "internal_error"
+    assert any("internal-host-7" in (r.exc_text or "") or "internal-host-7" in r.getMessage() for r in caplog.records)  # detail kept for operators

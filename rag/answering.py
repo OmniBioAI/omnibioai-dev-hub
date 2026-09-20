@@ -157,7 +157,7 @@ EXCERPTS
 QUESTION
 {query}
 
-ANSWER (cited, or exactly {SENTINEL}):"""
+ANSWER ({ANSWER_LABEL_HINT}):"""
 
 
 def build_judge_prompt(answer: str, chunks: list[dict[str, Any]]) -> str:
@@ -219,6 +219,13 @@ def unsupported_terms(query: str, chunks: list[dict[str, Any]]) -> list[str]:
     return missing
 
 
+# The ONLY structural label the answer protocol defines is the prompt's closing "ANSWER (...):" line, which
+# models tend to echo as "ANSWER:". It is protocol syntax, not a claim, so the name check skips it -- but only
+# at the start of a line and only in the two forms the contract produces. Nothing else is exempt: not other
+# all-caps words, headings, product names, or colon-terminated tokens ("NOTE:", "WARNING:" are still checked),
+# and a parenthetical that is not the exact echoed hint is NOT swallowed (it could hide a name).
+ANSWER_LABEL_HINT = f"cited, or exactly {SENTINEL}"
+_PROTOCOL_LABEL_RE = re.compile(rf"(?m)^[ \t]*ANSWER[ \t]*(?:\({re.escape(ANSWER_LABEL_HINT)}\))?[ \t]*:")
 _NUMBER_RE = re.compile(r"(?<![A-Za-z0-9._-])\d+(?:[.,]\d+)*(?![A-Za-z0-9])")
 _MARKUP_RE = re.compile(r"\[\d+(?:\s*,\s*\d+)*\]|`+|\*+|_{2,}|\]\([^)]*\)|https?://\S+")
 
@@ -232,7 +239,7 @@ def unsupported_answer_terms(answer: str, chunks: list[dict[str, Any]], query: s
     refused. Same name-like rules as unsupported_terms; markdown and citation
     markers are stripped first.
     """
-    cleaned = _MARKUP_RE.sub(" ", answer)
+    cleaned = _PROTOCOL_LABEL_RE.sub(" ", _MARKUP_RE.sub(" ", answer))
     support = [*chunks, {"text": query}]
     missing = unsupported_terms(cleaned, support)
     haystack = " ".join(f"{c.get('text', '')} {c.get('title', '')}" for c in support).lower()

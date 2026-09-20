@@ -1,4 +1,5 @@
 import json
+import logging
 import os
 import traceback
 
@@ -10,6 +11,9 @@ from api.auth import require_auth
 from rag.control_plane import CONTROL_PLANE
 
 router = APIRouter()
+logger = logging.getLogger(__name__)
+
+STREAM_ERROR_MESSAGE = "Ask OmniBioAI could not complete this request."
 
 # Ordinary callers get PUBLIC content only, and only chunks genuinely relevant
 # to the question. Both are decided here, server-side; nothing in the request
@@ -128,7 +132,7 @@ def stream(req: QueryRequest, actor: str = Depends(require_auth)):
       status    {"stage": "retrieved", "context_used": n}
       response  {"content", "grounded", "answer_status", "citations", "context_used", "llm_invoked"}
       done      {}
-      error     {"message"}
+      error     {"code": "internal_error", "message": <generic>}   (detail is logged server-side only)
     With no qualifying context, `response` is the fixed no-answer message and
     the LLM is never invoked -- the same code path as /query.
     """
@@ -158,8 +162,11 @@ def stream(req: QueryRequest, actor: str = Depends(require_auth)):
             })
             yield event({"type": "done"})
 
-        except Exception as e:  # noqa: BLE001 -- SSE generator boundary: must catch anything to emit an error event instead of killing the stream
-            yield event({"type": "error", "message": str(e)})
+        except Exception:
+            # Full detail goes to the server log only; the browser gets a stable code and a generic message
+            # (an exception string can carry hostnames, paths or other internals).
+            logger.exception("ask stream failed")
+            yield event({"type": "error", "code": "internal_error", "message": STREAM_ERROR_MESSAGE})
 
     return StreamingResponse(
         event_stream(),
