@@ -30,6 +30,7 @@ os.environ.setdefault("OLLAMA_URL", "http://localhost:11434/api")
 from fastapi.testclient import TestClient
 
 import rag.engine as engine_module
+from rag.answering import EXAMPLE_ONLY_TERMS, unsupported_answer_terms
 
 CUTOFF = 0.64
 REQ_CITE = ("repository", "relative_path", "source_revision", "document_id", "chunk_id", "content_state", "verification_state")
