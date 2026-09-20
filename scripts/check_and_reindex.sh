@@ -22,7 +22,9 @@ if [ "$LATEST" != "$LAST_INDEXED" ] && [ -n "$LATEST" ]; then
     cd /home/manish/Desktop/machine/omnibioai-dev-hub || { echo "[$(date)] ERROR: dev-hub repo not found" >> "$LOG"; exit 1; }
 
     export REPO_BASE=/home/manish/Desktop/machine
-    rm -rf data/faiss_index/*
+    # Phase 18: build_index.py now writes a staging candidate, never the live
+    # index, so it must not be wiped here -- doing so would delete the live
+    # index and leave nothing to replace it. Promotion is an explicit step.
 
     if python scripts/build_index.py >> "$LOG" 2>&1; then
         echo "$LATEST" > "$STATE_FILE"
