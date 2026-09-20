@@ -1,6 +1,8 @@
 __pycache__/
 data/faiss_index/
 data/faiss_candidates/
+data/faiss_previous/
+data/faiss_rolled/
 data_staging/
 *.pyc
 .coverage
