@@ -10,6 +10,7 @@ import requests
 import yaml
 
 from index.filtered_search import search_allowed
+from rag.answering import GENERATION_OPTIONS, generate_grounded_answer
 
 logger = logging.getLogger(__name__)
 
@@ -124,16 +125,11 @@ def ollama_embed(text: str, model: str = "nomic-embed-text", *, on_attempt=None)
     return vec
 
 
-def ollama_generate(prompt: str, model: str = LLM_MODEL):
-    res = requests.post(
-        f"{OLLAMA_URL}/generate",
-        json={
-            "model": model,
-            "prompt": prompt,
-            "stream": False
-        },
-        timeout=300
-    )
+def ollama_generate(prompt: str, model: str = LLM_MODEL, options: dict | None = None):
+    payload = {"model": model, "prompt": prompt, "stream": False}
+    if options:  # only sent when asked for, so callers that don't pass it are unchanged
+        payload["options"] = options
+    res = requests.post(f"{OLLAMA_URL}/generate", json=payload, timeout=300)
     res.raise_for_status()
     return res.json().get("response", "")
 
@@ -321,29 +317,25 @@ Answer clearly, technically, and concisely:
 """
 
     # =====================================================
-    # MAIN PIPELINE
+    # MAIN PIPELINE (Ask OmniBioAI grounded-answer contract, see rag/answering.py)
     # =====================================================
+    def answer_from_docs(self, query: str, docs: list[dict[str, Any]]):
+        """Answer from already-retrieved, already-policy-filtered docs.
+
+        The LLM is reached only when there is qualifying context and the question
+        passes the deterministic pre-check; its text is shown only if it verifies.
+        Both /query and /stream go through this one function so they cannot diverge.
+        """
+        return generate_grounded_answer(
+            query, docs, lambda prompt: ollama_generate(prompt, options=GENERATION_OPTIONS)
+        )
+
     def answer(self, query: str, repo: str | None = None, bundle: str | None = None,
                allowed_visibilities: set[str] | None = None, min_relevance: float | None = None):
 
         extra = {"min_relevance": min_relevance} if min_relevance is not None else {}
         docs = self.retrieve(query, repo=repo, bundle=bundle, allowed_visibilities=allowed_visibilities, **extra)
-        context = self.build_context(docs)
-        prompt = self.build_prompt(query, context)
-
-        try:
-            response = ollama_generate(prompt)
-        except Exception as e:  # noqa: BLE001 -- LLM call boundary: any failure becomes an inline error string instead of crashing the request
-            response = f"[LLM_ERROR] {e!s}"
-
-        return {
-            "query": query,
-            "answer": response,
-            "sources": [d.get("source") for d in docs],
-            "context": docs,
-            "context_used": len(docs),
-            "version": "v6-faiss"
-        }
+        return self.answer_from_docs(query, docs)
 
     # =====================================================
     # TOKEN STREAMING (Ollama stream=True NDJSON)

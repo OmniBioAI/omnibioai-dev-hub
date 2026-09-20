@@ -4,7 +4,7 @@ import traceback
 
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi.responses import StreamingResponse
-from pydantic import BaseModel
+from pydantic import BaseModel, Field, field_validator
 
 from api.auth import require_auth
 from rag.control_plane import CONTROL_PLANE
@@ -45,10 +45,23 @@ def _debug_tracebacks_enabled() -> bool:
 # REQUEST MODEL
 # =========================================================
 
+MAX_QUERY_CHARS = 2000
+
+
 class QueryRequest(BaseModel):
-    query: str
-    repo: str | None = None
-    bundle: str | None = None
+    # Unknown fields (allowed_visibilities, min_relevance, visibility...) are
+    # ignored, never honoured: policy is server-side (PUBLIC_ONLY, cutoff).
+    query: str = Field(min_length=1, max_length=MAX_QUERY_CHARS)
+    repo: str | None = Field(default=None, max_length=200)
+    bundle: str | None = Field(default=None, max_length=200)
+
+    @field_validator("query")
+    @classmethod
+    def _not_blank(cls, value: str) -> str:
+        stripped = value.strip()
+        if not stripped or "\x00" in stripped:
+            raise ValueError("query must be non-empty text")
+        return stripped
 
 
 # =========================================================
@@ -81,10 +94,10 @@ def query(req: QueryRequest, actor: str = Depends(require_auth)):
 
     try:
         engine = get_engine()
-
-        # V6 CONTRACT: only query() exists
-        result = engine.query(req.query, repo=req.repo, bundle=req.bundle,
-                              allowed_visibilities=PUBLIC_ONLY, min_relevance=_min_relevance())
+        docs = engine.retrieve(req.query, repo=req.repo, bundle=req.bundle,
+                               allowed_visibilities=PUBLIC_ONLY, min_relevance=_min_relevance())
+        # Grounded-answer contract (rag/answering.py): zero qualifying context never reaches the LLM.
+        result = engine.answer_from_docs(req.query, docs)
 
         return {
             **result,
@@ -107,33 +120,46 @@ def query(req: QueryRequest, actor: str = Depends(require_auth)):
 
 @router.post("/stream")
 def stream(req: QueryRequest, actor: str = Depends(require_auth)):
+    """Server-sent events for Ask OmniBioAI.
+
+    The answer is generated, VERIFIED, and only then sent: streaming raw model
+    tokens would show an unverified answer before the grounding checks could
+    reject it. Events:
+      status    {"stage": "retrieved", "context_used": n}
+      response  {"content", "grounded", "answer_status", "citations", "context_used", "llm_invoked"}
+      done      {}
+      error     {"message"}
+    With no qualifying context, `response` is the fixed no-answer message and
+    the LLM is never invoked -- the same code path as /query.
+    """
+
+    def event(payload: dict) -> str:
+        return f"data: {json.dumps(payload)}\n\n"
 
     def event_stream():
 
         try:
             engine = get_engine()
 
-            # V6: no hybrid_retrieve dependency anymore
-            # fallback-safe: reuse query pipeline structure
+            docs = engine.retrieve(req.query, repo=req.repo, bundle=req.bundle,
+                                   allowed_visibilities=PUBLIC_ONLY, min_relevance=_min_relevance())
+            yield event({"type": "status", "stage": "retrieved", "context_used": len(docs)})
 
-            result = engine.retrieve(req.query, repo=req.repo, bundle=req.bundle,
-                                    allowed_visibilities=PUBLIC_ONLY, min_relevance=_min_relevance())
-            context = engine.build_context(result)
-
-            # check optional LLM streaming support
-            if hasattr(engine, "stream_llm"):
-                for token in engine.stream_llm(req.query, context):
-                    yield f"data: {json.dumps({'type': 'token', 'content': token})}\n\n"
-            else:
-                # fallback: single response
-                response = engine.answer(req.query, repo=req.repo, bundle=req.bundle,
-                                       allowed_visibilities=PUBLIC_ONLY, min_relevance=_min_relevance())
-                yield f"data: {json.dumps({'type': 'response', 'content': response['answer']})}\n\n"
-
-            yield f"data: {json.dumps({'type': 'done'})}\n\n"
+            result = engine.answer_from_docs(req.query, docs)
+            yield event({
+                "type": "response",
+                "content": result["answer"],
+                "grounded": result["grounded"],
+                "answer_status": result["answer_status"],
+                "answer_contract": result["answer_contract"],
+                "citations": result["citations"],
+                "context_used": result["context_used"],
+                "llm_invoked": result["llm_invoked"],
+            })
+            yield event({"type": "done"})
 
         except Exception as e:  # noqa: BLE001 -- SSE generator boundary: must catch anything to emit an error event instead of killing the stream
-            yield f"data: {json.dumps({'type': 'error', 'message': str(e)})}\n\n"
+            yield event({"type": "error", "message": str(e)})
 
     return StreamingResponse(
         event_stream(),

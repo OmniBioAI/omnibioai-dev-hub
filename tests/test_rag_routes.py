@@ -63,113 +63,103 @@ def test_get_engine_exception(mock_control_plane):
     with pytest.raises(RuntimeError, match="Engine access failed: Internal Error"):
         get_engine()
 
-
 # =========================================================
 # ENDPOINT TESTS: /query
 # =========================================================
 
+RESULT = {
+    "query": "hello", "answer": "test answer [1]", "grounded": True, "answer_status": "GROUNDED",
+    "answer_contract": "ask.v1", "citations": [{"index": 1}], "context_used": 1, "llm_invoked": True,
+    "sources": ["s"], "context": [{"text": "c"}], "version": "v6-faiss",
+}
+
+
+def _engine(retrieved=None, result=None):
+    engine = MagicMock()
+    engine.retrieve.return_value = [{"text": "c"}] if retrieved is None else retrieved
+    engine.answer_from_docs.return_value = RESULT if result is None else result
+    return engine
+
+
 def test_query_endpoint_success(client, mock_control_plane):
-    """Return the engine's answer from /query along with the v6 API version."""
-    mock_engine = MagicMock()
-    mock_engine.query.return_value = {"answer": "test answer"}
-    mock_control_plane.get_engine.return_value = mock_engine
-    
+    """Retrieve under the server-side policy, answer through the contract, add the v6 API version."""
+    engine = _engine()
+    mock_control_plane.get_engine.return_value = engine
+
     response = client.post("/query", json={"query": "hello"})
-    
+
     assert response.status_code == 200
     data = response.json()
-    assert data["answer"] == "test answer"
-    assert data["api_version"] == "v6"
+    assert data["answer"] == "test answer [1]" and data["grounded"] is True and data["api_version"] == "v6"
+    engine.retrieve.assert_called_once_with("hello", repo=None, bundle=None,
+                                            allowed_visibilities={"PUBLIC"}, min_relevance=0.64)
+    engine.answer_from_docs.assert_called_once_with("hello", [{"text": "c"}])
+
 
 def test_query_endpoint_failure_traceback_enabled(client, mock_control_plane, monkeypatch):
     """Return a 500 with the error message and a traceback when DEBUG_TRACEBACKS is enabled."""
     monkeypatch.setenv("DEBUG_TRACEBACKS", "true")
-    mock_engine = MagicMock()
-    mock_engine.query.side_effect = Exception("Query Failed")
-    mock_control_plane.get_engine.return_value = mock_engine
+    engine = _engine()
+    engine.retrieve.side_effect = Exception("Query Failed")
+    mock_control_plane.get_engine.return_value = engine
 
     response = client.post("/query", json={"query": "hello"})
 
     assert response.status_code == 500
     data = response.json()
-    assert "detail" in data
     assert data["detail"]["error"] == "Query Failed"
     assert "trace" in data["detail"]
+
 
 def test_query_endpoint_failure_traceback_disabled(client, mock_control_plane, monkeypatch):
     """Return a 500 with the error message but no traceback when DEBUG_TRACEBACKS is unset."""
     monkeypatch.delenv("DEBUG_TRACEBACKS", raising=False)
-    mock_engine = MagicMock()
-    mock_engine.query.side_effect = Exception("Query Failed")
-    mock_control_plane.get_engine.return_value = mock_engine
+    engine = _engine()
+    engine.retrieve.side_effect = Exception("Query Failed")
+    mock_control_plane.get_engine.return_value = engine
 
     response = client.post("/query", json={"query": "hello"})
 
     assert response.status_code == 500
-    data = response.json()
-    assert "detail" in data
-    assert data["detail"]["error"] == "Query Failed"
-    assert "trace" not in data["detail"]
+    assert response.json()["detail"]["error"] == "Query Failed"
+    assert "trace" not in response.json()["detail"]
 
 
 # =========================================================
 # ENDPOINT TESTS: /stream
 # =========================================================
 
-def test_stream_endpoint_with_llm_streaming(client, mock_control_plane):
-    """Stream each LLM token as a server-sent event followed by a done event."""
-    mock_engine = MagicMock()
-    mock_engine.retrieve.return_value = [{"text": "context"}]
-    mock_engine.build_context.return_value = "built context"
-    
-    # Mock stream_llm which is an iterable
-    mock_engine.stream_llm.return_value = ["token1", " ", "token2"]
-    
-    mock_control_plane.get_engine.return_value = mock_engine
-    
-    response = client.post("/stream", json={"query": "hello"})
-    
-    assert response.status_code == 200
-    assert "text/event-stream" in response.headers["content-type"]
-    
-    lines = [line for line in response.iter_lines() if line]
-    assert len(lines) == 4 # 3 tokens + 1 done
-    assert json.loads(lines[0].replace("data: ", "")) == {"type": "token", "content": "token1"}
-    assert json.loads(lines[1].replace("data: ", "")) == {"type": "token", "content": " "}
-    assert json.loads(lines[2].replace("data: ", "")) == {"type": "token", "content": "token2"}
-    assert json.loads(lines[3].replace("data: ", "")) == {"type": "done"}
+def _events(response):
+    return [json.loads(line.replace("data: ", "")) for line in response.iter_lines() if line]
 
-def test_stream_endpoint_fallback_single_response(client, mock_control_plane):
-    """Fall back to one response event plus a done event when the engine cannot stream."""
-    mock_engine = MagicMock()
-    # Explicitly remove stream_llm to trigger fallback
-    del mock_engine.stream_llm
-    
-    mock_engine.retrieve.return_value = [{"text": "context"}]
-    mock_engine.build_context.return_value = "built context"
-    mock_engine.answer.return_value = {"answer": "single answer"}
-    
-    mock_control_plane.get_engine.return_value = mock_engine
-    
+
+def test_stream_endpoint_emits_status_then_verified_response_then_done(client, mock_control_plane):
+    """The stream sends the VERIFIED answer (never raw tokens): status, response, done."""
+    engine = _engine()
+    mock_control_plane.get_engine.return_value = engine
+
     response = client.post("/stream", json={"query": "hello"})
-    
-    assert response.status_code == 200
-    lines = [line for line in response.iter_lines() if line]
-    assert len(lines) == 2 # 1 response + 1 done
-    assert json.loads(lines[0].replace("data: ", "")) == {"type": "response", "content": "single answer"}
-    assert json.loads(lines[1].replace("data: ", "")) == {"type": "done"}
+
+    assert response.status_code == 200 and "text/event-stream" in response.headers["content-type"]
+    events = _events(response)
+    assert [e["type"] for e in events] == ["status", "response", "done"]
+    assert events[0] == {"type": "status", "stage": "retrieved", "context_used": 1}
+    assert events[1]["content"] == "test answer [1]" and events[1]["grounded"] is True
+    assert events[1]["answer_status"] == "GROUNDED" and events[1]["citations"] == [{"index": 1}]
+    assert not any(e["type"] == "token" for e in events)
+    engine.stream_llm.assert_not_called()  # the raw-token path is not used by the API
+
 
 def test_stream_endpoint_error(client, mock_control_plane):
     """Report an engine failure as a single error event on the stream instead of an HTTP error."""
     with patch("api.routes.rag.get_engine") as mock_get_engine:
         mock_get_engine.side_effect = Exception("Stream Init Error")
-        
+
         response = client.post("/stream", json={"query": "hello"})
-        
+
         assert response.status_code == 200
-        lines = [line for line in response.iter_lines() if line]
-        assert len(lines) == 1
-        assert json.loads(lines[0].replace("data: ", "")) == {"type": "error", "message": "Stream Init Error"}
+        assert _events(response) == [{"type": "error", "message": "Stream Init Error"}]
+
 
 # =========================================================
 # EDGE CASES
@@ -177,9 +167,7 @@ def test_stream_endpoint_error(client, mock_control_plane):
 
 def test_query_request_validation(client):
     """Reject a /query request that omits the required query field with a 422."""
-    # Test Pydantic validation
-    response = client.post("/query", json={}) # Missing 'query' field
-    assert response.status_code == 422
+    assert client.post("/query", json={}).status_code == 422
 
 
 # =========================================================
@@ -187,84 +175,63 @@ def test_query_request_validation(client):
 # =========================================================
 
 def test_query_endpoint_with_bundle_scope(client, mock_control_plane):
-    """Pass the requested bundle scope through to the engine's query."""
-    mock_engine = MagicMock()
-    mock_engine.query.return_value = {"answer": "scoped answer"}
-    mock_control_plane.get_engine.return_value = mock_engine
-
-    response = client.post("/query", json={"query": "metagenomics", "bundle": "metagenomics"})
-
-    assert response.status_code == 200
-    mock_engine.query.assert_called_once_with(
-        "metagenomics", repo=None, bundle="metagenomics", allowed_visibilities={"PUBLIC"}, min_relevance=0.64
-    )
+    """Pass the requested bundle scope through to retrieval."""
+    engine = _engine()
+    mock_control_plane.get_engine.return_value = engine
+    client.post("/query", json={"query": "metagenomics", "bundle": "metagenomics"})
+    engine.retrieve.assert_called_once_with("metagenomics", repo=None, bundle="metagenomics",
+                                            allowed_visibilities={"PUBLIC"}, min_relevance=0.64)
 
 
 def test_query_endpoint_with_repo_scope(client, mock_control_plane):
-    """Pass the requested repo scope through to the engine's query."""
-    mock_engine = MagicMock()
-    mock_engine.query.return_value = {"answer": "repo answer"}
-    mock_control_plane.get_engine.return_value = mock_engine
-
-    response = client.post("/query", json={"query": "model versioning", "repo": "omnibioai-model-registry"})
-
-    assert response.status_code == 200
-    mock_engine.query.assert_called_once_with(
-        "model versioning", repo="omnibioai-model-registry", bundle=None, allowed_visibilities={"PUBLIC"}, min_relevance=0.64
-    )
+    """Pass the requested repo scope through to retrieval."""
+    engine = _engine()
+    mock_control_plane.get_engine.return_value = engine
+    client.post("/query", json={"query": "model versioning", "repo": "omnibioai-model-registry"})
+    engine.retrieve.assert_called_once_with("model versioning", repo="omnibioai-model-registry", bundle=None,
+                                            allowed_visibilities={"PUBLIC"}, min_relevance=0.64)
 
 
 def test_query_endpoint_unscoped_passes_none_filters(client, mock_control_plane):
     """Pass None for both repo and bundle when the request is unscoped."""
-    mock_engine = MagicMock()
-    mock_engine.query.return_value = {"answer": "answer"}
-    mock_control_plane.get_engine.return_value = mock_engine
-
+    engine = _engine()
+    mock_control_plane.get_engine.return_value = engine
     client.post("/query", json={"query": "hello"})
-
-    mock_engine.query.assert_called_once_with("hello", repo=None, bundle=None, allowed_visibilities={"PUBLIC"}, min_relevance=0.64)
+    engine.retrieve.assert_called_once_with("hello", repo=None, bundle=None,
+                                            allowed_visibilities={"PUBLIC"}, min_relevance=0.64)
 
 
 def test_stream_endpoint_with_bundle_scope(client, mock_control_plane):
-    """Pass the requested bundle scope through to the engine's retrieval when streaming."""
-    mock_engine = MagicMock()
-    mock_engine.retrieve.return_value = [{"text": "ctx"}]
-    mock_engine.build_context.return_value = "ctx"
-    mock_engine.stream_llm.return_value = ["tok"]
-    mock_control_plane.get_engine.return_value = mock_engine
-
+    """Pass the requested bundle scope through to retrieval when streaming."""
+    engine = _engine()
+    mock_control_plane.get_engine.return_value = engine
     response = client.post("/stream", json={"query": "q", "bundle": "metagenomics"})
-
     assert response.status_code == 200
-    mock_engine.retrieve.assert_called_once_with("q", repo=None, bundle="metagenomics", allowed_visibilities={"PUBLIC"}, min_relevance=0.64)
+    engine.retrieve.assert_called_once_with("q", repo=None, bundle="metagenomics",
+                                            allowed_visibilities={"PUBLIC"}, min_relevance=0.64)
 
 
 # ---- PUBLIC-only + relevance cutoff are server-side policy, not client input ----
 
 def test_client_cannot_widen_visibility_or_lower_relevance_via_request_body(client, mock_control_plane):
-    mock_engine = MagicMock()
-    mock_engine.query.return_value = {"answer": "a"}
-    mock_control_plane.get_engine.return_value = mock_engine
+    engine = _engine()
+    mock_control_plane.get_engine.return_value = engine
 
     client.post("/query", json={
         "query": "q", "allowed_visibilities": ["PUBLIC", "INTERNAL", "REVIEW_REQUIRED"],
         "min_relevance": 0.0, "visibility": "INTERNAL",
     })
 
-    mock_engine.query.assert_called_once_with("q", repo=None, bundle=None, allowed_visibilities={"PUBLIC"}, min_relevance=0.64)
+    engine.retrieve.assert_called_once_with("q", repo=None, bundle=None, allowed_visibilities={"PUBLIC"}, min_relevance=0.64)
 
 
-def test_stream_fallback_path_is_also_public_only_with_cutoff(client, mock_control_plane):
-    mock_engine = MagicMock()
-    del mock_engine.stream_llm
-    mock_engine.retrieve.return_value = []
-    mock_engine.build_context.return_value = "c"
-    mock_engine.answer.return_value = {"answer": "x"}
-    mock_control_plane.get_engine.return_value = mock_engine
+def test_stream_also_ignores_client_policy_fields(client, mock_control_plane):
+    engine = _engine()
+    mock_control_plane.get_engine.return_value = engine
 
-    client.post("/stream", json={"query": "q", "allowed_visibilities": ["INTERNAL"]})
+    client.post("/stream", json={"query": "q", "allowed_visibilities": ["INTERNAL"], "min_relevance": 0})
 
-    mock_engine.answer.assert_called_once_with("q", repo=None, bundle=None, allowed_visibilities={"PUBLIC"}, min_relevance=0.64)
+    engine.retrieve.assert_called_once_with("q", repo=None, bundle=None, allowed_visibilities={"PUBLIC"}, min_relevance=0.64)
 
 
 @pytest.mark.parametrize("env,expected", [("", 0.64), ("0.7", 0.7), ("0", 0.0), ("abc", 0.64), ("1.5", 0.64), ("-1", 0.64)])
@@ -272,3 +239,28 @@ def test_min_relevance_env_override_and_fail_safe(monkeypatch, env, expected):
     from api.routes.rag import _min_relevance
     monkeypatch.setenv("DEVHUB_MIN_RELEVANCE", env)
     assert _min_relevance() == expected
+
+
+# ---- malformed / empty queries are rejected before anything runs ----
+
+@pytest.mark.parametrize("payload", [
+    {"query": ""}, {"query": "   \n\t "}, {"query": None}, {"query": 123}, {"query": ["a"]},
+    {"query": "x" * 2001}, {"query": "bad\u0000byte"}, {"query": "ok", "repo": "r" * 201},
+])
+@pytest.mark.parametrize("path", ["/query", "/stream"])
+def test_malformed_or_empty_queries_get_422_and_touch_nothing(client, mock_control_plane, path, payload):
+    engine = _engine()
+    mock_control_plane.get_engine.return_value = engine
+
+    response = client.post(path, json=payload)
+
+    assert response.status_code == 422
+    engine.retrieve.assert_not_called()
+    engine.answer_from_docs.assert_not_called()
+
+
+def test_query_text_is_stripped_before_use(client, mock_control_plane):
+    engine = _engine()
+    mock_control_plane.get_engine.return_value = engine
+    client.post("/query", json={"query": "   hello   "})
+    assert engine.retrieve.call_args.args[0] == "hello"

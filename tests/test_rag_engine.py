@@ -190,25 +190,45 @@ def test_build_prompt(engine):
 
 @patch("rag.engine.ollama_generate")
 def test_engine_answer_success(mock_gen, engine, mock_vector_store):
-    """Return the generated answer, the retrieved sources, and the v6-faiss version."""
-    mock_gen.return_value = "final answer"
-    
-    # Mock retrieve to return something
-    with patch.object(engine, "retrieve", return_value=[{"source": "s1"}]) as mock_retrieve:
+    """A cited answer over retrieved context is grounded, with only the cited chunks as citations."""
+    mock_gen.return_value = "final answer [1]"
+    doc = {"source": "s1", "text": "the text", "chunk_id": "c1", "repo": "r", "relative_path": "p.md"}
+
+    with patch.object(engine, "retrieve", return_value=[doc]) as mock_retrieve:
         res = engine.answer("query")
         mock_retrieve.assert_called_once_with("query", repo=None, bundle=None, allowed_visibilities=None)
-        assert res["answer"] == "final answer"
+        assert res["answer"] == "final answer [1]" and res["grounded"] is True
         assert res["sources"] == ["s1"]
+        assert [c["chunk_id"] for c in res["citations"]] == ["c1"]
         assert res["version"] == "v6-faiss"
 
+
 @patch("rag.engine.ollama_generate")
-def test_engine_answer_failure(mock_gen, engine, mock_vector_store):
-    """Return an LLM_ERROR answer instead of raising when generation fails."""
-    mock_gen.side_effect = Exception("Gen failed")
-    
+def test_engine_answer_with_no_context_never_calls_the_llm(mock_gen, engine, mock_vector_store):
+    """Zero qualifying context returns the deterministic no-answer and does not reach the LLM."""
     with patch.object(engine, "retrieve", return_value=[]):
         res = engine.answer("query")
-        assert "[LLM_ERROR] Gen failed" in res["answer"]
+    mock_gen.assert_not_called()
+    assert res["grounded"] is False and res["answer_status"] == "NO_TRUSTED_CONTEXT" and res["citations"] == []
+
+
+@patch("rag.engine.ollama_generate")
+def test_engine_answer_llm_failure_is_a_deterministic_state_not_an_error_string(mock_gen, engine, mock_vector_store):
+    """A generation failure never leaks the exception text and never invents an answer."""
+    mock_gen.side_effect = Exception("Gen failed")
+
+    with patch.object(engine, "retrieve", return_value=[{"source": "s", "text": "t", "chunk_id": "c"}]):
+        res = engine.answer("query")
+    assert res["answer_status"] == "LLM_UNAVAILABLE" and "Gen failed" not in res["answer"] and res["grounded"] is False
+
+
+@patch("rag.engine.requests.post")
+def test_ollama_generate_sends_options_only_when_given(mock_post):
+    mock_post.return_value = MagicMock(json=MagicMock(return_value={"response": "x"}))
+    ollama_generate("p")
+    assert "options" not in mock_post.call_args.kwargs["json"]
+    ollama_generate("p", options={"temperature": 0})
+    assert mock_post.call_args.kwargs["json"]["options"] == {"temperature": 0}
 
 def test_engine_query(engine):
     """Delegate query to answer with no repo or bundle scope."""
