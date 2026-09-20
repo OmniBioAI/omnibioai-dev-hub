@@ -123,13 +123,14 @@ def document_type_for(repo_name: str, rel_path: str) -> str:
 
 
 _HISTORICAL_TOKENS = {"historical", "archive", "archived", "obsolete", "deprecated", "legacy", "old"}
-_TARGET_TOKENS = {"roadmap", "target", "future"}
+# "target" is deliberately NOT a token: in this corpus it means drug/CRISPR/miRNA
+# target ("drug_target_intelligence", "off_target_prediction"), not target-state docs.
+_TARGET_TOKENS = {"roadmap", "future"}
 
 
 def content_state_for(rel_path: str) -> str:
     # Whole-token match on path words, not substring: substring matching
-    # labelled "alphafold" (contains "old") HISTORICAL and
-    # "targeted_metabolomics" TARGET.
+    # labelled "alphafold" (contains "old") HISTORICAL.
     tokens = [t for t in re.split(r"[^a-z0-9]+", rel_path.lower()) if t]
     if _HISTORICAL_TOKENS & set(tokens):
         return "HISTORICAL"

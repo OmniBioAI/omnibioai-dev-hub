@@ -135,7 +135,8 @@ def test_default_repository_policy_adds_only_deliberate_phase18_repositories():
     ("docs/roadmap.md", "TARGET"),
     ("docs/future-work.md", "TARGET"),
     ("docs/design-intent.md", "TARGET"),
-    ("docs/target_architecture.md", "TARGET"),
+    ("plugins/drug_target_intelligence/README.md", "CURRENT"),  # biology "target", not target-state
+    ("rnaseq/mirna_target_prediction/README.md", "CURRENT"),
 ])
 def test_content_state_matches_whole_path_tokens_not_substrings(path, expected):
     assert content_state_for(path) == expected
