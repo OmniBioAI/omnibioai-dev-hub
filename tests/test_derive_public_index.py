@@ -34,6 +34,25 @@ HELPER = textwrap.dedent('''
                         "embedding_model": "nomic-embed-text", "embedding_dimension": 768, "metadata_schema_version": "v1"}})
     if mode == "already_public":
         m = read_manifest(src); m["visibility_policy"] = "PUBLIC_ONLY"; write_manifest(src, m)
+    import os, index.derive as derive
+    if mode == "exists": os.makedirs(work + "/out/srcbuild-public")
+    if mode == "stale_partial":
+        os.makedirs(work + "/out/.srcbuild-public.partial"); open(work + "/out/.srcbuild-public.partial/junk", "w").close()
+    class Store(VectorStore):
+        def load(self, path):
+            if mode == "source_load_fails": return False
+            ok = super().load(path)
+            if mode == "unknown_after_validation" and path == src: self.metadata[1]["visibility"] = "SECRET"
+            if mode == "metadata_differs" and path.endswith(".partial"): self.metadata[0]["text"] = "tampered"
+            return ok
+    derive.VectorStore = Store
+    real_validate = derive.validate_index_directory
+    def validate(d, **kw):
+        if mode == "unknown_after_validation": return {{"ok": True}}
+        if mode == "derived_invalid" and kw.get("require_public_only"): return {{"ok": False, "reason": "forced"}}
+        return real_validate(d, **kw)
+    derive.validate_index_directory = validate
+    if mode == "vectors_differ": derive.np = type("np", (), {{**vars(np), "array_equal": staticmethod(lambda a, b: False)}})
     out = {{}}
     try:
         rep = derive_public_only(src, work + "/out")
@@ -114,3 +133,46 @@ def test_a_public_only_manifest_over_a_source_containing_internal_chunks_is_refu
     # Not derivable, and not servable: the mixed source fails validation before anything is copied.
     out = _run(tmp_path, "unknown_visibility")
     assert not out["ok"]
+
+
+def test_refuses_to_overwrite_an_existing_derived_candidate(tmp_path):
+    out = _run(tmp_path, "exists")
+    assert not out["ok"] and "already exists" in out["error"]
+
+
+def test_a_stale_partial_directory_from_a_crashed_run_is_replaced(tmp_path):
+    out = _run(tmp_path, "stale_partial")
+    assert out["ok"] and out["validation_ok"], out
+    assert not (tmp_path / "out" / ".srcbuild-public.partial").exists()
+
+
+def test_refuses_when_the_source_vector_store_does_not_load(tmp_path):
+    out = _run(tmp_path, "source_load_fails")
+    assert not out["ok"] and "did not load" in out["error"]
+
+
+def test_unknown_visibility_is_refused_even_if_validation_missed_it(tmp_path):
+    out = _run(tmp_path, "unknown_after_validation")
+    assert not out["ok"] and "missing/unknown visibility" in out["error"] and "[1]" in out["error"]
+
+
+def _no_derived_output(tmp_path):
+    return not (tmp_path / "out" / "srcbuild-public").exists() and not (tmp_path / "out" / ".srcbuild-public.partial").exists()
+
+
+def test_a_derived_artifact_that_fails_validation_is_discarded(tmp_path):
+    out = _run(tmp_path, "derived_invalid")
+    assert not out["ok"] and "failed validation: forced" in out["error"]
+    assert _no_derived_output(tmp_path)
+
+
+def test_derived_vectors_that_are_not_bit_identical_are_discarded(tmp_path):
+    out = _run(tmp_path, "vectors_differ")
+    assert not out["ok"] and "not bit-identical" in out["error"]
+    assert _no_derived_output(tmp_path)
+
+
+def test_derived_metadata_that_differs_from_the_source_is_discarded(tmp_path):
+    out = _run(tmp_path, "metadata_differs")
+    assert not out["ok"] and "metadata is not identical" in out["error"]
+    assert _no_derived_output(tmp_path)

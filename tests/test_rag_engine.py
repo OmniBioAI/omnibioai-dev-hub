@@ -50,6 +50,31 @@ def test_ollama_embed_dim_mismatch(mock_post):
     with pytest.raises(ValueError, match="Embedding dim mismatch"):
         ollama_embed("test text")
 
+@patch("rag.engine.time.sleep")
+@patch("rag.engine.requests.post")
+def test_ollama_embed_reports_each_attempt_to_on_attempt(mock_post, mock_sleep):
+    """Call on_attempt after every attempt, failed or successful, without changing the retry behavior."""
+    mock_response = MagicMock()
+    mock_response.json.return_value = {"embedding": [0.1] * 768}
+    mock_post.side_effect = [requests.exceptions.ConnectionError("down"), mock_response]
+    attempts = []
+
+    vec = ollama_embed("test text", on_attempt=lambda n, ok: attempts.append((n, ok)))
+    assert vec.shape == (768,)
+    assert attempts == [(1, False), (2, True)]
+    mock_sleep.assert_called_once_with(2)
+
+@patch("rag.engine.time.sleep")
+@patch("rag.engine.requests.post")
+def test_ollama_embed_reports_every_failed_attempt_before_raising(mock_post, mock_sleep):
+    """Report all three failed attempts to on_attempt, then re-raise the last error."""
+    mock_post.side_effect = requests.exceptions.ConnectionError("down")
+    attempts = []
+
+    with pytest.raises(requests.exceptions.ConnectionError):
+        ollama_embed("test text", on_attempt=lambda n, ok: attempts.append((n, ok)))
+    assert attempts == [(1, False), (2, False), (3, False)]
+
 # =========================================================
 # UNIT TESTS FOR ollama_generate
 # =========================================================

@@ -164,3 +164,110 @@ def test_chunk_metadata_carries_bundle_for_api_scope_filter(tmp_path):
     assert by_path["README.md"]["bundle"] is None
     chunk = chunks_for_document(by_path["atacseq/README.md"], "b1", "nomic-embed-text")[0]
     assert chunk["bundle"] == "atacseq"
+
+
+@pytest.mark.parametrize("text,expected", [
+    ("intro\n# Title Here\nbody", "Title Here"),
+    ("#   \nbody", "fallback"),
+    ("no heading at all", "fallback"),
+])
+def test_title_from_markdown_uses_first_h1_or_fallback(text, expected):
+    from ingestion.trusted import title_from_markdown
+
+    assert title_from_markdown(text, "fallback") == expected
+
+
+@pytest.mark.parametrize("repo,path,expected", [
+    ("omnibioai-tes", "docs/README.md", "README"),
+    ("omnibioai-docs", "site/docs/page.md", "PUBLICATION_PAGE"),
+    ("omnibioai-tes", "docs/security/model.md", "SECURITY_DOCUMENTATION"),
+    ("omnibioai-tes", "docs/testing.md", "TEST_SOURCE"),
+    ("omnibioai-tes", "docs/guide.md", "DOCUMENTATION"),
+])
+def test_document_type_for_classifies_by_name_repo_and_path(repo, path, expected):
+    from ingestion.trusted import document_type_for
+
+    assert document_type_for(repo, path) == expected
+
+
+def test_source_policy_skips_denylisted_dirs_and_skip_segment_files(tmp_path):
+    policy = SourcePolicy()
+    assert not policy.should_walk_dir(tmp_path, tmp_path, "node_modules")
+    assert policy.should_walk_dir(tmp_path, tmp_path, "docs")
+    assert not policy.should_walk_dir(tmp_path / "archive", tmp_path, "docs")
+    assert not policy.should_select_file("omnibioai-docs", "archive/notes.md")
+    assert not policy.should_select_file("omnibioai-tes", "docs/guide.txt")
+
+
+def test_files_under_a_skip_segment_directory_are_not_discovered(tmp_path):
+    repo = tmp_path / "omnibioai-tes"
+    (repo / "docs").mkdir(parents=True)
+    (repo / "archive").mkdir()
+    (repo / "docs/guide.md").write_text("# Guide\n\nDocs")
+    (repo / "archive/README.md").write_text("# Old\n\nStale")
+
+    found, _ = discover_documents(str(tmp_path), SourcePolicy(repository_names=["omnibioai-tes"]))
+
+    assert [d["relative_path"] for d in found] == ["docs/guide.md"]
+
+
+def test_unreadable_empty_and_missing_sources_are_reported(tmp_path, monkeypatch):
+    from pathlib import Path
+
+    repo = tmp_path / "omnibioai-tes"
+    (repo / "docs").mkdir(parents=True)
+    (repo / "docs/empty.md").write_text("   \n")
+    (repo / "docs/broken.md").write_text("# Broken")
+    real_read_text = Path.read_text
+
+    def read_text(self, *args, **kwargs):
+        if self.name == "broken.md":
+            raise OSError("disk error")
+        return real_read_text(self, *args, **kwargs)
+
+    monkeypatch.setattr(Path, "read_text", read_text)
+    found, stats = discover_documents(str(tmp_path), SourcePolicy(repository_names=["omnibioai-tes", "omnibioai-missing"]))
+
+    assert found == []
+    assert stats["failures"] == [{"repo": "omnibioai-tes", "path": "docs/broken.md", "reason": "disk error"}]
+    assert stats["skipped_documents"] == [{"repo": "omnibioai-tes", "path": "docs/empty.md", "reason": "empty"}]
+    assert stats["missing_repositories"] == ["omnibioai-missing"]
+
+
+def test_invalid_resolved_visibility_fails_closed_to_review_required(tmp_path, monkeypatch):
+    from ingestion.trusted import VisibilityResolver
+
+    repo = tmp_path / "omnibioai-tes"
+    repo.mkdir()
+    (repo / "README.md").write_text("# TES\n\nReadme")
+    monkeypatch.setattr(VisibilityResolver, "resolve", lambda self, repo_name, rel_path: ("SECRET", "bogus"))
+
+    found, stats = discover_documents(str(tmp_path), SourcePolicy(repository_names=["omnibioai-tes"]))
+    assert found == [] and stats["skipped_documents"][0]["reason"] == "review-required"
+
+    found, _ = discover_documents(str(tmp_path), SourcePolicy(repository_names=["omnibioai-tes"], include_review_required=True))
+    assert found[0]["visibility"] == "REVIEW_REQUIRED"
+    assert found[0]["visibility_source"] == "invalid-visibility-fail-closed"
+
+
+def test_build_manifest_counts_visibility_documents_and_revisions():
+    from ingestion.trusted import build_manifest
+
+    metadata = [
+        {"repo": "a", "document_id": "d1", "source_revision": "r1", "visibility": "PUBLIC"},
+        {"repo": "a", "document_id": "d1", "source_revision": "r1", "visibility": "PUBLIC"},
+        {"repo": "b", "document_id": "d2", "source_revision": "r2", "visibility": "INTERNAL"},
+        {"repo": "b", "document_id": "d3", "source_revision": "r2"},
+    ]
+    stats = {"configured_repositories": ["a", "b", "c"], "repositories_discovered": ["a", "b"],
+             "missing_repositories": ["c"], "skipped_documents": [{"path": "x"}], "failures": []}
+
+    m = build_manifest("b1", metadata, stats, embedding_provider="ollama", embedding_model="nomic-embed-text",
+                       embedding_identity="ollama:nomic-embed-text", embedding_dimension=768)
+
+    assert m["build_id"] == "b1" and m["vector_backend"] == "FAISS IndexFlatIP"
+    assert m["visibility_counts"] == {"INTERNAL": 1, "PUBLIC": 2, "REVIEW_REQUIRED": 1}
+    assert m["parsed"] == 3 and m["chunked"] == 4 and m["selected_document_count"] == 3
+    assert m["repositories"] == ["a", "b"] and m["repository_revisions"] == {"a": "r1", "b": "r2"}
+    assert m["missing_repositories"] == ["c"] and m["discovered"] == ["a", "b"]
+    assert m["build_status"] == "CLEAN" and m["promotion_status"] == "CANDIDATE"

@@ -313,3 +313,89 @@ def test_manifest_write_is_atomic_file_replace(tmp_path):
     write_manifest(tmp_path / "d", {"a": 1})
     assert not (tmp_path / "d" / "manifest.json.tmp").exists()
     assert json.loads((tmp_path / "d" / "manifest.json").read_text()) == {"a": 1}
+
+
+def _mock_store(cls, *, loads=True, ntotal=1, metadata=None, dim=768):
+    cls.return_value.load.return_value = loads
+    cls.return_value.index.ntotal = ntotal
+    cls.return_value.metadata = _valid_metadata() if metadata is None else metadata
+    cls.return_value.dim = dim
+
+
+def _legacy_dir(path):
+    path.mkdir(parents=True)
+    (path / "index.faiss").write_bytes(b"index")
+    (path / "metadata.pkl").write_bytes(b"metadata")
+    return path
+
+
+def test_legacy_validation_rejects_missing_artifacts(tmp_path):
+    directory = tmp_path / "legacy"
+    directory.mkdir()
+    (directory / "index.faiss").write_bytes(b"index")
+    result = validate_index_directory(directory, allow_legacy=True)
+    assert not result["ok"] and "legacy index missing artifacts" in result["reason"]
+
+
+def test_legacy_validation_rejects_a_store_that_does_not_load(tmp_path):
+    directory = _legacy_dir(tmp_path / "legacy")
+    with patch("index.lifecycle.VectorStore") as cls:
+        _mock_store(cls, loads=False)
+        result = validate_index_directory(directory, allow_legacy=True)
+    assert not result["ok"] and result["reason"] == "legacy vector store did not load"
+
+
+def test_legacy_validation_rejects_an_inconsistent_store(tmp_path):
+    directory = _legacy_dir(tmp_path / "legacy")
+    with patch("index.lifecycle.VectorStore") as cls:
+        _mock_store(cls, ntotal=3)
+        result = validate_index_directory(directory, allow_legacy=True)
+    assert not result["ok"] and "legacy index inconsistent" in result["reason"]
+
+
+def test_legacy_validation_accepts_a_consistent_store(tmp_path):
+    directory = _legacy_dir(tmp_path / "legacy")
+    with patch("index.lifecycle.VectorStore") as cls:
+        _mock_store(cls)
+        result = validate_index_directory(directory, allow_legacy=True)
+    assert result["ok"] and result["legacy"] is True and result["metadata_count"] == 1
+
+
+def test_validate_index_directory_rejects_missing_artifacts(tmp_path):
+    directory = tmp_path / "candidate"
+    directory.mkdir()
+    (directory / "index.faiss").write_bytes(b"index")
+    result = validate_index_directory(directory)
+    assert not result["ok"] and "missing artifacts" in result["reason"]
+    assert "metadata.pkl" in result["reason"] and "manifest.json" in result["reason"]
+
+
+def test_validate_index_directory_rejects_a_store_that_does_not_load(tmp_path):
+    directory = _index_dir(tmp_path / "candidate")
+    with patch("index.lifecycle.VectorStore") as cls:
+        _mock_store(cls, loads=False)
+        result = validate_index_directory(directory)
+    assert not result["ok"] and result["reason"] == "vector store did not load"
+
+
+def test_validate_index_directory_rejects_wrong_dimension(tmp_path):
+    directory = _index_dir(tmp_path / "candidate")
+    with patch("index.lifecycle.VectorStore") as cls:
+        _mock_store(cls, dim=384)
+        result = validate_index_directory(directory)
+    assert not result["ok"] and result["reason"] == "dimension mismatch: 384"
+
+
+def test_validate_index_directory_rejects_absolute_path_only_sources(tmp_path):
+    directory = _index_dir(tmp_path / "candidate")
+    with patch("index.lifecycle.VectorStore") as cls:
+        _mock_store(cls, metadata=[{**_valid_metadata()[0], "source": "/home/user/repo/README.md"}])
+        result = validate_index_directory(directory)
+    assert not result["ok"] and "absolute-path-only source identities" in result["reason"]
+
+
+def test_candidate_dir_is_build_id_under_staging_root(tmp_path):
+    from index.lifecycle import candidate_dir
+
+    assert candidate_dir(tmp_path, "b7") == tmp_path / "b7"
+    assert candidate_dir(str(tmp_path), "b7") == tmp_path / "b7"
