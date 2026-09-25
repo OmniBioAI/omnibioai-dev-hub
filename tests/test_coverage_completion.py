@@ -1,6 +1,5 @@
 """Focused branch coverage for the HTTP auth and RAG route helpers."""
 
-import asyncio
 from types import SimpleNamespace
 
 import jwt
@@ -48,13 +47,9 @@ async def test_require_auth_all_modes_and_identity_fields(monkeypatch):
         await auth.require_auth(SimpleNamespace(), authorization="bad")
 
 
-def test_rag_stream_success_fallback_and_error(monkeypatch):
-    captured = {}
-
+def test_rag_stream_success_and_error(monkeypatch):
     class FakeStreamingResponse:
         def __init__(self, content, media_type):
-            captured["content"] = content
-            captured["media_type"] = media_type
             self.content = content
             self.media_type = media_type
 
@@ -63,26 +58,20 @@ def test_rag_stream_success_fallback_and_error(monkeypatch):
 
     engine = SimpleNamespace(
         retrieve=lambda *args, **kwargs: [{"text": "ctx"}],
-        build_context=lambda docs: "context",
-        stream_llm=lambda query, context: ["one", "two"],
+        answer_from_docs=lambda query, docs: {
+            "answer": "single", "grounded": True, "answer_status": "ANSWERED", "answer_contract": "v1",
+            "citations": [], "context_used": len(docs), "llm_invoked": True,
+        },
     )
     monkeypatch.setattr(rag, "get_engine", lambda: engine)
     response = rag.stream(req, actor="system")
     assert response.media_type == "text/event-stream"
     events = list(response.content)
-    assert '"type": "token"' in events[0]
+    assert '"type": "status"' in events[0]
+    assert '"type": "response"' in events[1] and '"content": "single"' in events[1]
     assert '"type": "done"' in events[-1]
-
-    fallback = SimpleNamespace(
-        retrieve=lambda *args, **kwargs: [],
-        build_context=lambda docs: "",
-        answer=lambda query: {"answer": "single"},
-    )
-    monkeypatch.setattr(rag, "get_engine", lambda: fallback)
-    response = rag.stream(req, actor="system")
-    events = list(response.content)
-    assert '"type": "response"' in events[0]
 
     monkeypatch.setattr(rag, "get_engine", lambda: (_ for _ in ()).throw(RuntimeError("boom")))
     response = rag.stream(req, actor="system")
-    assert '"type": "error"' in list(response.content)[0]
+    events = list(response.content)
+    assert '"code": "internal_error"' in events[0] and "boom" not in events[0]

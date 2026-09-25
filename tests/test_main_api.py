@@ -11,10 +11,6 @@ import sys
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
-from unittest.mock import MagicMock, patch, AsyncMock
-import asyncio
-import sys
-from starlette.requests import Request
 from fastapi.testclient import TestClient
 
 # Mock heavy dependencies properly
@@ -30,32 +26,16 @@ sys.modules['sentence_transformers'] = mock_st
 with patch("index.vector_store.VectorStore"),      patch("index.graph_store.GraphStore"),      patch("index.plugin_index.PluginIndex"):
     from api.main import app
 
-from api import main as main_module
+client = TestClient(app)
 
 def test_health_endpoint():
     """Report an ok status from /health while the control plane is ready."""
     with patch("api.main.CONTROL_PLANE.status", return_value={"status": "READY"}):
-        response = main_module.health()
-        assert response["status"] == "ok"
+        response = client.get("/health")
+        assert response.status_code == 200
+        assert response.json()["status"] == "ok"
 
 def test_status_endpoint():
-    with patch("api.main.CONTROL_PLANE.status", return_value={"status": "READY"}):
-        with patch("api.main.graph_store") as mock_gs:
-            mock_gs.size.return_value = {"nodes": 3, "edges": 4}
-            response = main_module.status()
-            assert response["graph_edges"] == 4
-
-
-@pytest.mark.asyncio
-async def test_guard_requests_middleware_ready():
-    with patch("api.main.CONTROL_PLANE.status", return_value={"status": "READY"}):
-        with patch("api.routes.rag.get_engine"):
-            request = Request({"type": "http", "method": "POST", "path": "/rag/query", "headers": [], "query_string": b""})
-            response = await main_module.guard_requests(request, lambda _: asyncio.sleep(0))
-            assert response is None
-
-@pytest.mark.asyncio
-async def test_guard_requests_middleware_not_ready():
     """Report the control-plane status and the graph edge count from /status."""
     with (
         patch("api.main.CONTROL_PLANE.status", return_value={"status": "READY"}),
@@ -121,10 +101,9 @@ def test_guard_requests_middleware_not_ready():
     """Reject RAG requests with a 503 'Control plane not ready' while the control plane is not
     READY."""
     with patch("api.main.CONTROL_PLANE.status", return_value={"status": "INIT"}):
-        request = Request({"type": "http", "method": "POST", "path": "/rag/query", "headers": [], "query_string": b""})
-        response = await main_module.guard_requests(request, lambda _: asyncio.sleep(0))
+        response = client.post("/rag/query", json={"query": "q"})
         assert response.status_code == 503
-        assert response.body == b'{"detail":"Control plane not ready"}'
+        assert response.json()["detail"] == "Control plane not ready"
 
 def test_build_graph_seed():
     """Seed the application-level graph store with its four starter edges."""

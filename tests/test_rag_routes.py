@@ -9,9 +9,6 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 from fastapi import FastAPI
-from unittest.mock import MagicMock, patch
-import json
-from tests.sync_client import SyncASGIClient
 from fastapi.testclient import TestClient
 
 # Import the router and models from the target file
@@ -23,7 +20,6 @@ app.include_router(router)
 
 @pytest.fixture
 def client():
-    return SyncASGIClient(app)
     """Provide a TestClient for a throwaway app that mounts only the RAG router."""
     return TestClient(app)
 
