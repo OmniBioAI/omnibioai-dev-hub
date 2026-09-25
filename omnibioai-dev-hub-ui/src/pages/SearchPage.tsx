@@ -1,5 +1,7 @@
 import { useState, useEffect } from "react";
-import { ragQuery, getStatus } from "../api/client";
+import { ragQuery, getStatus, describeAskError } from "../api/client";
+import Citations from "../components/Citations";
+import { displaySource } from "../lib/docLinks";
 
 export default function SearchPage() {
   const [q, setQ] = useState("");
@@ -21,7 +23,7 @@ export default function SearchPage() {
       const res = await ragQuery(q);
       setResult(res);
     } catch (e) {
-      setResult({ error: String(e) });
+      setResult({ error: describeAskError(e) });
     } finally {
       setLoading(false);
     }
@@ -63,14 +65,24 @@ export default function SearchPage() {
         </div>
       )}
 
-      {result?.answer && (
+      {result?.answer && result.grounded === false && (
+        <div className="surface no-answer-card" role="status" data-answer-status={result.answer_status} style={{ marginBottom: 12 }}>
+          <div className="section-header" style={{ marginBottom: 8 }}>
+            <div className="section-title">No trusted documentation answer</div>
+          </div>
+          <div style={{ fontSize: 13, color: "var(--text-primary)", lineHeight: 1.7 }}>{result.answer}</div>
+        </div>
+      )}
+
+      {result?.answer && result.grounded !== false && (
         <div className="surface" style={{ marginBottom: 12 }}>
           <div className="section-header" style={{ marginBottom: 8 }}>
-            <div className="section-title">Generated Answer</div>
+            <div className="section-title">{result.grounded ? "Answer (grounded in documentation)" : "Generated Answer"}</div>
           </div>
           <div style={{ fontSize: 13, color: "var(--text-primary)", lineHeight: 1.7, whiteSpace: "pre-wrap" }}>
             {result.answer}
           </div>
+          {result.grounded && <Citations citations={result.citations} />}
         </div>
       )}
 
@@ -82,10 +94,10 @@ export default function SearchPage() {
           {contexts.map((ctx: any, i: number) => (
             <div key={i} className="result-card">
               <div className="result-source">
-                {ctx.source || ctx.file || `chunk_${i + 1}`}
+                {displaySource(ctx.source || ctx.file, ctx.repository ?? ctx.citation?.repository) || `chunk_${i + 1}`}
               </div>
               <div className="result-text">
-                {typeof ctx === "string" ? ctx : ctx.text || ctx.content || JSON.stringify(ctx)}
+                {typeof ctx === "string" ? ctx : ctx.text || ctx.content || ""}
               </div>
             </div>
           ))}
@@ -94,7 +106,7 @@ export default function SearchPage() {
 
       {result?.error && (
         <div className="result-card" style={{ borderLeftColor: "var(--red)" }}>
-          <div className="result-source" style={{ color: "var(--red)" }}>Error</div>
+          <div className="result-source" style={{ color: "var(--red)" }} role="alert">Search unavailable</div>
           <div className="result-text">{result.error}</div>
         </div>
       )}

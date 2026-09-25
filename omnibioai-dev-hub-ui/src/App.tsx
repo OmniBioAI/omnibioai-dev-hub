@@ -8,7 +8,7 @@ import GraphView from "./pages/GraphView";
 
 const PAGE_LABELS: Record<string, string> = {
   dashboard: "Overview",
-  chat:      "Query Assistant",
+  chat:      "Ask OmniBioAI",
   search:    "Vector Search",
   graph:     "Knowledge Graph",
   docs:      "System Status",

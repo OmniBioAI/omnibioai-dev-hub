@@ -1,17 +1,15 @@
+import logging
 import os
 
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
-import logging
-
+from api.auth import validate_auth_config
 from api.routes import rag
-
-from index.vector_store import VectorStore
 from index.graph_store import GraphStore
 from index.plugin_index import PluginIndex
-
+from index.vector_store import VectorStore
 from rag.control_plane import CONTROL_PLANE
 
 logger = logging.getLogger(__name__)
@@ -45,7 +43,7 @@ vector_store = VectorStore()
 _INDEX_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "data", "faiss_index")
 loaded = vector_store.load(_INDEX_DIR)
 if not loaded:
-    logger.warning("No persisted FAISS index found; will build from scratch on startup")
+    logger.warning("No FAISS index loaded; retrieval will return nothing. Index construction and promotion are explicit lifecycle operations, never startup side effects.")
 graph_store = GraphStore()
 plugin_index = PluginIndex([])
 
@@ -93,6 +91,10 @@ async def init_control_plane():
 
 @app.on_event("startup")
 async def startup_event():
+    # Fail loudly and refuse to start rather than silently serving a
+    # deployment that looks auth-protected but isn't -- see api/auth.py's
+    # validate_auth_config() for why.
+    validate_auth_config()
     await init_control_plane()
 
 
@@ -148,11 +150,10 @@ def status():
 @app.middleware("http")
 async def guard_requests(request: Request, call_next):
 
-    if request.url.path.startswith("/rag"):
-        if CONTROL_PLANE.status()["status"] != "READY":
-            return JSONResponse(
-                status_code=503,
-                content={"detail": "Control plane not ready"}
-            )
+    if request.url.path.startswith("/rag") and CONTROL_PLANE.status()["status"] != "READY":
+        return JSONResponse(
+            status_code=503,
+            content={"detail": "Control plane not ready"}
+        )
 
     return await call_next(request)

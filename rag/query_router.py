@@ -1,9 +1,6 @@
-import requests
 import json
-import time
-import uuid
-from typing import List, Dict, Any
 
+import requests
 
 # =========================================================
 # RAG QUERY ROUTER V4
@@ -45,7 +42,7 @@ class RAGQueryRouterV4:
     # -----------------------------
     # VECTOR SEARCH
     # -----------------------------
-    def vector_search(self, query: str) -> List[Dict]:
+    def vector_search(self, query: str) -> list[dict]:
 
         if not self.vector_store or not self.embedder:
             return []
@@ -58,7 +55,7 @@ class RAGQueryRouterV4:
 
             return self.vector_store.search(query_vector, top_k=self.top_k)
 
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001 -- per-source boundary: a broken subsystem must not break hybrid_retrieve's other sources
             print("[Vector Error]", e)
             return []
 
@@ -71,7 +68,7 @@ class RAGQueryRouterV4:
 
         try:
             return self.graph_store.search(query)
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001 -- per-source boundary: a broken subsystem must not break hybrid_retrieve's other sources
             print("[Graph Error]", e)
             return []
 
@@ -84,7 +81,7 @@ class RAGQueryRouterV4:
 
         try:
             return self.plugin_index.search(query)
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001 -- per-source boundary: a broken subsystem must not break hybrid_retrieve's other sources
             print("[Plugin Error]", e)
             return []
 
@@ -103,7 +100,7 @@ class RAGQueryRouterV4:
     # -----------------------------
     # CONTEXT BUILDER
     # -----------------------------
-    def build_context(self, results: Dict):
+    def build_context(self, results: dict):
 
         blocks = []
 
@@ -161,11 +158,12 @@ QUESTION:
                     token = data.get("message", {}).get("content", "")
                     if token:
                         yield token
-                except:
+                except (json.JSONDecodeError, UnicodeDecodeError, AttributeError, KeyError) as e:
+                    print("[Stream Parse Error]", e)
                     continue
 
-        except Exception as e:
-            yield f"[STREAM_ERROR] {str(e)}"
+        except Exception as e:  # noqa: BLE001 -- streaming boundary: any failure becomes an inline error token instead of killing the generator
+            yield f"[STREAM_ERROR] {e!s}"
 
     # -----------------------------
     # MAIN PIPELINE

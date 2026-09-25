@@ -1,8 +1,11 @@
+import logging
 import os
 import pickle
-import numpy as np
+
 import faiss
-import logging
+import numpy as np
+
+from index.filtered_search import search_allowed
 
 logger = logging.getLogger(__name__)
 
@@ -75,7 +78,16 @@ class VectorStore:
         self.metadata.extend(metadata)
         logger.debug(f"VectorStore.add: +{len(vecs)} vectors, total={self.index.ntotal}")
 
-    def search(self, query_vec, top_k: int = 5):
+    def _result_from_meta(self, score, meta, relevance=None):
+        result = dict(meta)
+        result["score"] = float(score)
+        result["relevance"] = relevance
+        result.setdefault("text", meta.get("text", ""))
+        result.setdefault("source", meta.get("source", "unknown"))
+        return result
+
+    def search(self, query_vec, top_k: int = 5, allowed_visibilities: set[str] | None = None,
+               min_relevance: float | None = None):
         if self.index is None or self.index.ntotal == 0:
             return []
 
@@ -88,22 +100,15 @@ class VectorStore:
                 f"Ensure nomic-embed-text is used for both indexing and querying."
             )
 
-        k = min(top_k, self.index.ntotal)
-        scores, indices = self.index.search(q, k)
+        def accept(meta):
+            return allowed_visibilities is None or meta.get("visibility") in allowed_visibilities
 
-        results = []
-        for s, i in zip(scores[0], indices[0]):
-            if i < 0 or i >= len(self.metadata):
-                continue
-            results.append({
-                "score": float(s),
-                "text": self.metadata[i].get("text", ""),
-                "source": self.metadata[i].get("source", "unknown"),
-            })
+        hits = search_allowed(self.index, self.metadata, q, top_k, accept, min_relevance=min_relevance)
+        return [self._result_from_meta(score, self.metadata[row], rel) for score, row, rel in hits]
 
-        return results
-
-    def filter_search(self, query_vec, top_k: int = 5, field: str = None, value: str = None):
+    def filter_search(self, query_vec, top_k: int = 5, field: str | None = None, value: str | None = None,
+                      allowed_visibilities: set[str] | None = None,
+                      min_relevance: float | None = None):
         """FAISS search with post-filtering on a metadata field.
 
         Retrieves top_k * 3 candidates from FAISS then keeps only those whose
@@ -111,7 +116,7 @@ class VectorStore:
         plain search when no filter is specified.
         """
         if field is None or value is None:
-            return self.search(query_vec, top_k)
+            return self.search(query_vec, top_k, allowed_visibilities=allowed_visibilities, min_relevance=min_relevance)
 
         if self.index is None or self.index.ntotal == 0:
             return []
@@ -123,27 +128,13 @@ class VectorStore:
                 f"query is {q.shape[1]}-d."
             )
 
-        k = min(top_k * 3, self.index.ntotal)
-        scores, indices = self.index.search(q, k)
+        def accept(meta):
+            if allowed_visibilities is not None and meta.get("visibility") not in allowed_visibilities:
+                return False
+            return meta.get(field) == value
 
-        results = []
-        for s, i in zip(scores[0], indices[0]):
-            if i < 0 or i >= len(self.metadata):
-                continue
-            meta = self.metadata[i]
-            if meta.get(field) != value:
-                continue
-            results.append({
-                "score": float(s),
-                "text": meta.get("text", ""),
-                "source": meta.get("source", "unknown"),
-                "repo": meta.get("repo"),
-                "bundle": meta.get("bundle"),
-            })
-            if len(results) >= top_k:
-                break
-
-        return results
+        hits = search_allowed(self.index, self.metadata, q, top_k, accept, initial_k=top_k * 3, min_relevance=min_relevance)
+        return [self._result_from_meta(score, self.metadata[row], rel) for score, row, rel in hits]
 
     def save(self, directory: str):
         os.makedirs(directory, exist_ok=True)

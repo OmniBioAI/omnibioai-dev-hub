@@ -2,162 +2,602 @@
   {
     "query": "what are the processing steps in the ATAC-seq pipeline from raw reads to peak calls",
     "expected_source_contains": "omnibioai-workflow-bundles/atacseq",
-    "notes": "ATAC-seq README describes FASTQ→FastQC→BWA→BAM Filtering→MACS2 step sequence"
+    "notes": "ATAC-seq README describes FASTQ\u2192FastQC\u2192BWA\u2192BAM Filtering\u2192MACS2 step sequence",
+    "id": "internal-legacy-01",
+    "category": "internal-positive",
+    "allowed_visibilities": [
+      "PUBLIC",
+      "INTERNAL"
+    ]
   },
   {
     "query": "how does the chipseq workflow bundle wrap nf-core pipelines for CUT&RUN and CUT&Tag",
     "expected_source_contains": "omnibioai-workflow-bundles/chipseq",
-    "notes": "ChIP-seq bundle is a thin orchestration wrapper around nf-core/chipseq"
+    "notes": "ChIP-seq bundle is a thin orchestration wrapper around nf-core/chipseq",
+    "id": "internal-legacy-02",
+    "category": "internal-positive",
+    "allowed_visibilities": [
+      "PUBLIC",
+      "INTERNAL"
+    ]
   },
   {
     "query": "what are the required input parameters for the RNA-seq count matrix QC workflow",
     "expected_source_contains": "omnibioai-workflow-bundles/rnaseq/count_matrix_qc",
-    "notes": "count_matrix_qc README lists WDL-style input parameters including CountMatrixQc.input_file"
+    "notes": "count_matrix_qc README lists WDL-style input parameters including CountMatrixQc.input_file",
+    "id": "internal-legacy-03",
+    "category": "internal-positive",
+    "allowed_visibilities": [
+      "PUBLIC",
+      "INTERNAL"
+    ]
   },
   {
     "query": "how does the GATK germline variant calling nextflow workflow support single and multi-sample cohort execution",
     "expected_source_contains": "omnibioai-workflow-bundles/wgs",
-    "notes": "WGS GATK bundle README describes single-sample and cohort modes with JSON input"
+    "notes": "WGS GATK bundle README describes single-sample and cohort modes with JSON input",
+    "id": "internal-legacy-04",
+    "category": "internal-positive",
+    "allowed_visibilities": [
+      "PUBLIC",
+      "INTERNAL"
+    ]
   },
   {
     "query": "which CYP enzyme star alleles does the pharmacogenomics pipeline call to predict drug metabolism",
     "expected_source_contains": "omnibioai-workflow-bundles/pharmacogenomics",
-    "notes": "pharmacogenomics README lists CYP2D6, CYP2C19, CYP2C9, CYP3A5, NAT2 star allele calling"
+    "notes": "pharmacogenomics README lists CYP2D6, CYP2C19, CYP2C9, CYP3A5, NAT2 star allele calling",
+    "id": "internal-legacy-05",
+    "category": "internal-positive",
+    "allowed_visibilities": [
+      "PUBLIC",
+      "INTERNAL"
+    ]
   },
   {
     "query": "what input files are required for the HLA typing pipeline for neoantigen discovery",
     "expected_source_contains": "omnibioai-workflow-bundles/hla_typing",
-    "notes": "HLA typing README specifies samplesheet CSV with fastq_1, fastq_2 and hla_reference database"
+    "notes": "HLA typing README specifies samplesheet CSV with fastq_1, fastq_2 and hla_reference database",
+    "id": "internal-legacy-06",
+    "category": "internal-positive",
+    "allowed_visibilities": [
+      "PUBLIC",
+      "INTERNAL"
+    ]
   },
   {
     "query": "what pipeline steps does the GWAS workflow run using PLINK2 and REGENIE",
     "expected_source_contains": "omnibioai-workflow-bundles/funcgen/gwas_pipeline",
-    "notes": "funcgen/gwas_pipeline README lists PLINK_QC, REGENIE, MANHATTAN, ANNOTATE steps"
+    "notes": "funcgen/gwas_pipeline README lists PLINK_QC, REGENIE, MANHATTAN, ANNOTATE steps",
+    "id": "internal-legacy-07",
+    "category": "internal-positive",
+    "allowed_visibilities": [
+      "PUBLIC",
+      "INTERNAL"
+    ]
   },
   {
     "query": "what tools does the long-read structural variant calling workflow use to merge and annotate SVs",
     "expected_source_contains": "omnibioai-workflow-bundles/longread/longread_sv",
-    "notes": "longread_sv README lists Sniffles2, PBSV, SURVIVOR_MERGE, and ANNOTATE_SV steps"
+    "notes": "longread_sv README lists Sniffles2, PBSV, SURVIVOR_MERGE, and ANNOTATE_SV steps",
+    "id": "internal-legacy-08",
+    "category": "internal-positive",
+    "allowed_visibilities": [
+      "PUBLIC",
+      "INTERNAL"
+    ]
   },
   {
     "query": "how does the metagenomics pipeline perform shotgun taxonomic profiling with Kraken2 and Bracken",
     "expected_source_contains": "omnibioai-workflow-bundles/metagenomics",
-    "notes": "metagenomics README describes FASTQC→Kraken2→Bracken→MultiQC pipeline flow"
+    "notes": "metagenomics README describes FASTQC\u2192Kraken2\u2192Bracken\u2192MultiQC pipeline flow",
+    "id": "internal-legacy-09",
+    "category": "internal-positive",
+    "allowed_visibilities": [
+      "PUBLIC",
+      "INTERNAL"
+    ]
   },
   {
     "query": "how does the Kraken classification workflow classify metagenomic reads taxonomically",
     "expected_source_contains": "omnibioai-workflow-bundles/microbiome/kraken_classification",
-    "notes": "kraken_classification README explains k-mer based classification against RefSeq before Bracken"
+    "notes": "kraken_classification README explains k-mer based classification against RefSeq before Bracken",
+    "id": "internal-legacy-10",
+    "category": "internal-positive",
+    "allowed_visibilities": [
+      "PUBLIC",
+      "INTERNAL"
+    ]
   },
   {
     "query": "how do you run Space Ranger count for 10x Visium spatial transcriptomics with multiple FASTQ lanes",
     "expected_source_contains": "omnibioai-workflow-bundles/spatial/spaceranger_visium_count",
-    "notes": "spaceranger_visium_count bundle supports comma-separated multi-lane FASTQ directories"
+    "notes": "spaceranger_visium_count bundle supports comma-separated multi-lane FASTQ directories",
+    "id": "internal-legacy-11",
+    "category": "internal-positive",
+    "allowed_visibilities": [
+      "PUBLIC",
+      "INTERNAL"
+    ]
   },
   {
     "query": "which cell segmentation models does the IMC segmentation workflow use for imaging mass cytometry",
     "expected_source_contains": "omnibioai-workflow-bundles/spatial/imc_segmentation",
-    "notes": "imc_segmentation README mentions Cellpose and DeepCell models"
+    "notes": "imc_segmentation README mentions Cellpose and DeepCell models",
+    "id": "internal-legacy-12",
+    "category": "internal-positive",
+    "allowed_visibilities": [
+      "PUBLIC",
+      "INTERNAL"
+    ]
   },
   {
     "query": "what input matrices are required for the multi-omics integration pipeline using MOFA and WNN",
     "expected_source_contains": "omnibioai-workflow-bundles/multimodal_integration",
-    "notes": "multimodal_integration README lists rna_matrix, atac_matrix, protein_matrix, clinical_data inputs"
+    "notes": "multimodal_integration README lists rna_matrix, atac_matrix, protein_matrix, clinical_data inputs",
+    "id": "internal-legacy-13",
+    "category": "internal-positive",
+    "allowed_visibilities": [
+      "PUBLIC",
+      "INTERNAL"
+    ]
   },
   {
     "query": "which tools does the gene regulatory network multiomics workflow use to build eGRNs from single-cell ATAC and RNA data",
     "expected_source_contains": "omnibioai-workflow-bundles/multimodal/gene_regulatory_networks",
-    "notes": "GRN workflow uses SCENIC+, CellOracle, Pando, FigR, DIRECT-NET, TRIPOD, scMEGA"
+    "notes": "GRN workflow uses SCENIC+, CellOracle, Pando, FigR, DIRECT-NET, TRIPOD, scMEGA",
+    "id": "internal-legacy-14",
+    "category": "internal-positive",
+    "allowed_visibilities": [
+      "PUBLIC",
+      "INTERNAL"
+    ]
   },
   {
     "query": "how does the peptide identification workflow perform protein identification from MS/MS tandem mass spectra",
     "expected_source_contains": "omnibioai-workflow-bundles/proteomics/peptide_identification",
-    "notes": "peptide_identification README describes database searching, spectral library matching, FDR estimation"
+    "notes": "peptide_identification README describes database searching, spectral library matching, FDR estimation",
+    "id": "internal-legacy-15",
+    "category": "internal-positive",
+    "allowed_visibilities": [
+      "PUBLIC",
+      "INTERNAL"
+    ]
   },
   {
     "query": "what parameters does the flow cytometry compensation workflow require for CyTOF data transformation",
     "expected_source_contains": "omnibioai-workflow-bundles/singlecell/flow_cytometry_comp",
-    "notes": "flow_cytometry_comp README lists FlowCytometryComp.sample_id and input_file parameters"
+    "notes": "flow_cytometry_comp README lists FlowCytometryComp.sample_id and input_file parameters",
+    "id": "internal-legacy-16",
+    "category": "internal-positive",
+    "allowed_visibilities": [
+      "PUBLIC",
+      "INTERNAL"
+    ]
   },
   {
     "query": "what immune repertoire diversity metrics does the VDJtools analysis workflow calculate",
     "expected_source_contains": "omnibioai-workflow-bundles/singlecell/vdjtools_analysis",
-    "notes": "VDJtools README describes diversity metrics, shared clonotype finding, and clonal dynamics tracking"
+    "notes": "VDJtools README describes diversity metrics, shared clonotype finding, and clonal dynamics tracking",
+    "id": "internal-legacy-17",
+    "category": "internal-positive",
+    "allowed_visibilities": [
+      "PUBLIC",
+      "INTERNAL"
+    ]
   },
   {
     "query": "which aligners are supported for CLIP-seq read alignment in the CLIP alignment workflow",
     "expected_source_contains": "omnibioai-workflow-bundles/epigenomics/clip_alignment",
-    "notes": "clip_alignment README mentions STAR and bowtie2 with ENCODE-compatible filters"
+    "notes": "clip_alignment README mentions STAR and bowtie2 with ENCODE-compatible filters",
+    "id": "internal-legacy-18",
+    "category": "internal-positive",
+    "allowed_visibilities": [
+      "PUBLIC",
+      "INTERNAL"
+    ]
   },
   {
     "query": "how does the CRISPR ML pipeline predict guide RNA efficiency and rank guides by off-target risk",
     "expected_source_contains": "omnibioai-workflow-bundles/crispr_ml",
-    "notes": "crispr_ml README describes k-mer feature encoding, efficiency model, off-target estimator, ranking"
+    "notes": "crispr_ml README describes k-mer feature encoding, efficiency model, off-target estimator, ranking",
+    "id": "internal-legacy-19",
+    "category": "internal-positive",
+    "allowed_visibilities": [
+      "PUBLIC",
+      "INTERNAL"
+    ]
   },
   {
     "query": "what query parameters does the GEO search plugin accept for filtering NCBI GEO datasets by organism",
-    "expected_source_contains": "omnibioai/plugins/geo_search",
-    "notes": "geo_search plugin README lists query, organism, experiment_type, max_results parameters"
+    "expected_source_contains": "omnibioai-workbench/plugins/geo_search",
+    "notes": "geo_search plugin README lists query, organism, experiment_type, max_results parameters",
+    "id": "internal-legacy-20",
+    "category": "internal-positive",
+    "allowed_visibilities": [
+      "PUBLIC",
+      "INTERNAL"
+    ]
   },
   {
     "query": "what modules are included in the integrated epigenomics pipeline that combines ChIP-seq and ATAC-seq analysis",
     "expected_source_contains": "omnibioai-workflow-bundles/epigenomics",
-    "notes": "epigenomics bundle README lists peak_calling, chromatin_state, enhancer_prediction, report modules"
+    "notes": "epigenomics bundle README lists peak_calling, chromatin_state, enhancer_prediction, report modules",
+    "id": "internal-legacy-21",
+    "category": "internal-positive",
+    "allowed_visibilities": [
+      "PUBLIC",
+      "INTERNAL"
+    ]
   },
   {
     "query": "how do you validate the omni-tool-runtime execution contract on Kubernetes using Minikube",
     "expected_source_contains": "omnibioai-tool-runtime",
-    "notes": "tool-runtime Kubernetes smoke test doc describes minimal validation of container execution via RESULT_URI"
+    "notes": "tool-runtime Kubernetes smoke test doc describes minimal validation of container execution via RESULT_URI",
+    "id": "internal-legacy-22",
+    "category": "internal-positive",
+    "allowed_visibilities": [
+      "PUBLIC",
+      "INTERNAL"
+    ]
   },
   {
     "query": "what does the OmniBioAI model registry provide for immutable versioning and staged promotion of ML models",
     "expected_source_contains": "omnibioai-model-registry",
-    "notes": "model-registry README covers write-once versioning, SHA256 integrity, latest→staging→production promotion"
+    "notes": "model-registry README covers write-once versioning, SHA256 integrity, latest\u2192staging\u2192production promotion",
+    "id": "internal-legacy-23",
+    "category": "internal-positive",
+    "allowed_visibilities": [
+      "PUBLIC",
+      "INTERNAL"
+    ]
   },
   {
     "query": "what quality control checks does the variant QC filtering plugin apply to genomic VCF files before downstream analysis",
-    "expected_source_contains": "omnibioai/plugins/variant_qc_filtering",
-    "notes": "variant_qc_filtering README describes format-level and evidence-level sanity checks as Stage-1 QC gate"
+    "expected_source_contains": "omnibioai-workbench/plugins/variant_qc_filtering",
+    "notes": "variant_qc_filtering README describes format-level and evidence-level sanity checks as Stage-1 QC gate",
+    "id": "internal-legacy-24",
+    "category": "internal-positive",
+    "allowed_visibilities": [
+      "PUBLIC",
+      "INTERNAL"
+    ]
   },
   {
     "query": "how does the clinical trial matching pipeline score and rank patients against trial eligibility criteria",
     "expected_source_contains": "omnibioai-workflow-bundles/clinical_trial_matching",
-    "notes": "clinical_trial_matching README describes genomic biomarker matching, eligibility scoring, HTML report generation"
+    "notes": "clinical_trial_matching README describes genomic biomarker matching, eligibility scoring, HTML report generation",
+    "id": "internal-legacy-25",
+    "category": "internal-positive",
+    "allowed_visibilities": [
+      "PUBLIC",
+      "INTERNAL"
+    ]
   },
   {
     "query": "what does the metagenomics nextflow pipeline use for shotgun taxonomic profiling and abundance estimation",
     "expected_source_contains": "omnibioai-workflow-bundles/metagenomics",
     "bundle": "metagenomics",
-    "notes": "scoped to metagenomics bundle — filters out competing microbiome/kraken sub-workflows that caused rank-6 failure unscoped"
+    "notes": "scoped to metagenomics bundle \u2014 filters out competing microbiome/kraken sub-workflows that caused rank-6 failure unscoped",
+    "id": "internal-legacy-26",
+    "category": "internal-positive",
+    "allowed_visibilities": [
+      "PUBLIC",
+      "INTERNAL"
+    ]
   },
   {
     "query": "how to process paired-end FASTQ files in a clinical sequencing workflow",
     "expected_source_contains": "omnibioai-workflow-bundles/clinical",
     "bundle": "clinical",
-    "notes": "scoped to clinical bundle — disambiguates from clinical_trial_matching and other clinical-adjacent repos"
+    "notes": "scoped to clinical bundle \u2014 disambiguates from clinical_trial_matching and other clinical-adjacent repos",
+    "id": "internal-legacy-27",
+    "category": "internal-positive",
+    "allowed_visibilities": [
+      "PUBLIC",
+      "INTERNAL"
+    ]
   },
   {
     "query": "CRISPR base editing screen analysis pipeline steps in functional genomics",
     "expected_source_contains": "omnibioai-workflow-bundles/funcgen",
     "bundle": "funcgen",
-    "notes": "scoped to funcgen bundle — avoids confusion with top-level crispr_ml and crispr bundles"
+    "notes": "scoped to funcgen bundle \u2014 avoids confusion with top-level crispr_ml and crispr bundles",
+    "id": "internal-legacy-28",
+    "category": "internal-positive",
+    "allowed_visibilities": [
+      "PUBLIC",
+      "INTERNAL"
+    ]
   },
   {
     "query": "how to promote a model version from staging to production and resolve a model by alias",
     "expected_source_contains": "omnibioai-model-registry",
     "repo": "omnibioai-model-registry",
-    "notes": "repo-scoped query — model registry terminology overlaps with generic ML documentation in other repos"
+    "notes": "repo-scoped query \u2014 model registry terminology overlaps with generic ML documentation in other repos",
+    "id": "internal-legacy-29",
+    "category": "internal-positive",
+    "allowed_visibilities": [
+      "PUBLIC",
+      "INTERNAL"
+    ]
   },
   {
     "query": "CLIP-seq read alignment using STAR with crosslink-preserving parameters and ENCODE-compatible filters",
     "expected_source_contains": "omnibioai-workflow-bundles/epigenomics/clip_alignment",
     "bundle": "epigenomics",
-    "notes": "scoped to epigenomics bundle — CLIP-seq alignment terms can match general RNA-seq alignment docs"
+    "notes": "scoped to epigenomics bundle \u2014 CLIP-seq alignment terms can match general RNA-seq alignment docs",
+    "id": "internal-legacy-30",
+    "category": "internal-positive",
+    "allowed_visibilities": [
+      "PUBLIC",
+      "INTERNAL"
+    ]
   },
   {
     "query": "how does the metagenomics pipeline perform shotgun taxonomic profiling with Kraken2 and Bracken",
     "expected_source_contains": "omnibioai-workflow-bundles/metagenomics",
     "rerank": true,
-    "notes": "unscoped rerank test — this query fails at rank 6+ without reranking; cross-encoder should promote metagenomics/README above microbiome/kraken sub-workflows"
+    "notes": "unscoped rerank test \u2014 this query fails at rank 6+ without reranking; cross-encoder should promote metagenomics/README above microbiome/kraken sub-workflows",
+    "id": "internal-legacy-31",
+    "category": "internal-positive",
+    "allowed_visibilities": [
+      "PUBLIC",
+      "INTERNAL"
+    ]
+  },
+  {
+    "id": "public-01",
+    "query": "how do I back up and restore the platform after a disaster",
+    "expected_source_contains": "omnibioai-docs/site/docs/admin/disaster-recovery.md",
+    "category": "public-positive"
+  },
+  {
+    "id": "public-02",
+    "query": "how do I install OmniBioAI on a new server",
+    "expected_source_contains": "omnibioai-docs/site/docs/admin/installation.md",
+    "category": "public-positive"
+  },
+  {
+    "id": "public-03",
+    "query": "what monitoring and health checks are available for the platform",
+    "expected_source_contains": "omnibioai-docs/site/docs/admin/monitoring.md",
+    "category": "public-positive"
+  },
+  {
+    "id": "public-04",
+    "query": "what security controls and settings should administrators configure",
+    "expected_source_contains": "omnibioai-docs/site/docs/admin/security.md",
+    "category": "public-positive"
+  },
+  {
+    "id": "public-05",
+    "query": "how does the platform make analyses reproducible",
+    "expected_source_contains": "omnibioai-docs/site/docs/admin/reproducibility.md",
+    "category": "public-positive"
+  },
+  {
+    "id": "public-06",
+    "query": "how do I deploy the platform to production",
+    "expected_source_contains": "omnibioai-docs/site/docs/admin/deployment.md",
+    "category": "public-positive"
+  },
+  {
+    "id": "public-07",
+    "query": "what configuration options does the platform have",
+    "expected_source_contains": "omnibioai-docs/site/docs/admin/configuration.md",
+    "category": "public-positive"
+  },
+  {
+    "id": "public-08",
+    "query": "what routine operational tasks do administrators perform",
+    "expected_source_contains": "omnibioai-docs/site/docs/admin/operations.md",
+    "category": "public-positive"
+  },
+  {
+    "id": "public-09",
+    "query": "how is the platform tested before release",
+    "expected_source_contains": "omnibioai-docs/site/docs/admin/testing.md",
+    "category": "public-positive"
+  },
+  {
+    "id": "public-10",
+    "query": "how do I get started as a new user",
+    "expected_source_contains": "omnibioai-docs/site/docs/user/getting-started.md",
+    "category": "public-positive"
+  },
+  {
+    "id": "public-11",
+    "query": "how do I run an analysis",
+    "expected_source_contains": "omnibioai-docs/site/docs/user/running-analyses.md",
+    "category": "public-positive"
+  },
+  {
+    "id": "public-12",
+    "query": "how do I interpret the results of an analysis",
+    "expected_source_contains": "omnibioai-docs/site/docs/user/interpreting-results.md",
+    "category": "public-positive"
+  },
+  {
+    "id": "public-13",
+    "query": "how are projects organized and shared",
+    "expected_source_contains": "omnibioai-docs/site/docs/user/projects.md",
+    "category": "public-positive"
+  },
+  {
+    "id": "public-14",
+    "query": "how do I set up a local development environment",
+    "expected_source_contains": "omnibioai-docs/site/docs/developer/local-development.md",
+    "category": "public-positive"
+  },
+  {
+    "id": "public-15",
+    "query": "how do I develop and register a new workflow",
+    "expected_source_contains": "omnibioai-docs/site/docs/developer/workflow-development.md",
+    "category": "public-positive"
+  },
+  {
+    "id": "public-16",
+    "query": "which repository contains which platform component",
+    "expected_source_contains": "omnibioai-docs/site/docs/developer/repository-map.md",
+    "category": "public-positive"
+  },
+  {
+    "id": "public-17",
+    "query": "what is the overall platform architecture",
+    "expected_source_contains": "omnibioai-docs/site/docs/developer/architecture.md",
+    "category": "public-positive"
+  },
+  {
+    "id": "public-18",
+    "query": "where is the developer API documented",
+    "expected_source_contains": "omnibioai-docs/site/docs/developer/api.md",
+    "category": "public-positive"
+  },
+  {
+    "id": "public-19",
+    "query": "my workflow execution failed, how do I troubleshoot it",
+    "expected_source_contains": "omnibioai-docs/site/docs/troubleshooting/execution.md",
+    "category": "public-positive"
+  },
+  {
+    "id": "public-20",
+    "query": "I cannot access my data, how do I troubleshoot",
+    "expected_source_contains": "omnibioai-docs/site/docs/troubleshooting/access-and-data.md",
+    "category": "public-positive"
+  },
+  {
+    "id": "public-21",
+    "query": "how do I connect the REDCap integration",
+    "expected_source_contains": "omnibioai-docs/site/docs/integrations/redcap.md",
+    "category": "public-positive"
+  },
+  {
+    "id": "public-22",
+    "query": "how do I publish results to Zenodo",
+    "expected_source_contains": "omnibioai-docs/site/docs/integrations/zenodo.md",
+    "category": "public-positive"
+  },
+  {
+    "id": "public-23",
+    "query": "how do I set up the Benchling integration",
+    "expected_source_contains": "omnibioai-docs/site/docs/integrations/benchling.md",
+    "category": "public-positive"
+  },
+  {
+    "id": "public-24",
+    "query": "how do I connect eLabFTW",
+    "expected_source_contains": "omnibioai-docs/site/docs/integrations/elabftw.md",
+    "category": "public-positive"
+  },
+  {
+    "id": "public-25",
+    "query": "how do I configure S3 storage",
+    "expected_source_contains": "omnibioai-docs/site/docs/integrations/s3-integration.md",
+    "category": "public-positive"
+  },
+  {
+    "id": "public-26",
+    "query": "how does variant annotation integration work",
+    "expected_source_contains": "omnibioai-docs/site/docs/integrations/variant-annotation.md",
+    "category": "public-positive"
+  },
+  {
+    "id": "unsupported-nonexistent-feature",
+    "query": "how do I configure the quantum-entanglement RNA folding scheduler's decoherence threshold",
+    "unsupported_terms": [
+      "quantum-entanglement",
+      "decoherence"
+    ],
+    "category": "unsupported-claim",
+    "notes": "Retrieval has no relevance cutoff, so it returns nearest neighbours; this asserts no retrieved chunk supports the fabricated claim. Weaker than 'no results' and recorded as a Phase 19 requirement."
+  },
+  {
+    "id": "unsupported-nonexistent-integration",
+    "query": "how do I configure the Salesforce CRM integration",
+    "unsupported_terms": [
+      "salesforce"
+    ],
+    "category": "unsupported-claim",
+    "notes": "Retrieval has no relevance cutoff, so it returns nearest neighbours; this asserts no retrieved chunk supports the fabricated claim. Weaker than 'no results' and recorded as a Phase 19 requirement."
+  },
+  {
+    "id": "index-separation-pubmed-literature",
+    "query": "summarize the abstract of a randomized controlled trial on statin efficacy in cardiovascular outcomes",
+    "unsupported_terms": [
+      "randomized controlled trial",
+      "cardiovascular outcomes",
+      "placebo",
+      "double-blind"
+    ],
+    "category": "index-separation",
+    "notes": "Retrieval has no relevance cutoff, so it returns nearest neighbours; this asserts no retrieved chunk supports the fabricated claim. Weaker than 'no results' and recorded as a Phase 19 requirement. The public docs legitimately DESCRIBE the PubMed system (pmid/statin appear in them), so the terms here are literature-content markers, not system vocabulary."
+  },
+  {
+    "id": "leak-internal-ragbio",
+    "category": "visibility-leakage",
+    "query": "what does the RAG-powered gene discovery assistant ragbio do and how do I run its bulk PubMed ingestion scripts",
+    "forbidden_visibilities": [
+      "INTERNAL"
+    ],
+    "forbidden_source_contains": [
+      "omnibioai-rag/README.md",
+      "omnibioai-rag/scripts/README.md"
+    ]
+  },
+  {
+    "id": "control-internal-ragbio",
+    "category": "internal-positive",
+    "query": "what does the RAG-powered gene discovery assistant ragbio do and how do I run its bulk PubMed ingestion scripts",
+    "allowed_visibilities": [
+      "PUBLIC",
+      "INTERNAL"
+    ],
+    "expected_source_contains": "omnibioai-rag/",
+    "notes": "control for leak-internal-ragbio: the forbidden content IS retrievable when explicitly permitted, so the leakage case is not vacuous"
+  },
+  {
+    "id": "leak-review-required-ml-tutorial",
+    "category": "visibility-leakage",
+    "query": "walk me through the cancer subtype prediction AutoML tutorial notebook",
+    "forbidden_visibilities": [
+      "REVIEW_REQUIRED",
+      "INTERNAL"
+    ],
+    "forbidden_source_contains": [
+      "omnibioai-docs/tutorials/ml"
+    ]
+  },
+  {
+    "id": "state-configured-not-verified",
+    "category": "configured-vs-verified",
+    "query": "how do I connect the REDCap integration",
+    "expected_source_contains": "omnibioai-docs/site/docs/integrations/redcap.md",
+    "expected_metadata": {
+      "verification_state": "CONFIGURED"
+    }
+  },
+  {
+    "id": "state-target-not-current",
+    "category": "target-vs-current",
+    "query": "what is on the OmniBioAI roadmap",
+    "allowed_visibilities": [
+      "PUBLIC",
+      "INTERNAL"
+    ],
+    "expected_source_contains": "omnibioai-workbench/docs/ROADMAP.md",
+    "expected_metadata": {
+      "content_state": "TARGET"
+    }
+  },
+  {
+    "id": "state-current-and-cited",
+    "category": "citation-correctness",
+    "require_citation": true,
+    "query": "which controls does the admin security guide describe",
+    "expected_source_contains": "omnibioai-docs/site/docs/admin/security.md",
+    "expected_metadata": {
+      "content_state": "CURRENT"
+    }
   }
 ]

@@ -25,3 +25,6 @@ repos:
   - omnibioai-security-audit
   - omnibioai-security-sdk
   - omnibioai-hpc-policy-engine
+  - omnibioai-workbench
+  - omnibioai-tes
+  - omnibioai-dev-hub

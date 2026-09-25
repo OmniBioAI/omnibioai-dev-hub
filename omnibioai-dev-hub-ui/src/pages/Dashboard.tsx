@@ -142,7 +142,7 @@ export default function DashboardPage({ onNavigate }: Props) {
       <div className="surface">
         <div className="section-header">
           <div className="section-title">RAG Pipeline</div>
-          <button className="section-action" onClick={() => onNavigate("chat")}>Try Query →</button>
+          <button className="section-action" onClick={() => onNavigate("chat")}>Ask OmniBioAI →</button>
         </div>
         <div className="pipeline-row">
           {pipelineSteps.map((step, i) => (
@@ -218,7 +218,7 @@ export default function DashboardPage({ onNavigate }: Props) {
             </tbody>
           </table>
           <div style={{ marginTop: 14, display: "flex", gap: 8 }}>
-            <button className="btn-primary" onClick={() => onNavigate("chat")} style={{ flex: 1 }}>✦ Query Assistant</button>
+            <button className="btn-primary" onClick={() => onNavigate("chat")} style={{ flex: 1 }}>✦ Ask OmniBioAI</button>
             <button className="btn-primary" onClick={() => onNavigate("search")} style={{ flex: 1 }}>⌕ Vector Search</button>
           </div>
         </div>

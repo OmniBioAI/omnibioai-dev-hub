@@ -1,6 +1,6 @@
 import os
 
-SKIP_DIRS = {".git", "__pycache__", "node_modules", ".venv", "venv", ".pytest_cache", "obsolete"}
+SKIP_DIRS = {".git", "__pycache__", "node_modules", ".venv", "venv", ".pytest_cache", "obsolete", "production-readiness"}
 
 # Path-based exclusion: skip any subtree whose path contains one of these
 # directory names *relative to the repo root*.  "work" covers omnibioai/work/,
@@ -41,7 +41,7 @@ def load_documents(repo_paths):
                                 "text": text,
                                 "source": fpath
                             })
-                    except Exception as e:
+                    except Exception as e:  # noqa: BLE001 -- one unreadable file must not abort the whole indexing walk
                         print(f"⚠️  Could not read {fpath}: {e}")
     print(f"📄 Loaded {len(docs)} documents")
     return docs

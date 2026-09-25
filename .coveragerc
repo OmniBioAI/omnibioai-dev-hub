@@ -1,5 +1,6 @@
 [run]
 source = .
+patch = subprocess
 omit =
     obsolete/*
     scripts/*
@@ -7,6 +8,8 @@ omit =
     */site-packages/*
 
 [report]
+fail_under = 97
+show_missing = true
 exclude_lines =
     pragma: no cover
     if __name__ == .__main__.:

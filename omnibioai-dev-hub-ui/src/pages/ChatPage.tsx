@@ -1,19 +1,22 @@
 import { useState, useRef, useEffect } from "react";
-import ReactMarkdown from "react-markdown";
-import { ragStream } from "../api/client";
+import { describeAskError, ragStream } from "../api/client";
+import type { AskResult } from "../api/client";
+import AnswerMarkdown from "../components/AnswerMarkdown";
+import Citations from "../components/Citations";
 
 interface Message {
   role: "user" | "bot";
   text: string;
-  sources?: string[];
+  result?: AskResult;
   streaming?: boolean;
+  error?: boolean;
 }
 
 export default function ChatPage() {
   const [messages, setMessages] = useState<Message[]>([
     {
       role: "bot",
-      text: "Hello! I'm the OmniBioAI Query Assistant powered by RAG V6. Ask me anything about your indexed documents.",
+      text: "Hello! I'm Ask OmniBioAI. I answer only from OmniBioAI's published documentation, with sources. If the documentation doesn't cover your question, I'll tell you rather than guess.",
     },
   ]);
   const [input, setInput] = useState("");
@@ -33,28 +36,17 @@ export default function ChatPage() {
     setMessages((prev) => [...prev, { role: "user", text: query }]);
     setMessages((prev) => [...prev, { role: "bot", text: "", streaming: true }]);
 
+    // Only the VERIFIED answer is ever rendered. Raw model tokens are ignored on purpose:
+    // an unverified answer must never appear as an OmniBioAI documentation answer.
     await ragStream(
       query,
-      (token) => {
-        setMessages((prev) => {
-          const updated = [...prev];
-          const last = updated[updated.length - 1];
-          if (last.role === "bot") {
-            updated[updated.length - 1] = { ...last, text: last.text + token };
-          }
-          return updated;
-        });
-      },
+      () => {},
       (fullContent?: string) => {
         setMessages((prev) => {
           const updated = [...prev];
           const last = updated[updated.length - 1];
           if (last.role === "bot") {
-            updated[updated.length - 1] = {
-              ...last,
-              text: fullContent ?? last.text,
-              streaming: false,
-            };
+            updated[updated.length - 1] = { ...last, text: fullContent ?? last.text, streaming: false };
           }
           return updated;
         });
@@ -63,14 +55,20 @@ export default function ChatPage() {
       (err) => {
         setMessages((prev) => {
           const updated = [...prev];
-          updated[updated.length - 1] = {
-            role: "bot",
-            text: `Error: ${err}`,
-            streaming: false,
-          };
+          updated[updated.length - 1] = { role: "bot", text: describeAskError(err), streaming: false, error: true };
           return updated;
         });
         setLoading(false);
+      },
+      (result) => {
+        setMessages((prev) => {
+          const updated = [...prev];
+          const last = updated[updated.length - 1];
+          if (last.role === "bot") {
+            updated[updated.length - 1] = { ...last, result, text: result.content, streaming: false };
+          }
+          return updated;
+        });
       }
     );
   };
@@ -85,31 +83,46 @@ export default function ChatPage() {
   return (
     <>
       <div className="page-header">
-        <div className="page-title">Query Assistant</div>
-        <div className="page-sub">RAG V6 · nomic-embed-text · FAISS</div>
+        <div className="page-title">Ask OmniBioAI</div>
+        <div className="page-sub">Answers only from published documentation · every answer cites its sources</div>
       </div>
 
       <div className="surface" style={{ flex: 1, display: "flex", flexDirection: "column", padding: 0, overflow: "hidden", minHeight: 0, height: "calc(100vh - 180px)" }}>
         <div className="chat-messages">
-          {messages.map((msg, i) => (
-            <div key={i} className={`chat-bubble ${msg.role}`}>
-              {msg.role === "bot" ? (
-                <div style={{ fontSize: 13 }}>
-                  <ReactMarkdown>{msg.text}</ReactMarkdown>
-                  {msg.streaming && <span className="cursor-blink" />}
-                </div>
-              ) : (
-                <pre style={{ margin: 0, whiteSpace: "pre-wrap", fontFamily: "var(--sans)", fontSize: 13 }}>
-                  {msg.text}
-                </pre>
-              )}
-              {msg.sources && msg.sources.length > 0 && (
-                <div className="chat-sources">
-                  Sources: {msg.sources.join(" · ")}
-                </div>
-              )}
-            </div>
-          ))}
+          {messages.map((msg, i) => {
+            const noAnswer = msg.role === "bot" && msg.result && !msg.result.grounded;
+            return (
+              <div key={i} className={`chat-bubble ${msg.role}${noAnswer ? " no-answer" : ""}${msg.error ? " error" : ""}`}>
+                {msg.role === "bot" ? (
+                  msg.error ? (
+                    <div style={{ fontSize: 13 }} role="alert">
+                      <div className="no-answer-title">Ask OmniBioAI couldn't answer</div>
+                      {msg.text}
+                    </div>
+                  ) : noAnswer ? (
+                    <div style={{ fontSize: 13 }} role="status" data-answer-status={msg.result!.answer_status}>
+                      <div className="no-answer-title">No trusted documentation answer</div>
+                      {msg.text}
+                    </div>
+                  ) : (
+                    <div style={{ fontSize: 13 }} data-grounded={msg.result?.grounded ? "true" : undefined}>
+                      {msg.streaming && !msg.text ? (
+                        <span className="searching">Searching the documentation…</span>
+                      ) : (
+                        <AnswerMarkdown text={msg.text} citations={msg.result?.citations} />
+                      )}
+                      {msg.streaming && <span className="cursor-blink" />}
+                    </div>
+                  )
+                ) : (
+                  <pre style={{ margin: 0, whiteSpace: "pre-wrap", fontFamily: "var(--sans)", fontSize: 13 }}>
+                    {msg.text}
+                  </pre>
+                )}
+                {msg.result?.grounded && <Citations citations={msg.result.citations} />}
+              </div>
+            );
+          })}
           <div ref={bottomRef} />
         </div>
 
@@ -123,7 +136,7 @@ export default function ChatPage() {
             rows={1}
           />
           <button className="btn-send" onClick={send} disabled={loading}>
-            {loading ? <><span className="spinner" />Streaming</> : "Send →"}
+            {loading ? <><span className="spinner" />Searching</> : "Ask →"}
           </button>
         </div>
       </div>

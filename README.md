@@ -2,6 +2,8 @@
 
 Production-grade Retrieval-Augmented Generation (RAG) system powering the OmniBioAI ecosystem documentation, architecture search, workflow discovery, and developer assistant APIs.
 
+![OmniBioAI Dev Hub overview dashboard](images/omnibioai-dev-hub.png)
+
 ---
 
 # Features
@@ -26,7 +28,7 @@ Repositories  (REPO_BASE/omnibioai-*)
      ↓
 Document Loader  (ingestion/doc_loader.py)
      ↓
-Chunker  (processing/chunker.py, 500-word windows / 2000-char max)
+Chunker  (processing/chunker.py, markdown-structure-aware, header/paragraph/word-boundary splitting, 2000-char max)
      ↓
 Ollama Embeddings  (nomic-embed-text, 768-d, normalized)
      ↓
@@ -129,7 +131,6 @@ omnibioai-dev-hub/
 │
 ├── scripts/
 │   ├── build_index.py       # Index builder entry point
-│   ├── ingest.py             # Standalone ingestion helper
 │   ├── run_eval.py           # Recall@K eval harness (tests/eval/)
 │   └── check_and_reindex.sh  # Rebuilds the index on new Studio releases (hourly cron)
 │
@@ -141,7 +142,10 @@ omnibioai-dev-hub/
 │
 ├── omnibioai-dev-hub-ui/     # Dev Hub UI (React + TypeScript) — see "Frontend" below
 │
-└── .env.example             # Environment variable template
+├── Dockerfile                # arm64 production image: nginx UI + FastAPI API
+├── requirements.txt          # Runtime Python dependencies
+├── requirements-dev.txt      # Test, coverage, and lint dependencies
+└── .env.example             # Environment variable template (source it before use)
 ```
 
 ---
@@ -203,13 +207,19 @@ ollama pull nomic-embed-text
 
 ### Generation Model
 
-The system uses `llama3` by default (hardcoded in `rag/engine.py`):
+The system uses `llama3` by default:
 
 ```bash
 ollama pull llama3
 ```
 
-Optional alternatives (change `model=` in `engine.py` if needed):
+The model name is read from `configs/index_config.yaml`'s `llm_model` key
+(see [Configuration](#configuration) below) — `llama3` is just that file's
+current value, and also what `rag/engine.py` falls back to if the config
+is missing, empty, or unset.
+
+Optional alternatives — pull the model, then set `llm_model:` in
+`configs/index_config.yaml` accordingly:
 
 ```bash
 ollama pull mistral
@@ -232,10 +242,25 @@ conda activate omnibioai-dev-hub
 ## Install Dependencies
 
 ```bash
-pip install fastapi uvicorn requests numpy faiss-cpu sentence-transformers
+pip install -r requirements.txt
 ```
 
 > `sentence-transformers` is required for cross-encoder reranking (`rerank=True` in `retrieve()`). It is also used by the test suite. If reranking is not needed you can omit it — the engine degrades gracefully to FAISS order when the model is unavailable.
+
+`requirements.txt` alone is enough to run the app — it does not install anything needed to run the test suite.
+
+### Running Tests
+
+If you're contributing and want to run `pytest` locally, also install the dev/test dependencies:
+
+```bash
+pip install -r requirements.txt -r requirements-dev.txt
+pytest
+```
+
+The repository does not currently include CI workflow definitions. To perform
+the equivalent local checks, also run `ruff check .`, then in
+`omnibioai-dev-hub-ui/` run `npm ci`, `npm run build`, and `npm test`.
 
 ---
 
@@ -260,12 +285,87 @@ The indexer **exits immediately with a clear error** if no repos are found under
 
 In Docker the image sets `ENV REPO_BASE=/repos` automatically — no action needed.
 
-Copy `.env.example` to `.env` for local development:
+Copy `.env.example` to `.env` for local development, then load it into the
+shell before starting a command. The Python application does not load `.env`
+automatically.
 
 ```bash
 cp .env.example .env
 # edit REPO_BASE as needed
+set -a; source .env; set +a
 ```
+
+## Ollama endpoint
+
+`OLLAMA_URL` defaults to `http://ollama:11434/api`, which is appropriate for
+the container setup below. When running Python directly against a local Ollama
+installation, set it explicitly:
+
+```bash
+export OLLAMA_URL=http://127.0.0.1:11434/api
+```
+
+---
+
+# Docker deployment
+
+The supplied `Dockerfile` builds the Vite UI and serves it through nginx on
+port `5173`; FastAPI is available on port `8082`. It is explicitly targeted
+at `linux/arm64`. The container waits for an Ollama service named `ollama` and
+creates `data/faiss_index/` on first start, so the repositories and index must
+be mounted persistently.
+
+```bash
+docker network create devhub-net
+
+docker run -d --name ollama --network devhub-net \
+  -v ollama-data:/root/.ollama \
+  ollama/ollama
+
+docker exec ollama ollama pull nomic-embed-text
+docker exec ollama ollama pull llama3
+
+docker build -t omnibioai-dev-hub .
+docker run --rm --name devhub --network devhub-net \
+  -p 5173:5173 -p 8082:8082 \
+  -v /path/to/parent-of-omnibioai-repos:/repos:ro \
+  -v devhub-index:/app/data/faiss_index \
+  omnibioai-dev-hub
+```
+
+Open `http://localhost:5173` for the UI, or use `http://localhost:8082` for
+the API. The initial start blocks while the index is built; later starts reuse
+the named `devhub-index` volume. The image runs as a non-root `appuser`.
+
+To enable authentication in the container, add
+`-e AUTH_ENABLED=true -e JWT_SECRET=<strong-secret>` to the final `docker
+run`. The container fails fast if authentication is enabled without a secret.
+
+---
+
+## configs/repos.yaml
+
+Lists the repo names `scripts/build_index.py` indexes (paths are built as
+`${REPO_BASE}/<name>`, same as [Supported Repositories](#supported-repositories)
+below). Edit this file to add, remove, or reorder indexed repos without
+touching code.
+
+If the file is missing, empty, fails to parse, or its `repos:` list is
+empty, the indexer falls back to the same 19-repo list hardcoded in
+`build_index.py` — so leaving it untouched changes nothing.
+
+---
+
+## configs/index_config.yaml
+
+Sets `llm_model`, the Ollama generation model name used by
+`ollama_generate()`'s default and `RAGEngine.stream_llm()` (see
+[Generation Model](#generation-model) above). Edit `llm_model:` here to
+switch models without touching code.
+
+If the file is missing, empty, or doesn't set `llm_model`, both call
+sites fall back to the prior hardcoded value, `"llama3"` — so leaving it
+untouched changes nothing.
 
 ---
 
@@ -301,7 +401,7 @@ Expected output:
 
 `seen_hashes` is **reset per repo** so cross-repo identical chunks each get their own index entry under their canonical source path. Within a single repo, duplicate chunks (e.g. shared boilerplate across plugin READMEs) are deduplicated.
 
-Chunks shorter than 10 characters are discarded (`MIN_CHUNK_CHARS = 10`) to eliminate overflow tails produced by the hard character-slice in `chunker.py`.
+Chunks shorter than 10 characters are discarded (`MIN_CHUNK_CHARS = 10`) to filter out low-information fragments (e.g. a lone header with no body).
 
 ### Excluded paths
 
@@ -398,6 +498,25 @@ curl -X POST http://localhost:8082/rag/query \
 
 A missing/invalid/expired token returns `401`. This follows the same
 shared-secret pattern as `omnibioai-model-registry`'s `require_auth`.
+
+**Fail-fast startup check:** if `AUTH_ENABLED=true` and `JWT_SECRET` is
+unset or empty, the app now **refuses to start** — `validate_auth_config()`
+(`api/auth.py`) raises `RuntimeError` from the FastAPI startup event
+(`api/main.py`) before a single request can be served. Previously an
+unset `JWT_SECRET` silently fell through to validating tokens against an
+empty HMAC secret, which PyJWT accepts, so anyone could forge a valid
+token — this closed that bypass. If you deploy with `AUTH_ENABLED=true`,
+make sure `JWT_SECRET` is actually set or the container/process will not
+come up.
+
+The Docker image enforces the equivalent check at the shell level before
+nginx or FastAPI start: if `AUTH_ENABLED=true` and `JWT_SECRET` is unset,
+the container exits immediately with an error instead of generating
+nginx's `devhub.conf` with an empty/placeholder value baked into the
+`X-Devhub-Internal` header (the internal UI-proxy auth path — see
+`Dockerfile`'s `CMD`).
+
+`DEBUG_TRACEBACKS` (default: unset/false) controls whether `/rag/query`'s error responses include a full stack trace (`trace` field) — omitted by default, included only when explicitly set to `true`; keep it off in production.
 
 ---
 
@@ -525,7 +644,9 @@ docs = engine.retrieve(query, top_k=5, rerank=True)
 
 # Supported Repositories
 
-The indexer targets 19 repositories. All paths are relative to `REPO_BASE`:
+The indexer targets 19 repositories, sourced from
+[`configs/repos.yaml`](#configsreposyaml) (falls back to this hardcoded
+list if that file is missing/empty). All paths are relative to `REPO_BASE`:
 
 ```python
 repos = [
@@ -565,9 +686,7 @@ run time, not a hardcoded present/absent list.
 
 ## Step 1 — Chunking
 
-Documents are split using a 500-word sliding window, hard-capped at 2000 characters per chunk. Chunks shorter than 10 characters are discarded.
-
-> **Known limitation:** The hard character slice at 2000 chars can produce 1–2 word overflow fragments at word boundaries (e.g. "onment", "abases"). These are above the 10-char filter threshold. A future fix will snap the slice to the nearest word boundary. See *Future Work* below.
+Documents are split using a markdown-structure-aware chunker (`processing/chunker.py`). Fenced code blocks (` ``` `) are never split. Text is divided at H1/H2/H3 header lines as natural section boundaries; sections longer than 2000 characters (`MAX_CHARS`) are split at paragraph boundaries (`\n\n`), and paragraphs still longer than 2000 characters fall back to word-boundary splitting. Each chunk is prefixed with its ancestor header chain (e.g. `# H1 > ## H2`) so retrieval context carries section identity. Chunks shorter than 10 characters are discarded.
 
 ---
 
@@ -716,13 +835,15 @@ Expected: `ntotal: 2067` (or your current count).
 
 # Known Limitations / Future Work
 
-## Chunker word-wrap (planned)
-
-`chunker.py` slices at a hard 2000-character boundary without snapping to word boundaries. This produces 1–2 word fragments at the tail of some documents (e.g. "onment", "abases" — 16–18 chars, above the `MIN_CHUNK_CHARS=10` filter). These fragments are harmless but pollute the index with low-information chunks. The fix is to snap the slice to the nearest preceding space.
+> **Resolved:** `chunker.py` previously sliced at a hard 2000-character
+> boundary without snapping to word boundaries, producing short tail
+> fragments. It is now markdown-structure-aware and snaps splits to
+> paragraph and word boundaries (see [Chunking strategy](#current-index-stats)
+> and `processing/chunker.py`'s `_split_at_paragraphs` /
+> `_split_at_word_boundary`) — no fix needed here anymore.
 
 ## Planned V7 Features
 
-* Chunker word-boundary snapping
 * IVF or HNSW indexes for million-scale corpora
 * Hybrid BM25 + vector search
 * Persistent storage and distributed / incremental index updates

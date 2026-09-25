@@ -1,13 +1,32 @@
 import re
-from typing import List, Optional
 
 MAX_CHARS = 2000
 
 _FENCE_RE = re.compile(r'```.*?```', re.DOTALL)
 _HEADER_RE = re.compile(r'^(#{1,3})\s+.+$', re.MULTILINE)
+_PLACEHOLDER_RE = re.compile(r'\x00FENCE(\d+)\x00')
 
 
-def _split_at_word_boundary(text: str, max_chars: int) -> List[str]:
+def _real_len(s: str, fences: list[str]) -> int:
+    """Length `s` would have once its fence placeholders are restored to their real content.
+
+    A fixed-width placeholder token undercounts a fence's real size. Used
+    unchecked, a section made of several individually-small fenced code
+    blocks would pass the MAX_CHARS budget check while still in placeholder
+    form and then balloon past it once fences are restored at the end. Every
+    MAX_CHARS decision in this module must compare against this, not len().
+    """
+    if not fences:
+        return len(s)
+    extra = 0
+    for m in _PLACEHOLDER_RE.finditer(s):
+        idx = int(m.group(1))
+        if idx < len(fences):
+            extra += len(fences[idx]) - len(m.group(0))
+    return len(s) + extra
+
+
+def _split_at_word_boundary(text: str, max_chars: int) -> list[str]:
     """Split text at word boundaries, keeping each piece ≤ max_chars."""
     if len(text) <= max_chars:
         return [text]
@@ -23,20 +42,33 @@ def _split_at_word_boundary(text: str, max_chars: int) -> List[str]:
     return chunks
 
 
-def _split_at_paragraphs(text: str, max_chars: int) -> List[str]:
-    """Split at blank-line boundaries; fall back to word-boundary for oversize paragraphs."""
+def _split_at_paragraphs(text: str, max_chars: int, fences: list[str] | None = None) -> list[str]:
+    """Split at blank-line boundaries; fall back to word-boundary for oversize paragraphs.
+
+    `fences` (if given) makes every length decision here use each
+    paragraph's real, post-restoration size (see _real_len) instead of its
+    placeholder-substituted length, so paragraphs holding fenced code blocks
+    are packed/split against their true size. _split_at_word_boundary itself
+    is intentionally left operating on placeholder-space length: a paragraph
+    that's short in placeholder form but long once its fence is restored
+    already can't be split further without cutting into that fence, so it's
+    correctly emitted whole (real length may exceed MAX_CHARS -- fenced code
+    blocks are never fragmented, real length wins over the budget there).
+    """
+    fences = fences or []
     if max_chars <= 0:
         return _split_at_word_boundary(text, MAX_CHARS) if text.strip() else []
-    if len(text) <= max_chars:
+    if _real_len(text, fences) <= max_chars:
         return [text] if text.strip() else []
 
     paragraphs = [p for p in re.split(r'\n\n+', text) if p.strip()]
-    result: List[str] = []
-    current_parts: List[str] = []
+    result: list[str] = []
+    current_parts: list[str] = []
     current_len = 0
 
     for para in paragraphs:
-        if len(para) > max_chars:
+        para_len = _real_len(para, fences)
+        if para_len > max_chars:
             if current_parts:
                 result.append('\n\n'.join(current_parts))
                 current_parts = []
@@ -44,13 +76,13 @@ def _split_at_paragraphs(text: str, max_chars: int) -> List[str]:
             result.extend(_split_at_word_boundary(para, max_chars))
         else:
             sep = 2 if current_parts else 0
-            if current_parts and current_len + sep + len(para) > max_chars:
+            if current_parts and current_len + sep + para_len > max_chars:
                 result.append('\n\n'.join(current_parts))
                 current_parts = [para]
-                current_len = len(para)
+                current_len = para_len
             else:
                 current_parts.append(para)
-                current_len += sep + len(para)
+                current_len += sep + para_len
 
     if current_parts:
         result.append('\n\n'.join(current_parts))
@@ -58,7 +90,7 @@ def _split_at_paragraphs(text: str, max_chars: int) -> List[str]:
     return result
 
 
-def chunk_text(text: str, chunk_size: int = 500) -> List[str]:
+def chunk_text(text: str, chunk_size: int = 500) -> list[str]:
     """
     Markdown-structure-aware chunker. chunk_size is kept for API compatibility.
 
@@ -73,7 +105,7 @@ def chunk_text(text: str, chunk_size: int = 500) -> List[str]:
         return []
 
     # Protect fenced code blocks — replace with non-splitting placeholders
-    fences: List[str] = []
+    fences: list[str] = []
 
     def _stash(m: re.Match) -> str:
         fences.append(m.group(0))
@@ -82,9 +114,9 @@ def chunk_text(text: str, chunk_size: int = 500) -> List[str]:
     protected = _FENCE_RE.sub(_stash, text)
 
     # Split into sections: list of (header_line | None, body_str, header_level)
-    sections: List[tuple] = []
+    sections: list[tuple] = []
     last_end = 0
-    current_header: Optional[str] = None
+    current_header: str | None = None
     current_level = 0
 
     for m in _HEADER_RE.finditer(protected):
@@ -100,8 +132,8 @@ def chunk_text(text: str, chunk_size: int = 500) -> List[str]:
         sections.append((current_header, tail, current_level))
 
     # Build chunks, maintaining a header breadcrumb stack
-    header_stack: List[str] = []
-    all_chunks: List[str] = []
+    header_stack: list[str] = []
+    all_chunks: list[str] = []
 
     for header_line, body, level in sections:
         if header_line is not None:
@@ -113,27 +145,40 @@ def chunk_text(text: str, chunk_size: int = 500) -> List[str]:
         body = body.strip()
         full = (prefix + body).strip()
 
-        if not full:
+        if not full:  # pragma: no cover
+            # Structurally unreachable given how `sections` is built above:
+            # a section only carries header_line=None with an empty body if
+            # it's the sole pre-first-header entry, and that's appended only
+            # when its body is non-whitespace; every other section has a
+            # non-empty header_line, which alone makes `prefix` (and so
+            # `full`) non-empty. Kept as a defensive guard in case that
+            # invariant ever changes.
             continue
 
-        if len(full) <= MAX_CHARS:
+        if _real_len(full, fences) <= MAX_CHARS:
             all_chunks.append(full)
             continue
 
         # Section too long — split body at paragraph boundaries
-        budget = MAX_CHARS - len(prefix)
-        sub_bodies = _split_at_paragraphs(body, budget)
+        budget = MAX_CHARS - _real_len(prefix, fences)
+        sub_bodies = _split_at_paragraphs(body, budget, fences)
 
         if sub_bodies:
             for sb in sub_bodies:
                 chunk = (prefix + sb).strip()
                 if chunk:
                     all_chunks.append(chunk)
-        else:
-            all_chunks.append(full)  # fallback: emit as-is
+        else:  # pragma: no cover
+            # Structurally unreachable: `body` is always non-empty here
+            # (guarded by the `if not full` check above), and both branches
+            # of _split_at_paragraphs return at least one element for
+            # non-empty input -- verified empirically, including with a
+            # negative `budget`. Kept as a defensive fallback in case that
+            # invariant ever changes.
+            all_chunks.append(full)
 
     # Restore fenced code blocks in every chunk
-    restored: List[str] = []
+    restored: list[str] = []
     for chunk in all_chunks:
         for i, fence in enumerate(fences):
             chunk = chunk.replace(f'\x00FENCE{i}\x00', fence)

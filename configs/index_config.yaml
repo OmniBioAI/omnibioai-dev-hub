@@ -1,0 +1,7 @@
+# Ollama generation model used by rag/engine.py's ollama_generate() default
+# arg and RAGEngine.stream_llm(). Both call sites read this same value.
+#
+# If this file is missing, empty, or llm_model isn't set, the code falls
+# back to "llama3" -- the prior hardcoded value -- so behavior is unchanged
+# unless this is explicitly edited.
+llm_model: llama3
