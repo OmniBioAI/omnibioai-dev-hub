@@ -26,11 +26,25 @@ from api.auth import (
 )
 
 SECRET = "test-secret-value"
+AUDIENCE = "omnibioai-platform"
+ISSUER = "omnibioai-auth"
+
+
+@pytest.fixture(autouse=True)
+def configured_claim_validation(monkeypatch):
+    monkeypatch.setenv("JWT_AUDIENCE", AUDIENCE)
+    monkeypatch.setenv("JWT_ISSUER", ISSUER)
 
 
 def _make_token(secret=SECRET, sub="alice", exp_delta=3600, **extra_claims):
     """Sign an HS256 JWT for tests with the given subject, expiry offset, and extra claims."""
-    payload = {"sub": sub, "exp": int(time.time()) + exp_delta, **extra_claims}
+    payload = {
+        "sub": sub,
+        "exp": int(time.time()) + exp_delta,
+        "aud": AUDIENCE,
+        "iss": ISSUER,
+        **extra_claims,
+    }
     return jwt.encode(payload, secret, algorithm="HS256")
 
 
@@ -82,7 +96,7 @@ def test_extract_token_wrong_scheme():
 def test_validate_token_valid():
     """Return the claims of a correctly signed, unexpired token."""
     token = _make_token()
-    payload = validate_token(token, SECRET)
+    payload = validate_token(token, SECRET, AUDIENCE, ISSUER)
     assert payload["sub"] == "alice"
 
 
@@ -90,20 +104,42 @@ def test_validate_token_expired():
     """Reject an expired token with a token-expired AuthError."""
     token = _make_token(exp_delta=-3600)  # expired an hour ago
     with pytest.raises(AuthError, match="Token has expired"):
-        validate_token(token, SECRET)
+        validate_token(token, SECRET, AUDIENCE, ISSUER)
 
 
 def test_validate_token_malformed_garbage():
     """Reject a string that is not a JWT as an invalid token."""
     with pytest.raises(AuthError, match="Invalid token"):
-        validate_token("this-is-not-a-jwt", SECRET)
+        validate_token("this-is-not-a-jwt", SECRET, AUDIENCE, ISSUER)
 
 
 def test_validate_token_wrong_secret_rejected():
     """Reject a token signed with a different secret as invalid."""
     token = _make_token(secret=SECRET)
     with pytest.raises(AuthError, match="Invalid token"):
-        validate_token(token, "a-different-secret")
+        validate_token(token, "a-different-secret", AUDIENCE, ISSUER)
+
+
+@pytest.mark.parametrize(
+    "claims",
+    [
+        {"aud": "wrong-audience"},
+        {"aud": None},
+        {"iss": "wrong-issuer"},
+        {"iss": None},
+    ],
+)
+def test_validate_token_rejects_invalid_or_missing_claims(claims):
+    extra = {key: value for key, value in claims.items() if value is not None}
+    if claims.get("aud") is None:
+        extra["aud"] = None
+    if claims.get("iss") is None:
+        extra["iss"] = None
+    payload = {"sub": "alice", "exp": int(time.time()) + 3600, "aud": AUDIENCE, "iss": ISSUER}
+    payload.update(extra)
+    token = jwt.encode(payload, SECRET, algorithm="HS256")
+    with pytest.raises(AuthError, match="Invalid token"):
+        validate_token(token, SECRET, AUDIENCE, ISSUER)
 
 
 # =========================================================
@@ -142,6 +178,8 @@ def test_require_auth_enabled_valid_jwt_accepted(monkeypatch):
     subject."""
     monkeypatch.setenv("AUTH_ENABLED", "true")
     monkeypatch.setenv("JWT_SECRET", SECRET)
+    monkeypatch.setenv("JWT_AUDIENCE", AUDIENCE)
+    monkeypatch.setenv("JWT_ISSUER", ISSUER)
     token = _make_token(sub="alice")
 
     resp = client.get("/protected", headers={"Authorization": f"Bearer {token}"})
@@ -154,9 +192,11 @@ def test_require_auth_enabled_jwt_without_identity_claim_falls_back_to_unknown(m
     """Fall back to the unknown actor when a valid JWT carries no identity claim."""
     monkeypatch.setenv("AUTH_ENABLED", "true")
     monkeypatch.setenv("JWT_SECRET", SECRET)
+    monkeypatch.setenv("JWT_AUDIENCE", AUDIENCE)
+    monkeypatch.setenv("JWT_ISSUER", ISSUER)
     # A structurally valid, correctly-signed token that carries none of the
     # identity fields require_auth() checks (sub/service/username/email).
-    payload = {"exp": int(time.time()) + 3600, "role": "irrelevant"}
+    payload = {"exp": int(time.time()) + 3600, "aud": AUDIENCE, "iss": ISSUER, "role": "irrelevant"}
     token = jwt.encode(payload, SECRET, algorithm="HS256")
 
     resp = client.get("/protected", headers={"Authorization": f"Bearer {token}"})
@@ -169,6 +209,8 @@ def test_require_auth_enabled_expired_jwt_rejected(monkeypatch):
     """Reject an expired JWT with a 401 that reports the expiry."""
     monkeypatch.setenv("AUTH_ENABLED", "true")
     monkeypatch.setenv("JWT_SECRET", SECRET)
+    monkeypatch.setenv("JWT_AUDIENCE", AUDIENCE)
+    monkeypatch.setenv("JWT_ISSUER", ISSUER)
     token = _make_token(exp_delta=-3600)
 
     resp = client.get("/protected", headers={"Authorization": f"Bearer {token}"})
@@ -181,6 +223,8 @@ def test_require_auth_enabled_garbage_token_rejected(monkeypatch):
     """Reject a malformed Bearer token with a 401 invalid-token error."""
     monkeypatch.setenv("AUTH_ENABLED", "true")
     monkeypatch.setenv("JWT_SECRET", SECRET)
+    monkeypatch.setenv("JWT_AUDIENCE", AUDIENCE)
+    monkeypatch.setenv("JWT_ISSUER", ISSUER)
 
     resp = client.get("/protected", headers={"Authorization": "Bearer garbage.not.a.jwt"})
 
@@ -192,6 +236,8 @@ def test_require_auth_enabled_missing_authorization_header_rejected(monkeypatch)
     """Reject a request with no Authorization header with a 401 when authentication is enabled."""
     monkeypatch.setenv("AUTH_ENABLED", "true")
     monkeypatch.setenv("JWT_SECRET", SECRET)
+    monkeypatch.setenv("JWT_AUDIENCE", AUDIENCE)
+    monkeypatch.setenv("JWT_ISSUER", ISSUER)
 
     resp = client.get("/protected")
 
@@ -204,6 +250,8 @@ def test_require_auth_internal_header_bypasses_jwt(monkeypatch):
     JWT."""
     monkeypatch.setenv("AUTH_ENABLED", "true")
     monkeypatch.setenv("JWT_SECRET", SECRET)
+    monkeypatch.setenv("JWT_AUDIENCE", AUDIENCE)
+    monkeypatch.setenv("JWT_ISSUER", ISSUER)
 
     # No Authorization header at all -- only the matching internal header.
     resp = client.get("/protected", headers={"X-Devhub-Internal": SECRET})
@@ -216,6 +264,8 @@ def test_require_auth_internal_header_absent_falls_through_to_jwt(monkeypatch):
     """Fall back to JWT validation when the internal header is absent."""
     monkeypatch.setenv("AUTH_ENABLED", "true")
     monkeypatch.setenv("JWT_SECRET", SECRET)
+    monkeypatch.setenv("JWT_AUDIENCE", AUDIENCE)
+    monkeypatch.setenv("JWT_ISSUER", ISSUER)
     token = _make_token(sub="bob")
 
     # No X-Devhub-Internal header sent -- a valid JWT should still work.
@@ -229,6 +279,8 @@ def test_require_auth_internal_header_wrong_value_falls_through_and_fails(monkey
     """Reject a request whose internal header value is wrong and that carries no JWT."""
     monkeypatch.setenv("AUTH_ENABLED", "true")
     monkeypatch.setenv("JWT_SECRET", SECRET)
+    monkeypatch.setenv("JWT_AUDIENCE", AUDIENCE)
+    monkeypatch.setenv("JWT_ISSUER", ISSUER)
 
     # Wrong internal-header value and no Authorization header -- falls
     # through to the JWT path, which then has nothing to validate.
@@ -275,6 +327,17 @@ def test_validate_auth_config_raises_when_enabled_without_secret(monkeypatch):
     monkeypatch.delenv("JWT_SECRET", raising=False)
 
     with pytest.raises(RuntimeError, match="AUTH_ENABLED is true but JWT_SECRET is not set"):
+        validate_auth_config()
+
+
+@pytest.mark.parametrize("missing", ["JWT_AUDIENCE", "JWT_ISSUER"])
+def test_validate_auth_config_requires_claim_configuration(monkeypatch, missing):
+    monkeypatch.setenv("AUTH_ENABLED", "true")
+    monkeypatch.setenv("JWT_SECRET", SECRET)
+    monkeypatch.setenv("JWT_AUDIENCE", AUDIENCE)
+    monkeypatch.setenv("JWT_ISSUER", ISSUER)
+    monkeypatch.delenv(missing)
+    with pytest.raises(RuntimeError, match=missing):
         validate_auth_config()
 
 

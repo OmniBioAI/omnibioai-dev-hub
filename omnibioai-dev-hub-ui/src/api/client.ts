@@ -1,4 +1,15 @@
 const API_BASE = "";
+const ACCESS_TOKEN_COOKIE = "omnibioai_access_token";
+
+/** Reuse Studio's same-origin session cookie for protected API calls. */
+const authHeaders = (): Record<string, string> => {
+  const token = document.cookie
+    .split(";")
+    .map((part) => part.trim())
+    .find((part) => part.startsWith(`${ACCESS_TOKEN_COOKIE}=`))
+    ?.slice(ACCESS_TOKEN_COOKIE.length + 1);
+  return token ? { Authorization: `Bearer ${decodeURIComponent(token)}` } : {};
+};
 
 // ------------------ ASK OMNIBIOAI ANSWER CONTRACT (ask.v1) ------------------
 export interface AskCitation {
@@ -80,7 +91,7 @@ export const ragQuery = async (query: string) => {
   try {
     res = await fetch(`${API_BASE}/rag/query`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: { "Content-Type": "application/json", ...authHeaders() },
       body: JSON.stringify({ query }),
     });
   } catch (e) {
@@ -102,7 +113,7 @@ export const ragStream = async (
   try {
     const res = await fetch(`${API_BASE}/rag/stream`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: { "Content-Type": "application/json", ...authHeaders() },
       body: JSON.stringify({ query }),
     });
 
