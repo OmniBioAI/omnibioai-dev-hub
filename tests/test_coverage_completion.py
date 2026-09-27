@@ -17,13 +17,15 @@ def test_auth_token_helpers_cover_success_and_failures(monkeypatch):
     with pytest.raises(auth.AuthError, match="Bearer"):
         auth.extract_token("Token abc")
 
-    token = jwt.encode({"sub": "user-1"}, "secret", algorithm="HS256")
-    assert auth.validate_token(token, "secret")["sub"] == "user-1"
+    token = jwt.encode({"sub": "user-1", "aud": "audience", "iss": "issuer", "exp": 4102444800}, "secret", algorithm="HS256")
+    assert auth.validate_token(token, "secret", "audience", "issuer")["sub"] == "user-1"
     with pytest.raises(auth.AuthError, match="Invalid token"):
-        auth.validate_token("bad", "secret")
+        auth.validate_token("bad", "secret", "audience", "issuer")
 
     monkeypatch.setenv("AUTH_ENABLED", "true")
     monkeypatch.setenv("JWT_SECRET", "secret")
+    monkeypatch.setenv("JWT_AUDIENCE", "audience")
+    monkeypatch.setenv("JWT_ISSUER", "issuer")
     assert auth._auth_enabled() is True
     assert auth._jwt_secret() == "secret"
 
@@ -35,12 +37,14 @@ async def test_require_auth_all_modes_and_identity_fields(monkeypatch):
 
     monkeypatch.setenv("AUTH_ENABLED", "true")
     monkeypatch.setenv("JWT_SECRET", "secret")
+    monkeypatch.setenv("JWT_AUDIENCE", "audience")
+    monkeypatch.setenv("JWT_ISSUER", "issuer")
     assert await auth.require_auth(SimpleNamespace(), x_devhub_internal="secret") == "devhub-ui"
 
-    token = jwt.encode({"email": "user@example.com"}, "secret", algorithm="HS256")
+    token = jwt.encode({"email": "user@example.com", "aud": "audience", "iss": "issuer", "exp": 4102444800}, "secret", algorithm="HS256")
     assert await auth.require_auth(SimpleNamespace(), authorization=f"Bearer {token}") == "user@example.com"
 
-    unknown = jwt.encode({}, "secret", algorithm="HS256")
+    unknown = jwt.encode({"aud": "audience", "iss": "issuer", "exp": 4102444800}, "secret", algorithm="HS256")
     assert await auth.require_auth(SimpleNamespace(), authorization=f"Bearer {unknown}") == "unknown"
 
     with pytest.raises(HTTPException, match="Authorization header"):

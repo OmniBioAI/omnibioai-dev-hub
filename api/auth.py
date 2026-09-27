@@ -24,6 +24,14 @@ def _jwt_secret() -> str:
     return os.getenv("JWT_SECRET", "").strip()
 
 
+def _jwt_audience() -> str:
+    return os.getenv("JWT_AUDIENCE", "").strip()
+
+
+def _jwt_issuer() -> str:
+    return os.getenv("JWT_ISSUER", "").strip()
+
+
 def validate_auth_config() -> None:
     """Fail loudly at startup if auth is enabled but misconfigured.
 
@@ -37,11 +45,19 @@ def validate_auth_config() -> None:
     app's startup path (see api/main.py) -- not from require_auth(), so a
     misconfigured deployment never serves a single request.
     """
-    if _auth_enabled() and not _jwt_secret():
-        raise RuntimeError(
-            "AUTH_ENABLED is true but JWT_SECRET is not set -- "
-            "refusing to start with auth silently disabled."
-        )
+    if _auth_enabled():
+        missing = [
+            name for name, value in (
+                ("JWT_SECRET", _jwt_secret()),
+                ("JWT_AUDIENCE", _jwt_audience()),
+                ("JWT_ISSUER", _jwt_issuer()),
+            ) if not value
+        ]
+        if missing:
+            raise RuntimeError(
+                f"AUTH_ENABLED is true but {', '.join(missing)} is not set -- "
+                "refusing to start with auth misconfigured."
+            )
 
 
 def extract_token(authorization_header: str | None) -> str:
@@ -53,9 +69,15 @@ def extract_token(authorization_header: str | None) -> str:
     return parts[1]
 
 
-def validate_token(token: str, secret: str) -> dict:
+def validate_token(token: str, secret: str, audience: str, issuer: str) -> dict:
     try:
-        return _jwt.decode(token, secret, algorithms=["HS256"])
+        return _jwt.decode(
+            token,
+            secret,
+            algorithms=["HS256"],
+            audience=audience,
+            issuer=issuer,
+        )
     except _jwt.ExpiredSignatureError:
         raise AuthError("Token has expired", 401)
     except _jwt.InvalidTokenError as exc:
@@ -86,7 +108,7 @@ async def require_auth(
 
     try:
         token = extract_token(authorization)
-        payload = validate_token(token, internal_secret)
+        payload = validate_token(token, internal_secret, _jwt_audience(), _jwt_issuer())
         for field in ("sub", "service", "username", "email"):
             value = payload.get(field)
             if value:

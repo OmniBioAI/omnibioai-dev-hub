@@ -3,10 +3,12 @@ import { AskError, ASK_ERROR_MESSAGES, describeAskError, getStatus, ragQuery, ra
 
 describe("API client", () => {
   it("sends a JSON query and returns the decoded response", async () => {
+    document.cookie = "omnibioai_access_token=test-token";
     vi.spyOn(globalThis, "fetch").mockResolvedValue(new Response(JSON.stringify({ answer: "ok" }), { status: 200 }));
     await expect(ragQuery("hello")).resolves.toEqual({ answer: "ok" });
     expect(fetch).toHaveBeenCalledWith("/rag/query", expect.objectContaining({
       method: "POST", body: JSON.stringify({ query: "hello" }),
+      headers: { "Content-Type": "application/json", Authorization: "Bearer test-token" },
     }));
   });
 
@@ -119,4 +121,3 @@ describe("describeAskError", () => {
     warn.mockRestore();
   });
 });
-
