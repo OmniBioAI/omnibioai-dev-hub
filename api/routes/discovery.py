@@ -6,6 +6,7 @@ from api.auth import require_auth
 from integrations.tes_discovery import TESDiscoveryClient, TESDiscoveryError
 from integrations.model_discovery import ModelDiscoveryClient, ModelDiscoveryError
 from integrations.service_api_discovery import ServiceAPIDiscoveryClient, ServiceAPIDiscoveryError
+from integrations.discovery_routing import DiscoveryRoutingError, route_query
 
 router = APIRouter(prefix="/api/discovery", tags=["tool-discovery"])
 
@@ -33,6 +34,10 @@ def _service_api_call(method_name: str, *args, **kwargs):
         return getattr(ServiceAPIDiscoveryClient.from_environment(), method_name)(*args, **kwargs)
     except ServiceAPIDiscoveryError as exc:
         raise HTTPException(status_code=exc.status_code, detail={"code": exc.code, "message": exc.message}) from exc
+
+
+def _routing_error(exc: DiscoveryRoutingError) -> HTTPException:
+    return HTTPException(status_code=exc.status_code, detail={"code": exc.code, "message": exc.message})
 
 
 @router.get("/tools/{tool_id}")
@@ -136,3 +141,36 @@ def list_apis(
     actor: str = Depends(require_auth),
 ):
     return {"items": _service_api_call("list_apis", service_id=service_id, method=method, visibility=visibility, route_id=route_id)}
+
+
+@router.get("/query")
+def structured_query(
+    entity_type: str,
+    q: str | None = None,
+    task: str | None = None,
+    model_name: str | None = None,
+    version: str | None = None,
+    alias: str | None = None,
+    service_id: str | None = None,
+    method: str | None = None,
+    visibility: str | None = None,
+    route_id: str | None = None,
+    tool_id: str | None = None,
+    authorization: str | None = Header(default=None),
+    actor: str = Depends(require_auth),
+):
+    """Route explicit structured intent without semantic or execution fallback."""
+    try:
+        decision = route_query(entity_type)
+    except DiscoveryRoutingError as exc:
+        raise _routing_error(exc) from exc
+
+    if decision.requested_entity_type == "documentation":
+        return {"routing": decision.as_dict(), "next_route": "/rag/query", "query": q}
+    if decision.requested_entity_type == "tool":
+        return {"routing": decision.as_dict(), "result": _call("search", q=q, tool_id=tool_id)}
+    if decision.requested_entity_type == "model":
+        return {"routing": decision.as_dict(), "result": _model_call("list_models", authorization=authorization, task=task, model_name=model_name, version=version)}
+    if decision.requested_entity_type == "service":
+        return {"routing": decision.as_dict(), "result": _service_api_call("list_services", query=q or service_id)}
+    return {"routing": decision.as_dict(), "result": _service_api_call("list_apis", service_id=service_id, method=method, visibility=visibility, route_id=route_id)}
