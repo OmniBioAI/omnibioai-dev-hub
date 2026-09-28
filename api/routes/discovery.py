@@ -7,6 +7,7 @@ from integrations.tes_discovery import TESDiscoveryClient, TESDiscoveryError
 from integrations.model_discovery import ModelDiscoveryClient, ModelDiscoveryError
 from integrations.service_api_discovery import ServiceAPIDiscoveryClient, ServiceAPIDiscoveryError
 from integrations.discovery_routing import DiscoveryRoutingError, route_query
+from integrations.relationship_discovery import RelationshipDiscoveryClient, RelationshipDiscoveryError
 
 router = APIRouter(prefix="/api/discovery", tags=["tool-discovery"])
 
@@ -37,6 +38,10 @@ def _service_api_call(method_name: str, *args, **kwargs):
 
 
 def _routing_error(exc: DiscoveryRoutingError) -> HTTPException:
+    return HTTPException(status_code=exc.status_code, detail={"code": exc.code, "message": exc.message})
+
+
+def _relationship_error(exc: RelationshipDiscoveryError) -> HTTPException:
     return HTTPException(status_code=exc.status_code, detail={"code": exc.code, "message": exc.message})
 
 
@@ -174,3 +179,22 @@ def structured_query(
     if decision.requested_entity_type == "service":
         return {"routing": decision.as_dict(), "result": _service_api_call("list_services", query=q or service_id)}
     return {"routing": decision.as_dict(), "result": _service_api_call("list_apis", service_id=service_id, method=method, visibility=visibility, route_id=route_id)}
+
+
+@router.get("/relationships")
+def relationships(
+    source_entity_type: str,
+    source_local_id: str,
+    relationship_type: str | None = None,
+    actor: str = Depends(require_auth),
+):
+    """Return bounded, explicit relationships from compatible B4 sources only."""
+    try:
+        items = RelationshipDiscoveryClient().query(
+            source_entity_type=source_entity_type,
+            source_local_id=source_local_id,
+            relationship_type=relationship_type,
+        )
+    except RelationshipDiscoveryError as exc:
+        raise _relationship_error(exc) from exc
+    return {"items": items, "count": len(items), "execution_allowed": False}
