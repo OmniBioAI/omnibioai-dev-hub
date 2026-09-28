@@ -6,7 +6,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
 from api.auth import validate_auth_config
-from api.routes import rag
+from api.routes import discovery, rag
 from index.graph_store import GraphStore
 from index.plugin_index import PluginIndex
 from index.vector_store import VectorStore
@@ -103,6 +103,7 @@ async def startup_event():
 # =========================================================
 
 app.include_router(rag.router, prefix="/rag")
+app.include_router(discovery.router)
 
 
 # =========================================================

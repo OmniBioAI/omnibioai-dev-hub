@@ -1,7 +1,21 @@
 import { describe, expect, it, vi } from "vitest";
-import { AskError, ASK_ERROR_MESSAGES, describeAskError, getStatus, ragQuery, ragStream } from "./client";
+import { AskError, ASK_ERROR_MESSAGES, describeAskError, discoverySearch, discoveryTool, getStatus, ragQuery, ragStream } from "./client";
 
 describe("API client", () => {
+  it("calls the structured TES discovery contract and preserves filters", async () => {
+    vi.spyOn(globalThis, "fetch").mockResolvedValueOnce(new Response(JSON.stringify({ items: [], total: 0, limit: 20, offset: 0 }), { status: 200 }));
+    await discoverySearch({ q: "alignment", input_type: "PAIRED_END_FASTQ", limit: 20, offset: 0 });
+    expect(fetch).toHaveBeenCalledWith("/api/discovery/search?q=alignment&input_type=PAIRED_END_FASTQ&limit=20&offset=0", expect.objectContaining({ headers: expect.any(Object) }));
+  });
+
+  it("URL-encodes exact tool lookup and maps catalog errors without exposing response text", async () => {
+    vi.spyOn(globalThis, "fetch").mockResolvedValueOnce(new Response(JSON.stringify({ detail: { code: "TOOL_NOT_FOUND", message: "private detail" } }), { status: 404 }));
+    const error = await discoveryTool("tool /private").catch((e) => e);
+    expect(fetch).toHaveBeenCalledWith("/api/discovery/tools/tool%20%2Fprivate", expect.any(Object));
+    expect(error).toMatchObject({ status: 404, code: "TOOL_NOT_FOUND" });
+    expect(error.message).not.toContain("private detail");
+  });
+
   it("sends a JSON query and returns the decoded response", async () => {
     document.cookie = "omnibioai_access_token=test-token";
     vi.spyOn(globalThis, "fetch").mockResolvedValue(new Response(JSON.stringify({ answer: "ok" }), { status: 200 }));

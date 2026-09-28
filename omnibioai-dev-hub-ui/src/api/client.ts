@@ -166,3 +166,113 @@ export const getStatus = async () => {
   const res = await fetch(`${API_BASE}/status`);
   return res.json();
 };
+
+// ------------------ TES DISCOVERY ------------------
+export interface DiscoveryFilters {
+  q?: string;
+  input_type?: string;
+  output_type?: string;
+  category?: string;
+  backend?: string;
+  architecture?: string;
+  tool_id?: string;
+  limit?: number;
+  offset?: number;
+}
+
+export interface DiscoveryTool {
+  tool_id: string;
+  display_name?: string | null;
+  description?: string | null;
+  classification?: string | null;
+  classification_confidence?: string | number | null;
+  tags?: string[];
+  architecture?: string | null;
+  required_inputs?: Array<Record<string, unknown>>;
+  optional_inputs?: Array<Record<string, unknown>>;
+  normalized_inputs?: Array<Record<string, unknown>>;
+  normalized_outputs?: Array<Record<string, unknown>>;
+  backend_capabilities?: Array<Record<string, unknown>>;
+  compatible_servers?: Array<Record<string, unknown>>;
+  container_metadata?: Record<string, unknown> | null;
+  resource_requirements?: Record<string, unknown> | null;
+  configuration_status?: string | null;
+  serving_status?: string | null;
+  registration_status?: string | null;
+  tested_status?: string | null;
+  operational_verification_status?: string | null;
+  source_provenance?: Record<string, unknown> | null;
+  catalog_version?: Record<string, unknown> | null;
+}
+
+export interface DiscoverySearchResult {
+  items: DiscoveryTool[];
+  total: number;
+  limit: number;
+  offset: number;
+  query?: string | null;
+  filters?: Record<string, unknown>;
+}
+
+export interface DiscoveryFacetItem {
+  value: string;
+  count: number;
+}
+
+export interface DiscoveryFacetResult {
+  items: DiscoveryFacetItem[];
+  total: number;
+}
+
+export class DiscoveryError extends Error {
+  readonly status?: number;
+  readonly code?: string;
+
+  constructor(status?: number, code?: string) {
+    super("TES tool discovery is temporarily unavailable. Please try again.");
+    this.name = "DiscoveryError";
+    this.status = status;
+    this.code = code;
+  }
+}
+
+const discoveryRequest = async <T>(path: string, params?: DiscoveryFilters): Promise<T> => {
+  const query = new URLSearchParams();
+  Object.entries(params || {}).forEach(([key, value]) => {
+    if (value !== undefined && value !== null && value !== "") query.set(key, String(value));
+  });
+  const url = `${API_BASE}/api/discovery${path}${query.toString() ? `?${query}` : ""}`;
+  let res: Response;
+  try {
+    res = await fetch(url, { headers: authHeaders() });
+  } catch {
+    throw new DiscoveryError();
+  }
+  let body: unknown = null;
+  try { body = await res.json(); } catch { /* handled below */ }
+  if (!res.ok) {
+    const detail = body && typeof body === "object" && "detail" in body ? (body as { detail?: unknown }).detail : null;
+    const code = detail && typeof detail === "object" && "code" in detail ? String((detail as { code: unknown }).code) : undefined;
+    throw new DiscoveryError(res.status, code);
+  }
+  if (!body || typeof body !== "object") throw new DiscoveryError(502, "TES_MALFORMED_RESPONSE");
+  return body as T;
+};
+
+export const discoverySearch = (filters: DiscoveryFilters) =>
+  discoveryRequest<DiscoverySearchResult>("/search", filters);
+
+export const discoveryTool = (toolId: string) =>
+  discoveryRequest<DiscoveryTool>(`/tools/${encodeURIComponent(toolId)}`);
+
+export const discoveryDataTypes = () =>
+  discoveryRequest<DiscoveryFacetResult>("/data-types");
+
+export const discoveryCategories = () =>
+  discoveryRequest<DiscoveryFacetResult>("/categories");
+
+export const discoveryCatalogVersion = () =>
+  discoveryRequest<Record<string, unknown>>("/catalog/version");
+
+export const discoveryCatalogStatus = () =>
+  discoveryRequest<Record<string, unknown>>("/catalog/status");

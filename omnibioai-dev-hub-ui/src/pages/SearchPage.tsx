@@ -2,8 +2,12 @@ import { useState, useEffect } from "react";
 import { ragQuery, getStatus, describeAskError } from "../api/client";
 import Citations from "../components/Citations";
 import { displaySource } from "../lib/docLinks";
+import ToolDiscovery from "../components/ToolDiscovery";
+
+const statusText = (value: unknown) => value == null ? "Unknown" : String(value);
 
 export default function SearchPage() {
+  const [mode, setMode] = useState<"documentation" | "tools">("documentation");
   const [q, setQ] = useState("");
   const [result, setResult] = useState<any>(null);
   const [loading, setLoading] = useState(false);
@@ -35,8 +39,13 @@ export default function SearchPage() {
 
   const contexts: any[] = result?.context || [];
 
+  if (mode === "tools") {
+    return <><div className="search-bar-row" role="tablist" aria-label="Search mode"><button className="btn-secondary" onClick={() => setMode("documentation")}>Documentation</button><button className="btn-primary" onClick={() => setMode("tools")}>Tools</button></div><ToolDiscovery /></>;
+  }
+
   return (
     <>
+      <div className="search-bar-row" role="tablist" aria-label="Search mode"><button className="btn-primary" onClick={() => setMode("documentation")}>Documentation</button><button className="btn-secondary" onClick={() => setMode("tools")}>Tools</button></div>
       <div className="page-header">
         <div className="page-title">Vector Search</div>
         <div className="page-sub">Semantic search across {indexVectors != null ? indexVectors.toLocaleString() : "…"} embeddings · FAISS IndexFlatIP</div>

@@ -3,11 +3,38 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { AskError } from "../api/client";
 import SearchPage from "./SearchPage";
 
-const { getStatus, ragQuery } = vi.hoisted(() => ({ getStatus: vi.fn(), ragQuery: vi.fn() }));
-vi.mock("../api/client", async (orig) => ({ ...(await orig<typeof import("../api/client")>()), getStatus, ragQuery }));
+const { getStatus, ragQuery, discoverySearch, discoveryDataTypes, discoveryCategories, discoveryCatalogStatus } = vi.hoisted(() => ({
+  getStatus: vi.fn(), ragQuery: vi.fn(), discoverySearch: vi.fn(), discoveryDataTypes: vi.fn(), discoveryCategories: vi.fn(), discoveryCatalogStatus: vi.fn(),
+}));
+vi.mock("../api/client", async (orig) => ({ ...(await orig<typeof import("../api/client")>()), getStatus, ragQuery, discoverySearch, discoveryDataTypes, discoveryCategories, discoveryCatalogStatus }));
 
 describe("SearchPage", () => {
-  beforeEach(() => { getStatus.mockResolvedValue({ index_vectors: 12 }); ragQuery.mockReset(); });
+  beforeEach(() => { getStatus.mockResolvedValue({ index_vectors: 12 }); ragQuery.mockReset(); discoverySearch.mockReset(); discoveryDataTypes.mockResolvedValue({ items: [{ value: "BAM", count: 2 }] }); discoveryCategories.mockResolvedValue({ items: [{ value: "alignment", count: 2 }] }); discoveryCatalogStatus.mockResolvedValue({ status: "READY", tool_count: 12276 }); });
+
+  it("switches to structured Tools mode and renders canonical metadata with unknown statuses", async () => {
+    discoverySearch.mockResolvedValue({ total: 1, items: [{ tool_id: "bwa_mem", display_name: "BWA MEM", description: "Align reads", classification: "alignment", required_inputs: [{ name: "reads", normalized_type: "FASTQ" }], optional_inputs: [], normalized_inputs: [{ normalized_type: "FASTQ" }], normalized_outputs: [{ normalized_type: "BAM" }], backend_capabilities: [{ backend: "Slurm" }], compatible_servers: [{ server_id: "slurm" }], architecture: "base", configuration_status: "CONFIGURED", serving_status: null, registration_status: null, tested_status: null, operational_verification_status: null }] });
+    render(<SearchPage />);
+    fireEvent.click(screen.getByRole("button", { name: "Tools" }));
+    await waitFor(() => expect(screen.getByTestId("catalog-status")).toBeInTheDocument());
+    fireEvent.change(screen.getByPlaceholderText(/Search TES tools/), { target: { value: "BAM alignment" } });
+    fireEvent.click(screen.getByRole("button", { name: "Find tools" }));
+    await waitFor(() => expect(screen.getByTestId("tool-result-bwa_mem")).toBeInTheDocument());
+    expect(screen.getByText(/Configured: CONFIGURED/)).toBeInTheDocument();
+    expect(screen.getByText(/Serving: Unknown/)).toBeInTheDocument();
+    expect(discoverySearch).toHaveBeenCalledWith(expect.objectContaining({ q: "BAM alignment", limit: 20, offset: 0 }));
+  });
+
+  it("keeps documentation search separate when TES discovery is unavailable", async () => {
+    discoverySearch.mockRejectedValue(new Error("TES unavailable"));
+    render(<SearchPage />);
+    fireEvent.click(screen.getByRole("button", { name: "Tools" }));
+    fireEvent.change(await screen.findByPlaceholderText(/Search TES tools/), { target: { value: "BAM" } });
+    fireEvent.click(screen.getByRole("button", { name: "Find tools" }));
+    await waitFor(() => expect(screen.getByText(/TES tool discovery is unavailable\. Documentation/)).toBeInTheDocument());
+    expect(ragQuery).not.toHaveBeenCalled();
+    fireEvent.click(screen.getByRole("button", { name: "Documentation" }));
+    expect(screen.getByPlaceholderText(/Search embeddings/)).toBeInTheDocument();
+  });
 
   it("shows the empty prompt, then renders answer and retrieved chunks", async () => {
     ragQuery.mockResolvedValue({ query: "gene", answer: "Found it", context_used: 1, version: "v6", context: [{ source: "doc.md", text: "chunk text" }] });
@@ -86,4 +113,3 @@ describe("SearchPage", () => {
     expect(screen.queryByRole("list", { name: "Sources" })).not.toBeInTheDocument();
   });
 });
-

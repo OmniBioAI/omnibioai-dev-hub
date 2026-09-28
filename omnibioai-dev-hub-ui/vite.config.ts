@@ -10,6 +10,11 @@ export default defineConfig({
 
     // IMPORTANT: connect UI → FastAPI backend
     proxy: {
+      // TES discovery keeps its versioned /api/discovery contract intact.
+      "/api/discovery": {
+        target: "http://127.0.0.1:8082",
+        changeOrigin: true,
+      },
       "/api": {
         target: "http://127.0.0.1:8082",
         changeOrigin: true,
