@@ -1,6 +1,10 @@
 # OmniBioAI Dev Hub — RAG V6
 
-Production-grade Retrieval-Augmented Generation (RAG) system powering the OmniBioAI ecosystem documentation, architecture search, workflow discovery, and developer assistant APIs.
+Retrieval-Augmented Generation (RAG) service for OmniBioAI documentation,
+architecture search, and developer-assistant APIs. The current document
+pipeline is primarily Markdown-based; structured workflow, plugin, tool, and
+service catalogs require authoritative source adapters and should not be
+represented by duplicated README entries.
 
 ![OmniBioAI Dev Hub overview dashboard](images/omnibioai-dev-hub.png)
 
@@ -14,7 +18,7 @@ Production-grade Retrieval-Augmented Generation (RAG) system powering the OmniBi
 * FastAPI API server
 * Real token-level SSE streaming via Ollama `stream: true`
 * Chunk-level document retrieval with source attribution
-* Repository-wide multi-project indexing (19 repos)
+* Configurable multi-repository indexing (see `configs/repos.yaml`)
 * Fully local execution — no OpenAI dependency
 * Production-safe embedding normalization
 * V6 dimension consistency enforcement
@@ -40,6 +44,20 @@ FastAPI API  (api/main.py + api/routes/rag.py)
      ↓
 LLM Answer Generation  (llama3 via Ollama, blocking or token-streamed)
 ```
+
+## Current Discovery Boundary
+
+The general document loader selects Markdown from configured repositories and
+the trusted ingestion path adds source, revision, visibility, authority, and
+content-state metadata. This repository does not make the FAISS index a
+canonical registry for TES tools, workflow manifests, or workbench plugin
+manifests. Those entities must remain sourced from their structured registries
+and discovery APIs, with documentation retrieval used as explanatory context.
+
+The configured repository list is operational configuration, not a claim that
+all OmniBioAI repositories are currently indexed. The persisted index may also
+reflect an earlier ingestion run; rebuilds and promotions are explicit
+lifecycle operations.
 
 ---
 
@@ -413,7 +431,9 @@ Chunks shorter than 10 characters are discarded (`MIN_CHUNK_CHARS = 10`) to filt
 SKIP_DIRS = {".git", "__pycache__", "node_modules", ".venv", "venv", ".pytest_cache", "obsolete"}
 ```
 
-Note: both `.venv` and bare `venv` are excluded. `.pytest_cache` is excluded because it contains auto-generated `README.md` stubs (present in 17 of the 19 repos) that would otherwise pollute the index with boilerplate.
+Note: both `.venv` and bare `venv` are excluded. `.pytest_cache` is excluded
+because it can contain auto-generated `README.md` stubs that would otherwise
+pollute the index with boilerplate.
 
 **By path segment (`SKIP_PATH_SEGMENTS`):**
 
@@ -644,7 +664,7 @@ docs = engine.retrieve(query, top_k=5, rerank=True)
 
 # Supported Repositories
 
-The indexer targets 19 repositories, sourced from
+The indexer targets the repositories listed in `configs/repos.yaml`, sourced from
 [`configs/repos.yaml`](#configsreposyaml) (falls back to this hardcoded
 list if that file is missing/empty). All paths are relative to `REPO_BASE`:
 
