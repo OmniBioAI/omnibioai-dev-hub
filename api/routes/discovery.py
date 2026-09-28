@@ -1,9 +1,11 @@
 from __future__ import annotations
 
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Depends, Header, HTTPException, Query
 
 from api.auth import require_auth
 from integrations.tes_discovery import TESDiscoveryClient, TESDiscoveryError
+from integrations.model_discovery import ModelDiscoveryClient, ModelDiscoveryError
+from integrations.service_api_discovery import ServiceAPIDiscoveryClient, ServiceAPIDiscoveryError
 
 router = APIRouter(prefix="/api/discovery", tags=["tool-discovery"])
 
@@ -16,6 +18,20 @@ def _call(method_name: str, *args, **kwargs):
     try:
         return getattr(_client(), method_name)(*args, **kwargs)
     except TESDiscoveryError as exc:
+        raise HTTPException(status_code=exc.status_code, detail={"code": exc.code, "message": exc.message}) from exc
+
+
+def _model_call(method_name: str, *args, **kwargs):
+    try:
+        return getattr(ModelDiscoveryClient.from_environment(), method_name)(*args, **kwargs)
+    except ModelDiscoveryError as exc:
+        raise HTTPException(status_code=exc.status_code, detail={"code": exc.code, "message": exc.message}) from exc
+
+
+def _service_api_call(method_name: str, *args, **kwargs):
+    try:
+        return getattr(ServiceAPIDiscoveryClient.from_environment(), method_name)(*args, **kwargs)
+    except ServiceAPIDiscoveryError as exc:
         raise HTTPException(status_code=exc.status_code, detail={"code": exc.code, "message": exc.message}) from exc
 
 
@@ -63,3 +79,60 @@ def catalog_version(actor: str = Depends(require_auth)):
 @router.get("/catalog/status")
 def catalog_status(actor: str = Depends(require_auth)):
     return _call("catalog_status")
+
+
+@router.get("/models")
+def list_models(
+    task: str | None = None,
+    model_name: str | None = None,
+    version: str | None = None,
+    authorization: str | None = Header(default=None),
+    actor: str = Depends(require_auth),
+):
+    """Read-only metadata listing; Model Registry remains the auth authority."""
+    return {"items": _model_call("list_models", authorization=authorization, task=task, model_name=model_name, version=version)}
+
+
+@router.get("/models/{task}/{model_name}")
+def get_model(
+    task: str,
+    model_name: str,
+    version: str | None = None,
+    alias: str | None = None,
+    authorization: str | None = Header(default=None),
+    actor: str = Depends(require_auth),
+):
+    if version and alias:
+        raise HTTPException(status_code=400, detail={"code": "MODEL_ID_AMBIGUOUS", "message": "Specify version or alias, not both"})
+    return _model_call("get_model", task, model_name, version=version, alias=alias, authorization=authorization)
+
+
+@router.get("/services")
+def list_services(query: str | None = None, actor: str = Depends(require_auth)):
+    return {"items": _service_api_call("list_services", query=query)}
+
+
+@router.get("/services/{service_id}")
+def get_service(service_id: str, actor: str = Depends(require_auth)):
+    return _service_api_call("get_service", service_id)
+
+
+@router.get("/services/{service_id}/apis")
+def list_service_apis(
+    service_id: str,
+    method: str | None = None,
+    visibility: str | None = None,
+    actor: str = Depends(require_auth),
+):
+    return {"items": _service_api_call("list_apis", service_id=service_id, method=method, visibility=visibility)}
+
+
+@router.get("/apis")
+def list_apis(
+    service_id: str | None = None,
+    method: str | None = None,
+    visibility: str | None = None,
+    route_id: str | None = None,
+    actor: str = Depends(require_auth),
+):
+    return {"items": _service_api_call("list_apis", service_id=service_id, method=method, visibility=visibility, route_id=route_id)}
