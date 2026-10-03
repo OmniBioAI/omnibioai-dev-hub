@@ -11,6 +11,8 @@ jobs:
   lint-and-test:
     name: Lint & Test
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
 
     steps:
       - uses: actions/checkout@v4
@@ -24,22 +26,21 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          if [ -f pyproject.toml ]; then
-            pip install -e ".[dev]" 2>/dev/null || pip install -e .
-          elif [ -f requirements.txt ]; then
-            pip install -r requirements.txt -r requirements-dev.txt
-          fi
+          pip install -r requirements.txt -r requirements-dev.txt
 
       - name: Lint with ruff
         run: ruff check .
 
       - name: Run tests
-        run: |
-          if [ -d tests ]; then
-            pytest --tb=short -q --cov --cov-report=term-missing
-          else
-            echo "No tests directory found, skipping pytest"
-          fi
+        # `scripts/` has no __init__.py, and two test files import it as
+        # a dotted package (`from scripts.build_trusted_index import ...`,
+        # `from scripts.run_eval import ...`). Without PYTHONPATH=. these
+        # fail collection with ModuleNotFoundError before a single test
+        # runs. Confirmed locally: identical failure reproduced with the
+        # exact command below minus this env var, resolved by adding it.
+        env:
+          PYTHONPATH: .
+        run: pytest --tb=short -q --cov --cov-report=term-missing
 
   frontend:
     name: Frontend Build & Test
@@ -68,16 +69,74 @@ jobs:
       - name: Test
         run: npm test
 
-  docker:
-    name: Build & Push Docker image
-    runs-on: ubuntu-latest
+  # Resolves and validates (once, for every downstream job) the exact
+  # release version, the exact source commit SHA, and the canonical
+  # lowercase GHCR repository path being published. Fails closed if the
+  # tag isn't vX.Y.Z or if GITHUB_SHA is ever anything other than a
+  # genuine 40-character hex SHA.
+  #
+  # The lowercase derivation exists because github.repository preserves
+  # GitHub's configured case for this org ("OmniBioAI/omnibioai-dev-hub"),
+  # but OCI/Docker registry repository names must be all-lowercase --
+  # using the raw, mixed-case value directly in any GHCR reference fails
+  # buildx with "repository name must be lowercase". Every downstream job
+  # below consumes this output instead of touching github.repository
+  # directly, so there is exactly one place this normalization can drift.
+  resolve-version:
+    name: Resolve release version and source SHA
+    runs-on: ubuntu-24.04
     needs: [lint-and-test, frontend]
     if: startsWith(github.ref, 'refs/tags/v')
+    outputs:
+      version: ${{ steps.resolve.outputs.version }}
+      sha: ${{ steps.resolve.outputs.sha }}
+      repo: ${{ steps.resolve.outputs.repo }}
+    permissions:
+      contents: read
+    steps:
+      - name: Resolve and validate
+        id: resolve
+        run: |
+          set -euo pipefail
+          TAG="${GITHUB_REF_NAME}"
+          if [[ ! "$TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "::error::release tag '$TAG' is not a valid vX.Y.Z semver tag" >&2
+            exit 1
+          fi
+          VERSION="${TAG#v}"
+          SHA="${GITHUB_SHA}"
+          if [[ ! "$SHA" =~ ^[0-9a-f]{40}$ ]]; then
+            echo "::error::GITHUB_SHA '$SHA' is not an exact 40-character hex SHA" >&2
+            exit 1
+          fi
+          REPO_LOWER="$(echo "${GITHUB_REPOSITORY}" | tr '[:upper:]' '[:lower:]')"
+          {
+            echo "version=${VERSION}"
+            echo "sha=${SHA}"
+            echo "repo=${REPO_LOWER}"
+          } >> "$GITHUB_OUTPUT"
+
+  # ── Native per-architecture builds ──────────────────────────────────
+  # Two explicit jobs, not one strategy.matrix of two cells: a matrix
+  # job's per-cell outputs are not reliably addressable downstream in
+  # GitHub Actions (the last matrix cell to finish silently overwrites
+  # the others), which is exactly the kind of architecture-write
+  # collision this design has to avoid. Runs on native GitHub-hosted
+  # arm64/amd64 runners. No QEMU, no `platform:` emulation override
+  # anywhere in this file.
+  build-amd64:
+    name: Build Dev Hub (linux/amd64)
+    runs-on: ubuntu-24.04
+    needs: resolve-version
     permissions:
       contents: read
       packages: write
-
+    outputs:
+      digest: ${{ steps.build.outputs.digest }}
     steps:
+      - name: Assert native architecture (no QEMU)
+        run: test "$(uname -m)" = "x86_64"
+
       - uses: actions/checkout@v4
 
       - name: Log in to GHCR
@@ -87,24 +146,223 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Extract metadata
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Extract OCI labels
         id: meta
         uses: docker/metadata-action@v5
         with:
-          images: ghcr.io/${{ github.repository }}
-          tags: |
-            type=semver,pattern={{version}}
-            type=raw,value=latest
+          images: ghcr.io/${{ needs.resolve-version.outputs.repo }}
+          tags: type=raw,value=${{ needs.resolve-version.outputs.version }}
+          labels: |
+            org.opencontainers.image.revision=${{ needs.resolve-version.outputs.sha }}
+            org.opencontainers.image.version=${{ needs.resolve-version.outputs.version }}
+
+      - name: Build and push architecture-staged image
+        id: build
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          platforms: linux/amd64
+          push: true
+          # Collision-safe: unique per (arch, commit) -- two concurrent
+          # releases, or a re-run of the same release, never fight over
+          # this tag the way two architectures racing on :latest/:X.Y.Z
+          # would. Never a mutable version/latest tag; only assemble
+          # (operating on the immutable digest output below) writes those.
+          tags: ghcr.io/${{ needs.resolve-version.outputs.repo }}:staging-amd64-${{ needs.resolve-version.outputs.sha }}
+          labels: ${{ steps.meta.outputs.labels }}
+          provenance: true
+          sbom: true
+          cache-from: type=gha,scope=devhub-amd64
+          cache-to: type=gha,mode=max,scope=devhub-amd64
+
+  build-arm64:
+    name: Build Dev Hub (linux/arm64)
+    runs-on: ubuntu-24.04-arm
+    needs: resolve-version
+    permissions:
+      contents: read
+      packages: write
+    outputs:
+      digest: ${{ steps.build.outputs.digest }}
+    steps:
+      - name: Assert native architecture (no QEMU)
+        run: test "$(uname -m)" = "aarch64"
+
+      - uses: actions/checkout@v4
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
-      - name: Build and push
+      - name: Extract OCI labels
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ghcr.io/${{ needs.resolve-version.outputs.repo }}
+          tags: type=raw,value=${{ needs.resolve-version.outputs.version }}
+          labels: |
+            org.opencontainers.image.revision=${{ needs.resolve-version.outputs.sha }}
+            org.opencontainers.image.version=${{ needs.resolve-version.outputs.version }}
+
+      - name: Build and push architecture-staged image
+        id: build
         uses: docker/build-push-action@v5
         with:
           context: .
+          platforms: linux/arm64
           push: true
-          tags: ${{ steps.meta.outputs.tags }}
+          tags: ghcr.io/${{ needs.resolve-version.outputs.repo }}:staging-arm64-${{ needs.resolve-version.outputs.sha }}
           labels: ${{ steps.meta.outputs.labels }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+          provenance: true
+          sbom: true
+          cache-from: type=gha,scope=devhub-arm64
+          cache-to: type=gha,mode=max,scope=devhub-arm64
+
+  # ── Deterministic OCI index assembly ────────────────────────────────
+  # Only after BOTH architecture builds have succeeded: assemble a
+  # STAGING index directly from the two immutable per-architecture
+  # digests (never from a mutable tag). Deliberately NOT the public
+  # :X.Y.Z tag yet -- neither it nor :latest is ever written until
+  # verification AND native runtime smoke have both passed.
+  assemble:
+    name: Assemble Dev Hub staging index
+    runs-on: ubuntu-24.04
+    needs: [resolve-version, build-amd64, build-arm64]
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Assemble staging index from immutable per-arch digests
+        run: |
+          set -euo pipefail
+          IMAGE="ghcr.io/${{ needs.resolve-version.outputs.repo }}"
+          SHA="${{ needs.resolve-version.outputs.sha }}"
+          docker buildx imagetools create \
+            --tag "${IMAGE}:staging-index-${SHA}" \
+            "${IMAGE}@${{ needs.build-amd64.outputs.digest }}" \
+            "${IMAGE}@${{ needs.build-arm64.outputs.digest }}"
+          docker buildx imagetools inspect "${IMAGE}:staging-index-${SHA}"
+
+  # ── Structured remote verification (fails closed) ───────────────────
+  # Re-derives every release-contract fact from the REAL staging index --
+  # runtime-manifest count/arch, OCI source/revision/version, SBOM and
+  # provenance subject-binding -- never from what the build jobs merely
+  # claim to have pushed. Nothing public can be written unless this passes.
+  verify:
+    name: Verify staged Dev Hub release contract
+    runs-on: ubuntu-24.04
+    needs: [resolve-version, assemble]
+    permissions:
+      contents: read
+      packages: read
+    steps:
+      - uses: actions/checkout@v4
+      - run: |
+          scripts/ci/verify_release_image.sh \
+            "ghcr.io/${{ needs.resolve-version.outputs.repo }}" \
+            "staging-index-${{ needs.resolve-version.outputs.sha }}" \
+            "https://github.com/${{ github.repository }}" \
+            "${{ needs.resolve-version.outputs.sha }}" \
+            "${{ needs.resolve-version.outputs.version }}"
+
+  # ── Native runtime smoke (per architecture, against the staging index) ──
+  # Each job resolves its OWN architecture's exact digest fresh from the
+  # just-verified staging index, pulls by that digest, and proves the
+  # smallest meaningful safe contract: native arch inside the container,
+  # plus GET /health. A disposable Ollama sidecar and a tiny real
+  # PUBLIC-only fixture index (see the script's own comment) satisfy Dev
+  # Hub's fail-closed startup checks without weakening either of them.
+  # Gated on verify so a smoke job never runs against unverified metadata.
+  # Still never touches :X.Y.Z or :latest.
+  smoke-amd64:
+    name: Native runtime smoke - Dev Hub (linux/amd64)
+    runs-on: ubuntu-24.04
+    needs: [resolve-version, verify]
+    permissions:
+      contents: read
+      packages: read
+    steps:
+      - uses: actions/checkout@v4
+      - run: |
+          scripts/ci/native_runtime_smoke.sh \
+            "ghcr.io/${{ needs.resolve-version.outputs.repo }}" \
+            "staging-index-${{ needs.resolve-version.outputs.sha }}" \
+            x86_64
+
+  smoke-arm64:
+    name: Native runtime smoke - Dev Hub (linux/arm64)
+    runs-on: ubuntu-24.04-arm
+    needs: [resolve-version, verify]
+    permissions:
+      contents: read
+      packages: read
+    steps:
+      - uses: actions/checkout@v4
+      - run: |
+          scripts/ci/native_runtime_smoke.sh \
+            "ghcr.io/${{ needs.resolve-version.outputs.repo }}" \
+            "staging-index-${{ needs.resolve-version.outputs.sha }}" \
+            aarch64
+
+  # ── Publish the public version tag (only after full verification + smoke) ──
+  # The ONLY place that ever writes the public :X.Y.Z tag, by retagging
+  # the already-assembled, already-verified, already-smoke-tested staging
+  # index -- never by building or assembling anything new.
+  publish-version:
+    name: Publish Dev Hub :X.Y.Z
+    runs-on: ubuntu-24.04
+    needs: [resolve-version, verify, smoke-amd64, smoke-arm64]
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - run: |
+          set -euo pipefail
+          IMAGE="ghcr.io/${{ needs.resolve-version.outputs.repo }}"
+          SHA="${{ needs.resolve-version.outputs.sha }}"
+          VERSION="${{ needs.resolve-version.outputs.version }}"
+          docker buildx imagetools create --tag "${IMAGE}:${VERSION}" "${IMAGE}:staging-index-${SHA}"
+
+  # ── latest promotion (gated last, atomic retag of the published version) ──
+  # Never builds anything new: retags the just-published :X.Y.Z to
+  # :latest, so :latest can never observably point at a partially
+  # completed release. Dev Hub's own production compose already depends
+  # on :latest (docker-compose.release.yml), so this preserves that
+  # existing consumption contract rather than dropping latest promotion.
+  promote-latest:
+    name: Promote Dev Hub :latest
+    runs-on: ubuntu-24.04
+    needs: [resolve-version, publish-version]
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - run: |
+          set -euo pipefail
+          IMAGE="ghcr.io/${{ needs.resolve-version.outputs.repo }}"
+          VERSION="${{ needs.resolve-version.outputs.version }}"
+          docker buildx imagetools create --tag "${IMAGE}:latest" "${IMAGE}:${VERSION}"
