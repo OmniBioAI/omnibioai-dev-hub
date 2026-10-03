@@ -239,6 +239,48 @@ class TestNoPersonalMachinePathsInThePublishedImage:
         assert "scripts/check_and_reindex.sh" in dockerignore
 
 
+class TestPrivateGhcrReadsAreAuthenticated:
+    """v1.0.0's first real production release (not any prior design
+    review or local test) discovered that `verify`, `smoke-amd64`, and
+    `smoke-arm64` each read the staging OCI index from GHCR without ever
+    authenticating -- `docker buildx imagetools inspect`/pull silently
+    falls back to an anonymous pull token, which works against public
+    packages but returns 401 against omnibioai-dev-hub's (intentionally)
+    PRIVATE package, failing the job before it can inspect anything.
+    Every other job that touches GHCR already authenticates first
+    (build-amd64, build-arm64, assemble, publish-version, promote-latest)
+    -- this only guards the three that didn't."""
+
+    PRIVATE_GHCR_READ_JOBS = ("verify", "smoke-amd64", "smoke-arm64")
+
+    def test_each_private_ghcr_read_job_logs_in_before_its_first_private_read(self, workflow):
+        for job_name in self.PRIVATE_GHCR_READ_JOBS:
+            steps = workflow["jobs"][job_name]["steps"]
+            login_index = next(
+                (i for i, s in enumerate(steps) if s.get("uses", "").startswith("docker/login-action")),
+                None,
+            )
+            read_index = next(
+                i for i, s in enumerate(steps)
+                if "verify_release_image.sh" in (s.get("run") or "")
+                or "native_runtime_smoke.sh" in (s.get("run") or "")
+            )
+            assert login_index is not None, f"{job_name} has no docker/login-action step"
+            assert login_index < read_index, f"{job_name} logs in after its private GHCR read"
+
+    def test_login_step_uses_the_same_established_pattern(self, workflow):
+        for job_name in self.PRIVATE_GHCR_READ_JOBS:
+            steps = workflow["jobs"][job_name]["steps"]
+            login_step = next(s for s in steps if s.get("uses", "").startswith("docker/login-action"))
+            assert login_step["with"]["registry"] == "ghcr.io"
+            assert login_step["with"]["username"] == "${{ github.actor }}"
+            assert login_step["with"]["password"] == "${{ secrets.GITHUB_TOKEN }}"
+
+    def test_private_ghcr_read_jobs_keep_least_privilege_read_only_packages_permission(self, workflow):
+        for job_name in self.PRIVATE_GHCR_READ_JOBS:
+            assert workflow["jobs"][job_name]["permissions"]["packages"] == "read"
+
+
 class TestLintDoesNotBlockEveryRelease:
     """Confirmed via live CI evidence (both the pre-hardening commit and
     this release candidate's own branch-push run) that `ruff check .`

@@ -300,6 +300,11 @@ jobs:
       packages: read
     steps:
       - uses: actions/checkout@v4
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
       - run: |
           scripts/ci/verify_release_image.sh \
             "ghcr.io/${{ needs.resolve-version.outputs.repo }}" \
@@ -326,6 +331,11 @@ jobs:
       packages: read
     steps:
       - uses: actions/checkout@v4
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
       - run: |
           scripts/ci/native_runtime_smoke.sh \
             "ghcr.io/${{ needs.resolve-version.outputs.repo }}" \
@@ -341,6 +351,11 @@ jobs:
       packages: read
     steps:
       - uses: actions/checkout@v4
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
       - run: |
           scripts/ci/native_runtime_smoke.sh \
             "ghcr.io/${{ needs.resolve-version.outputs.repo }}" \
