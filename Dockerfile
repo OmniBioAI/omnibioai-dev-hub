@@ -1,6 +1,9 @@
 # ── Stage 1: Build Vite UI ────────────────────────────────────────────────────
-# Explicitly target linux/arm64 for aarch64 host
-FROM --platform=linux/arm64 node:20-bookworm-slim AS ui-builder
+# Always build on the host (BuildKit) platform, never the target platform:
+# the UI build output (static JS/CSS/HTML) is architecture-independent, so
+# building it once per target arch would be wasted native-runner work. Same
+# pattern already proven in omnibioai-control-center's own Dockerfile.
+FROM --platform=$BUILDPLATFORM node:20-bookworm-slim AS ui-builder
 WORKDIR /ui
 COPY omnibioai-dev-hub-ui/package*.json ./
 RUN npm ci
@@ -8,9 +11,14 @@ COPY omnibioai-dev-hub-ui/ ./
 RUN npm run build
 
 # ── Stage 2: Python API + nginx ───────────────────────────────────────────────
-FROM --platform=linux/arm64 ghcr.io/omnibioai/omnibioai-base:latest AS backend
+# No --platform override here: the native per-architecture CI build invokes
+# buildx with --platform linux/amd64 or linux/arm64 on a runner that is
+# natively that architecture (no QEMU) -- the previous hardcoded
+# --platform=linux/arm64 meant this stage could only ever be cross-built
+# from an aarch64 host, and would fail outright on a native amd64 runner.
+FROM ghcr.io/omnibioai/omnibioai-base:1.0.0 AS backend
 
-LABEL org.opencontainers.image.source=https://github.com/man4ish/omnibioai
+LABEL org.opencontainers.image.source=https://github.com/OmniBioAI/omnibioai-dev-hub
 
 # curl needed for Ollama readiness check; nginx for UI serving
 RUN apt-get update && apt-get install -y --no-install-recommends \
@@ -33,6 +41,13 @@ COPY api/        ./api/
 COPY embeddings/ ./embeddings/
 COPY index/      ./index/
 COPY ingestion/  ./ingestion/
+# api/routes/discovery.py imports integrations.tes_discovery (and the
+# other integrations.* modules) -- this line was missing entirely, so
+# the image would crash on startup with ModuleNotFoundError as soon as
+# api.main imported api.routes.discovery. Confirmed by a real native
+# ARM64 build + run: this was the next failure surfaced immediately
+# after fixing the unrelated cryptography SIGILL below.
+COPY integrations/ ./integrations/
 COPY processing/ ./processing/
 COPY retrieval/  ./retrieval/
 COPY rag/        ./rag/

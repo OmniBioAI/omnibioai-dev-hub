@@ -6,3 +6,19 @@ faiss-cpu==1.15.0
 sentence-transformers==5.4.1
 PyJWT==2.10.1
 PyYAML==6.0.2
+
+# PyJWT's jwt/utils.py unconditionally imports
+# cryptography.hazmat.primitives.asymmetric.ec at import time (api/auth.py
+# -> jwt -> jwt.algorithms -> jwt.utils). cryptography is not declared
+# anywhere else in this file -- it arrives transitively, pre-installed in
+# omnibioai-base's own ML stack -- and the base image's current
+# cryptography==50.0.1 is within the documented broken range: versions
+# 47.x-50.x ship an ARM64 manylinux wheel (_rust.abi3.so) that SIGILLs
+# (exit 132) on exactly this import. Confirmed locally: this exact native
+# ARM64 build of Dev Hub crashed with "Illegal instruction" the moment
+# `exec uvicorn` tried to import api.main -> api.auth -> jwt. Same root
+# cause, same validated fix already applied in omnibioai-tes and
+# omnibioai-control-center (see
+# OMNIBIOAI-SECURITY-AUDIT-ARM64-CRYPTOGRAPHY-SIGILL-2026-09-30.md):
+# cryptography==46.0.3 is the newest clean release.
+cryptography==46.0.3
