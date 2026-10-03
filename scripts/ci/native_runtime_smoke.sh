@@ -55,6 +55,7 @@ VOLUME="devhub-smoke-data-${SUFFIX}"
 OLLAMA_CONTAINER="devhub-smoke-ollama-${SUFFIX}"
 APP_CONTAINER="devhub-smoke-app-${SUFFIX}"
 HOST_PORT=$((20000 + RANDOM % 10000))
+UI_HOST_PORT=$((30000 + RANDOM % 10000))
 
 fail() {
   echo "FAIL: $1" >&2
@@ -127,6 +128,7 @@ echo "== Starting disposable Dev Hub container (no production config/secrets) ==
 docker run -d --name "$APP_CONTAINER" \
   --network "$NETWORK" \
   -p "${HOST_PORT}:8082" \
+  -p "${UI_HOST_PORT}:5173" \
   -v "${VOLUME}:/app/data" \
   -e AUTH_ENABLED=false \
   "$PULL_REF" >/dev/null \
@@ -153,5 +155,35 @@ HEALTH_BODY="$(curl -sf "http://127.0.0.1:${HOST_PORT}/health")"
 echo "$HEALTH_BODY" | jq -e '.status == "ok" and .service == "omnibioai-dev-hub"' >/dev/null \
   || fail "GET /health returned unexpected body: ${HEALTH_BODY}"
 echo "GET /health -> 200 {\"status\":\"ok\",\"service\":\"omnibioai-dev-hub\",...} OK"
+
+# Frontend: nginx's own generated config (docker-entrypoint.sh) serves
+# the built React/Vite SPA on 5173 via `location / { try_files $uri
+# $uri/ /index.html; }` against `root /usr/share/nginx/html` -- read
+# directly from the real entrypoint, not invented. nginx only starts
+# once the index/Ollama checks above have already passed, so this is
+# checked after /health, not before.
+echo "== Waiting for GET / (frontend, port 5173) =="
+tries=30
+until curl -sf -o /dev/null "http://127.0.0.1:${UI_HOST_PORT}/"; do
+  if ! docker ps --filter "name=${APP_CONTAINER}" --filter status=running -q | grep -q .; then
+    fail "${APP_CONTAINER} exited before the frontend became ready (see captured logs above)"
+  fi
+  tries=$((tries - 1))
+  [ "$tries" -gt 0 ] || fail "Dev Hub frontend (port 5173) never became ready"
+  sleep 1
+done
+
+UI_STATUS="$(curl -s -o /dev/null -w '%{http_code}' "http://127.0.0.1:${UI_HOST_PORT}/")"
+[ "$UI_STATUS" = "200" ] || fail "GET / (frontend) returned ${UI_STATUS}, expected 200"
+
+UI_BODY="$(curl -sf "http://127.0.0.1:${UI_HOST_PORT}/")"
+grep -qi '<html' <<<"$UI_BODY" \
+  || fail "GET / (frontend) returned 200 but body does not look like the built SPA (no <html> found)"
+echo "GET / (frontend) -> 200, SPA index.html served OK"
+
+if ! docker ps --filter "name=${APP_CONTAINER}" --filter status=running -q | grep -q .; then
+  fail "${APP_CONTAINER} is not running after serving the frontend request"
+fi
+echo "Container still running after frontend request OK"
 
 echo "PASS: native linux/${ARCH} Dev Hub runtime smoke succeeded for ${PULL_REF}"

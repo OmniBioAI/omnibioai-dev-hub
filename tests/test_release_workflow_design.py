@@ -205,3 +205,20 @@ class TestRuntimeSmokeDesign:
 
     def test_smoke_resolves_against_the_staging_index_not_a_mutable_tag(self, workflow_text):
         assert "native_runtime_smoke.sh" in workflow_text
+
+
+class TestRuntimeSmokeCoversBothBackendAndFrontend:
+    """Dev Hub ships a FastAPI backend (port 8082) and an nginx-served
+    React/Vite frontend (port 5173) in one container -- the smoke script
+    must exercise both, not just the backend. Derived from the real
+    nginx config docker-entrypoint.sh generates at container start
+    (`location / { try_files $uri $uri/ /index.html; }` on 5173), not
+    invented."""
+
+    def test_smoke_publishes_the_frontend_port(self):
+        script = (REPO_ROOT / "scripts" / "ci" / "native_runtime_smoke.sh").read_text()
+        assert "5173" in script
+
+    def test_smoke_checks_a_real_html_response_on_the_frontend_port(self):
+        script = (REPO_ROOT / "scripts" / "ci" / "native_runtime_smoke.sh").read_text()
+        assert "<html" in script.lower()
