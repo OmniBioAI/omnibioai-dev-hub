@@ -28,3 +28,12 @@ perf_baseline.json
 **/build
 data/
 data_staging/
+
+# Personal bare-metal cron/maintenance tooling (hardcoded /home/manish/...
+# paths, a personal conda env, `sudo systemctl restart`) -- never invoked
+# by the container's own entrypoint or any application code (confirmed:
+# zero references anywhere else in the repo). Excluded so it never ships
+# inside the published production image; not deleted from the repo, since
+# whether to keep it as tracked ops tooling is a separate decision outside
+# this release's scope.
+scripts/check_and_reindex.sh

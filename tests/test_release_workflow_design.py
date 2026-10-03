@@ -222,3 +222,18 @@ class TestRuntimeSmokeCoversBothBackendAndFrontend:
     def test_smoke_checks_a_real_html_response_on_the_frontend_port(self):
         script = (REPO_ROOT / "scripts" / "ci" / "native_runtime_smoke.sh").read_text()
         assert "<html" in script.lower()
+
+
+class TestNoPersonalMachinePathsInThePublishedImage:
+    """scripts/check_and_reindex.sh is a personal bare-metal cron script
+    (hardcoded /home/manish/... paths, a personal conda env, `sudo
+    systemctl restart`) that COPY scripts/ ./scripts/ would otherwise
+    bundle into the published production image -- it is never invoked by
+    any application code or the container's own entrypoint. Excluded via
+    .dockerignore rather than deleted from the repo (a separate decision
+    outside this release's scope); confirmed by a real build that it is
+    actually absent from the resulting image."""
+
+    def test_dockerignore_excludes_the_personal_maintenance_script(self):
+        dockerignore = (REPO_ROOT / ".dockerignore").read_text()
+        assert "scripts/check_and_reindex.sh" in dockerignore
