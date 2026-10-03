@@ -6,10 +6,12 @@ import hashlib
 from dataclasses import dataclass
 from typing import Any
 
-from integrations.service_api_discovery import ServiceAPIDiscoveryClient, ServiceAPIDiscoveryError
-from integrations.tes_discovery import TESDiscoveryClient, TESDiscoveryError
 from integrations.b1_contract import canonical_key
-
+from integrations.service_api_discovery import (
+    ServiceAPIDiscoveryClient,
+    ServiceAPIDiscoveryError,
+)
+from integrations.tes_discovery import TESDiscoveryClient, TESDiscoveryError
 
 RELATIONSHIP_VERSION = "1.0"
 SERVICE_EXPOSES_API = "SERVICE_EXPOSES_API"

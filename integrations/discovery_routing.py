@@ -5,7 +5,6 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Any
 
-
 SUPPORTED_ENTITY_TYPES = frozenset({"documentation", "tool", "model", "service", "api", "workflow", "plugin"})
 ROUTABLE_ENTITY_TYPES = frozenset({"tool", "model", "service", "api"})
 

@@ -5,7 +5,6 @@ from __future__ import annotations
 import os
 from dataclasses import dataclass
 from typing import Any
-from urllib.parse import quote
 
 import requests
 
@@ -26,7 +25,7 @@ class ModelDiscoveryClient:
     timeout_seconds: float = 5.0
 
     @classmethod
-    def from_environment(cls) -> "ModelDiscoveryClient":
+    def from_environment(cls) -> ModelDiscoveryClient:
         base_url = os.environ.get("MODEL_REGISTRY_URL", "").strip().rstrip("/")
         if not base_url:
             raise ModelDiscoveryError("MODEL_REGISTRY_NOT_CONFIGURED", "Model Registry discovery is not configured")

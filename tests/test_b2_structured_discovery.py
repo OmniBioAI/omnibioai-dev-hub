@@ -6,13 +6,15 @@ import json
 from pathlib import Path
 from unittest.mock import patch
 
-import requests
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
 
 from api.routes.discovery import router
 from integrations.model_discovery import ModelDiscoveryClient, ModelDiscoveryError
-from integrations.service_api_discovery import ServiceAPIDiscoveryClient, ServiceAPIDiscoveryError
+from integrations.service_api_discovery import (
+    ServiceAPIDiscoveryClient,
+    ServiceAPIDiscoveryError,
+)
 
 
 class Response:

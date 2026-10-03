@@ -25,7 +25,7 @@ class ServiceAPIDiscoveryClient:
     catalog_path: str
 
     @classmethod
-    def from_environment(cls) -> "ServiceAPIDiscoveryClient":
+    def from_environment(cls) -> ServiceAPIDiscoveryClient:
         path = os.environ.get("SERVICE_API_CATALOG_PATH", "").strip()
         if not path:
             raise ServiceAPIDiscoveryError("SERVICE_API_CATALOG_NOT_CONFIGURED", "Service/API catalog is not configured")

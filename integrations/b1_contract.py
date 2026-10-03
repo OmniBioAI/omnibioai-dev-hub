@@ -6,7 +6,6 @@ import json
 from typing import Any
 from urllib.parse import quote
 
-
 CONTRACT_VERSION = "1.0"
 
 

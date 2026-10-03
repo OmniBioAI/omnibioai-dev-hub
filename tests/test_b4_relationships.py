@@ -8,13 +8,13 @@ from fastapi import FastAPI
 from fastapi.testclient import TestClient
 
 from api.routes.discovery import router
+from integrations.b1_contract import envelope
 from integrations.relationship_discovery import (
-    RelationshipDiscoveryClient,
-    RelationshipDiscoveryError,
     SERVICE_EXPOSES_API,
     TOOL_COMPATIBLE_WITH_BACKEND,
+    RelationshipDiscoveryClient,
+    RelationshipDiscoveryError,
 )
-from integrations.b1_contract import envelope
 
 
 def _service(service_id: str = "auth") -> dict:

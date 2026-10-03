@@ -3,11 +3,17 @@ from __future__ import annotations
 from fastapi import APIRouter, Depends, Header, HTTPException, Query
 
 from api.auth import require_auth
-from integrations.tes_discovery import TESDiscoveryClient, TESDiscoveryError
-from integrations.model_discovery import ModelDiscoveryClient, ModelDiscoveryError
-from integrations.service_api_discovery import ServiceAPIDiscoveryClient, ServiceAPIDiscoveryError
 from integrations.discovery_routing import DiscoveryRoutingError, route_query
-from integrations.relationship_discovery import RelationshipDiscoveryClient, RelationshipDiscoveryError
+from integrations.model_discovery import ModelDiscoveryClient, ModelDiscoveryError
+from integrations.relationship_discovery import (
+    RelationshipDiscoveryClient,
+    RelationshipDiscoveryError,
+)
+from integrations.service_api_discovery import (
+    ServiceAPIDiscoveryClient,
+    ServiceAPIDiscoveryError,
+)
+from integrations.tes_discovery import TESDiscoveryClient, TESDiscoveryError
 
 router = APIRouter(prefix="/api/discovery", tags=["tool-discovery"])
 
