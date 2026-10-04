@@ -215,7 +215,8 @@ def _check_staging_root_writable(staging_root: str) -> None:
 
 
 def build_candidate(repo_base: str, staging_root: str, build_id: str | None = None, repo_names: list[str] | None = None,
-                     *, batch_size: int = DEFAULT_EMBED_BATCH_SIZE, cooldown_seconds: float = DEFAULT_EMBED_COOLDOWN_SECONDS) -> dict:
+                     *, batch_size: int = DEFAULT_EMBED_BATCH_SIZE, cooldown_seconds: float = DEFAULT_EMBED_COOLDOWN_SECONDS,
+                     include_internal_index: bool = True) -> dict:
     build_id = build_id or f"devhub-{uuid.uuid4().hex[:12]}"
     out_dir = candidate_dir(staging_root, build_id)
     if out_dir.exists():
@@ -223,7 +224,11 @@ def build_candidate(repo_base: str, staging_root: str, build_id: str | None = No
     _check_staging_root_writable(staging_root)
     build_start = time.monotonic()
 
-    policy = SourcePolicy(repository_names=repo_names) if repo_names is not None else SourcePolicy()
+    policy = (
+        SourcePolicy(repository_names=repo_names, include_internal_index=include_internal_index)
+        if repo_names is not None
+        else SourcePolicy(include_internal_index=include_internal_index)
+    )
     docs, discovery_stats = discover_documents(repo_base, policy)
     metadata = []
     for doc in docs:
@@ -290,6 +295,12 @@ def main() -> int:
     parser.add_argument("--repo-base", default=os.environ.get("REPO_BASE", "/home/manish/Desktop/machine"))
     parser.add_argument("--staging-root", default=str(Path(__file__).resolve().parents[1] / "data" / "faiss_candidates"))
     parser.add_argument("--build-id")
+    parser.add_argument("--repo-name", action="append", help="limit ingestion to this repository (repeatable)")
+    parser.add_argument(
+        "--public-only",
+        action="store_true",
+        help="exclude INTERNAL and REVIEW_REQUIRED documents before reading/embedding; requires explicit --repo-name",
+    )
     parser.add_argument(
         "--embed-batch-size", type=int,
         default=int(os.environ.get("DEVHUB_EMBED_BATCH_SIZE", DEFAULT_EMBED_BATCH_SIZE)),
@@ -299,9 +310,12 @@ def main() -> int:
         default=float(os.environ.get("DEVHUB_EMBED_COOLDOWN_SECONDS", DEFAULT_EMBED_COOLDOWN_SECONDS)),
     )
     args = parser.parse_args()
+    if args.public_only and not args.repo_name:
+        parser.error("--public-only requires at least one explicit --repo-name")
     result = build_candidate(
-        args.repo_base, args.staging_root, args.build_id,
+        args.repo_base, args.staging_root, args.build_id, repo_names=args.repo_name,
         batch_size=args.embed_batch_size, cooldown_seconds=args.embed_cooldown_seconds,
+        include_internal_index=not args.public_only,
     )
     print(result["candidate_dir"])
     return 0

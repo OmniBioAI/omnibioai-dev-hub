@@ -1,6 +1,7 @@
 __pycache__/
 data/faiss_index/
 data/faiss_candidates/
+data/faiss_public_staging/
 data/faiss_previous/
 data/faiss_rolled/
 data_staging/

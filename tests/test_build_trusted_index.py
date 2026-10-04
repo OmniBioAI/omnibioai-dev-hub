@@ -7,11 +7,13 @@ don't need the network or faiss.
 """
 
 import os
+import json
 from unittest.mock import patch
 
 import pytest
 
 from scripts.build_trusted_index import _check_staging_root_writable, embed_metadata
+from ingestion.trusted import SourcePolicy, discover_documents
 
 
 def _meta(chunk_id: str, source: str = "repo:README.md@abc") -> dict:
@@ -208,3 +210,32 @@ def test_check_staging_root_writable_raises_on_permission_denied(tmp_path):
             _check_staging_root_writable(str(staging_root))
     finally:
         os.chmod(staging_root, 0o700)  # restore so tmp_path cleanup can remove it
+
+
+def test_public_only_source_policy_excludes_non_public_documents_before_ingestion(tmp_path):
+    repo = tmp_path / "omnibioai-docs"
+    visibility = repo / "visibility"
+    visibility.mkdir(parents=True)
+    (repo / "site").mkdir()
+    (repo / "site" / "public.md").write_text("# Public\npublic content", encoding="utf-8")
+    (repo / "site" / "internal.md").write_text("# Internal\ninternal content", encoding="utf-8")
+    (repo / "site" / "review.md").write_text("# Review\nreview content", encoding="utf-8")
+    (visibility / "VISIBILITY-INVENTORY.json").write_text(
+        json.dumps({"artifacts": [
+            {"path": "site/public.md", "classification": "PUBLIC"},
+            {"path": "site/internal.md", "classification": "INTERNAL"},
+            {"path": "site/review.md", "classification": "REVIEW_REQUIRED"},
+        ]}),
+        encoding="utf-8",
+    )
+
+    docs, stats = discover_documents(
+        str(tmp_path),
+        SourcePolicy(repository_names=["omnibioai-docs"], include_internal_index=False),
+    )
+
+    assert [doc["relative_path"] for doc in docs] == ["site/public.md"]
+    assert docs[0]["visibility"] == "PUBLIC"
+    assert {item["reason"] for item in stats["skipped_documents"]} == {
+        "internal-excluded", "review-required"
+    }
