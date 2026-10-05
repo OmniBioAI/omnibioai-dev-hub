@@ -1,3 +1,13 @@
+"""
+OmniBioAI scripts.build_index.
+
+Purpose:
+    Defines build_index for scripts.build_index.
+
+Author:
+    Manish Kumar <manish@omnibioai.org>
+"""
+
 import os
 import sys
 
