@@ -1,3 +1,7 @@
+# OmniBioAI — Developer Hub
+# Purpose: Build the developer hub API and nginx-served web UI.
+# Author: Manish Kumar <manish@omnibioai.org>
+
 # ── Stage 1: Build Vite UI ────────────────────────────────────────────────────
 # Always build on the host (BuildKit) platform, never the target platform:
 # the UI build output (static JS/CSS/HTML) is architecture-independent, so
@@ -7,6 +11,7 @@ FROM --platform=$BUILDPLATFORM node:20-bookworm-slim AS ui-builder
 WORKDIR /ui
 COPY omnibioai-dev-hub-ui/package*.json ./
 RUN npm ci
+# Application source
 COPY omnibioai-dev-hub-ui/ ./
 RUN npm run build
 
@@ -88,6 +93,7 @@ RUN groupadd --gid 10001 appuser \
     && sed -i '/^user www-data;$/d' /etc/nginx/nginx.conf \
     && sed -i 's#pid /run/nginx.pid;#pid /tmp/nginx.pid;#' /etc/nginx/nginx.conf
 
+# Runtime configuration
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
     PYTHONPATH=/app \
