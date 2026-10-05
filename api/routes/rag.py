@@ -1,3 +1,13 @@
+"""
+OmniBioAI api.routes.rag.
+
+Purpose:
+    Defines HTTP route handlers for api.routes.rag, including query and stream.
+
+Author:
+    Manish Kumar <manish@omnibioai.org>
+"""
+
 import json
 import logging
 import os

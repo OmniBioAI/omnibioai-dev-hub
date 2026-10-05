@@ -1,3 +1,13 @@
+"""
+OmniBioAI rag.control_plane.
+
+Purpose:
+    Defines ControlPlaneState and ControlPlane for rag.control_plane.
+
+Author:
+    Manish Kumar <manish@omnibioai.org>
+"""
+
 import threading
 import time
 from dataclasses import dataclass, field

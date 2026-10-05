@@ -1,3 +1,13 @@
+"""
+OmniBioAI index.graph_store.
+
+Purpose:
+    Defines GraphStore with add_edge, search, size and export methods for index.graph_store.
+
+Author:
+    Manish Kumar <manish@omnibioai.org>
+"""
+
 from collections import defaultdict, deque
 from typing import Any
 

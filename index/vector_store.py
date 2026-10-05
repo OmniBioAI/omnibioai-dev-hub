@@ -1,3 +1,13 @@
+"""
+OmniBioAI index.vector_store.
+
+Purpose:
+    Defines VectorStore with add, search, filter_search and save methods for index.vector_store.
+
+Author:
+    Manish Kumar <manish@omnibioai.org>
+"""
+
 import logging
 import os
 import pickle

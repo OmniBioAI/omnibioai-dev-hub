@@ -1,3 +1,13 @@
+"""
+OmniBioAI api.routes.discovery.
+
+Purpose:
+    Defines HTTP route handlers for api.routes.discovery, including get_tool, search_tools, data_types and categories.
+
+Author:
+    Manish Kumar <manish@omnibioai.org>
+"""
+
 from __future__ import annotations
 
 from fastapi import APIRouter, Depends, Header, HTTPException, Query

@@ -1,3 +1,13 @@
+"""
+OmniBioAI processing.chunker.
+
+Purpose:
+    Defines chunk_text for processing.chunker.
+
+Author:
+    Manish Kumar <manish@omnibioai.org>
+"""
+
 import re
 
 MAX_CHARS = 2000

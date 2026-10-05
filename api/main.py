@@ -1,3 +1,13 @@
+"""
+OmniBioAI api.main.
+
+Purpose:
+    Defines HTTP route handlers for api.main, including health and status.
+
+Author:
+    Manish Kumar <manish@omnibioai.org>
+"""
+
 import logging
 import os
 

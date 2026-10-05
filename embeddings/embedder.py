@@ -1,4 +1,14 @@
 
+"""
+OmniBioAI embeddings.embedder.
+
+Purpose:
+    Defines Embedder with encode and encode_single methods for embeddings.embedder.
+
+Author:
+    Manish Kumar <manish@omnibioai.org>
+"""
+
 import numpy as np
 from sentence_transformers import SentenceTransformer
 

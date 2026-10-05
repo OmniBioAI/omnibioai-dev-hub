@@ -1,3 +1,13 @@
+"""
+OmniBioAI rag.query_router.
+
+Purpose:
+    Defines RAGQueryRouterV4, init_engine and get_engine for rag.query_router.
+
+Author:
+    Manish Kumar <manish@omnibioai.org>
+"""
+
 import json
 
 import requests

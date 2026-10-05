@@ -1,3 +1,13 @@
+"""
+OmniBioAI rag.tool_executor.
+
+Purpose:
+    Defines ToolExecutorV4 with run methods for rag.tool_executor.
+
+Author:
+    Manish Kumar <manish@omnibioai.org>
+"""
+
 from typing import Any
 
 # =========================================================

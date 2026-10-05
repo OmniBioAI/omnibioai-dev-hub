@@ -1,3 +1,13 @@
+"""
+OmniBioAI api.middleware.trace.
+
+Purpose:
+    Defines TraceContext with start, add_step and get methods for api.middleware.trace.
+
+Author:
+    Manish Kumar <manish@omnibioai.org>
+"""
+
 import time
 import uuid
 

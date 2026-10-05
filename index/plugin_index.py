@@ -1,3 +1,13 @@
+"""
+OmniBioAI index.plugin_index.
+
+Purpose:
+    Defines PluginIndex with add and search methods for index.plugin_index.
+
+Author:
+    Manish Kumar <manish@omnibioai.org>
+"""
+
 class PluginIndex:
     def __init__(self, plugin_docs=None):
         """

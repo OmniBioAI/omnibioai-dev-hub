@@ -1,3 +1,13 @@
+"""
+OmniBioAI ingestion.doc_loader.
+
+Purpose:
+    Defines load_documents for ingestion.doc_loader.
+
+Author:
+    Manish Kumar <manish@omnibioai.org>
+"""
+
 import os
 
 SKIP_DIRS = {".git", "__pycache__", "node_modules", ".venv", "venv", ".pytest_cache", "obsolete", "production-readiness"}

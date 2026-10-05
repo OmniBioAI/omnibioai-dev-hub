@@ -1,3 +1,13 @@
+"""
+OmniBioAI rag.memory_store.
+
+Purpose:
+    Defines MemoryStoreV4 with add and get_context methods for rag.memory_store.
+
+Author:
+    Manish Kumar <manish@omnibioai.org>
+"""
+
 from collections import deque
 
 

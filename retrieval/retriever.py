@@ -1,3 +1,13 @@
+"""
+OmniBioAI retrieval.retriever.
+
+Purpose:
+    Defines Retriever with retrieve methods for retrieval.retriever.
+
+Author:
+    Manish Kumar <manish@omnibioai.org>
+"""
+
 from embeddings.embedder import Embedder
 
 

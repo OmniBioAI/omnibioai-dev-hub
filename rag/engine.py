@@ -1,3 +1,13 @@
+"""
+OmniBioAI rag.engine.
+
+Purpose:
+    Defines ollama_embed, ollama_generate, cosine and with_full_citation for rag.engine.
+
+Author:
+    Manish Kumar <manish@omnibioai.org>
+"""
+
 import json
 import logging
 import os
