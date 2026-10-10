@@ -16,3 +16,8 @@ dist/
 .env
 cache/
 logs/
+
+.coverage
+.coverage.*
+coverage.xml
+htmlcov/
