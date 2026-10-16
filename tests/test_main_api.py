@@ -5,6 +5,7 @@ out.
 Developer: Manish Kumar <manish@omnibioai.org>
 """
 
+import contextlib
 import importlib
 import logging
 import sys
@@ -68,6 +69,15 @@ def test_status_endpoint_counts_distinct_omnibioai_repos():
         assert response.json()["repos_loaded"] == 2
 
 
+@contextlib.contextmanager
+def _as_runtime_uid():
+    """Re-importing api.main re-runs its import-time identity/auth gate (F-UID-1).
+    These tests are about index selection, so they reload as the runtime UID with
+    auth disabled; identity enforcement itself is tested in test_serving_identity.py."""
+    with patch("os.geteuid", return_value=10001), patch.dict("os.environ", {"AUTH_ENABLED": ""}):
+        yield
+
+
 def test_warns_when_no_persisted_faiss_index_is_found(caplog):
     """Log a warning at import time when no persisted FAISS index can be loaded."""
     import api.main as main_module
@@ -77,6 +87,7 @@ def test_warns_when_no_persisted_faiss_index_is_found(caplog):
         with (
             patch.object(VectorStore, "load", return_value=False),
             caplog.at_level(logging.WARNING, logger="api.main"),
+            _as_runtime_uid(),
         ):
             importlib.reload(main_module)
         assert any(
@@ -85,7 +96,8 @@ def test_warns_when_no_persisted_faiss_index_is_found(caplog):
     finally:
         # Restore api.main to a normal (unpatched) import for any test that
         # runs after this one and reaches for its module-level state.
-        importlib.reload(main_module)
+        with _as_runtime_uid():
+            importlib.reload(main_module)
 
 
 def test_application_uses_canonical_index_path_and_ignores_environment_override(monkeypatch):
@@ -97,12 +109,14 @@ def test_application_uses_canonical_index_path_and_ignores_environment_override(
         monkeypatch.setenv("DEVHUB_INDEX_DIR", "/tmp/unauthorized-index")
         with (
             patch.object(VectorStore, "load", return_value=True) as load,
+            _as_runtime_uid(),
         ):
             importlib.reload(main_module)
         load.assert_called_once_with("/app/data/faiss_index")
     finally:
         monkeypatch.delenv("DEVHUB_INDEX_DIR", raising=False)
-        importlib.reload(main_module)
+        with _as_runtime_uid():
+            importlib.reload(main_module)
 
 
 def test_guard_requests_middleware_ready():

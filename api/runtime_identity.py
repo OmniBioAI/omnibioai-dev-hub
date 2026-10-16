@@ -2,9 +2,11 @@
 
 docker-entrypoint.sh enforces this before anything starts, but the image's
 CMD can be replaced (e.g. ``docker run <image> uvicorn api.main:app``), which
-skips the shell gate entirely. The FastAPI startup event therefore enforces
-the same contract, so every ASGI launch path that runs the application's
-lifespan refuses to serve under any other identity -- including root.
+skips the shell gate entirely. api/main.py therefore enforces the same contract
+when the application module is imported -- before any ASGI server can bind or
+serve, independent of the lifespan protocol (``--lifespan off``) -- and again
+in its startup event, so no launch path serves under any other identity,
+including root.
 """
 import os
 

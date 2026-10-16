@@ -23,6 +23,13 @@ from index.runtime_path import validate_runtime_index_root
 from index.vector_store import VectorStore
 from rag.control_plane import CONTROL_PLANE
 
+# F-UID-1: refuse before the ASGI application object exists. Every ASGI server
+# must import this module before it can bind a socket or serve a request, so
+# these checks hold even with `--lifespan off`, which skips startup_event()
+# below (kept as defense in depth). No environment variable or flag relaxes them.
+require_runtime_uid()
+validate_auth_config()
+
 logger = logging.getLogger(__name__)
 
 
