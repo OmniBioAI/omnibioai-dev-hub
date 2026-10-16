@@ -119,11 +119,13 @@ def query(req: QueryRequest, actor: str = Depends(require_auth)):
         }
 
     except Exception as e:  # noqa: BLE001 -- top-level HTTP boundary: must catch anything to return a clean 500 instead of an unhandled crash
-        detail = {"error": str(e)}
+        logger.exception("ask query failed")
+        detail = {"error": STREAM_ERROR_MESSAGE}
         # Stack traces can leak file paths, internals, and other sensitive
         # detail into the HTTP response -- only include one when a deployer
         # has explicitly opted in via DEBUG_TRACEBACKS=true.
         if _debug_tracebacks_enabled():
+            detail["error"] = str(e)
             detail["trace"] = traceback.format_exc()
         raise HTTPException(status_code=500, detail=detail)
 

@@ -9,7 +9,6 @@ Author:
 """
 
 import logging
-import os
 
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
@@ -20,6 +19,7 @@ from api.routes import discovery, rag
 from index.graph_store import GraphStore
 from index.plugin_index import PluginIndex
 from index.vector_store import VectorStore
+from index.runtime_path import validate_runtime_index_root
 from rag.control_plane import CONTROL_PLANE
 
 logger = logging.getLogger(__name__)
@@ -50,7 +50,7 @@ app.add_middleware(
 # =========================================================
 
 vector_store = VectorStore()
-_INDEX_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "data", "faiss_index")
+_INDEX_DIR = str(validate_runtime_index_root("/app/data/faiss_index"))
 loaded = vector_store.load(_INDEX_DIR)
 if not loaded:
     logger.warning("No FAISS index loaded; retrieval will return nothing. Index construction and promotion are explicit lifecycle operations, never startup side effects.")

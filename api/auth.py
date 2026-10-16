@@ -3,11 +3,15 @@ omnibioai-model-registry's require_auth (Authorization: Bearer <jwt>,
 HS256, verified against JWT_SECRET, gated by AUTH_ENABLED so it stays a
 no-op until a deployment turns it on)."""
 
+import hmac
 import os
 from typing import Annotated
 
 import jwt as _jwt
 from fastapi import Header, HTTPException, Request
+from api.secret_config import load_proxy_secret
+
+_INSECURE_SECRET_VALUES = {"change-me", "change-me-in-production"}
 
 
 class AuthError(Exception):
@@ -22,6 +26,13 @@ def _auth_enabled() -> bool:
 
 def _jwt_secret() -> str:
     return os.getenv("JWT_SECRET", "").strip()
+
+
+def _internal_proxy_secret() -> str:
+    try:
+        return load_proxy_secret()
+    except RuntimeError:
+        return ""
 
 
 def _jwt_audience() -> str:
@@ -57,6 +68,20 @@ def validate_auth_config() -> None:
             raise RuntimeError(
                 f"AUTH_ENABLED is true but {', '.join(missing)} is not set -- "
                 "refusing to start with auth misconfigured."
+            )
+        try:
+            proxy_secret = load_proxy_secret()
+        except RuntimeError as exc:
+            raise RuntimeError("AUTH_ENABLED is true but the independent proxy secret is invalid or not independent -- refusing to start.") from exc
+        jwt_secret = _jwt_secret()
+        insecure = [
+            name for name, value in (
+                ("JWT_SECRET", jwt_secret),
+            ) if value in _INSECURE_SECRET_VALUES
+        ]
+        if insecure:
+            raise RuntimeError(
+                f"AUTH_ENABLED is true but {', '.join(insecure)} uses an insecure placeholder."
             )
 
 
@@ -102,13 +127,17 @@ async def require_auth(
     if not _auth_enabled():
         return "system"
 
-    internal_secret = _jwt_secret()
-    if internal_secret and x_devhub_internal == internal_secret:
+    internal_secret = _internal_proxy_secret()
+    if (
+        internal_secret
+        and x_devhub_internal is not None
+        and hmac.compare_digest(x_devhub_internal, internal_secret)
+    ):
         return "devhub-ui"
 
     try:
         token = extract_token(authorization)
-        payload = validate_token(token, internal_secret, _jwt_audience(), _jwt_issuer())
+        payload = validate_token(token, _jwt_secret(), _jwt_audience(), _jwt_issuer())
         for field in ("sub", "service", "username", "email"):
             value = payload.get(field)
             if value:

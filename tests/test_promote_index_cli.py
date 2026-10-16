@@ -81,6 +81,49 @@ def test_promote_refuses_when_the_candidate_was_already_staged(tmp_path):
     assert r.returncode == 1 and "already exists" in r.stderr and _hashes(live) == before
 
 
+def test_first_activation_accepts_the_canonical_staged_candidate(tmp_path):
+    data = tmp_path / "data"
+    src = data / "faiss_candidates" / "b"
+    _make_index(src, "PUBLIC,PUBLIC")
+
+    r = _cli("promote", "--source", str(src), "--data-dir", str(data))
+
+    assert r.returncode == 0, r.stderr
+    assert "using staged b; hashes verified" in r.stdout
+    assert not src.exists()
+    assert _hashes(data / "faiss_index")
+    assert json.loads((data / "faiss_index" / "manifest.json").read_text())["promotion_status"] == "PROMOTED"
+
+
+def test_stale_interrupted_partial_does_not_block_a_clean_retry(tmp_path):
+    data, src = tmp_path / "data", tmp_path / "src"
+    data.mkdir()
+    _make_index(src, "PUBLIC")
+    stale = data / "faiss_candidates" / ".b.partial-abandoned"
+    stale.mkdir(parents=True)
+    (stale / "incomplete").write_text("partial copy\n")
+
+    r = _cli("promote", "--source", str(src), "--data-dir", str(data))
+
+    assert r.returncode == 0, r.stderr
+    assert (data / "faiss_index" / "index.faiss").exists()
+    assert stale.exists()  # unknown crash debris is preserved for operator review, not deleted implicitly
+
+
+def test_promote_refuses_a_corrupted_candidate_and_leaves_active_untouched(tmp_path):
+    data, src = tmp_path / "data", tmp_path / "src"
+    data.mkdir()
+    live = _legacy(data)
+    before = _hashes(live)
+    _make_index(src, "PUBLIC")
+    (src / "index.faiss").write_bytes(b"corrupted")
+
+    r = _cli("promote", "--source", str(src), "--data-dir", str(data))
+
+    assert r.returncode == 1 and "artifact hashes do not match" in r.stderr
+    assert _hashes(live) == before
+
+
 def test_rollback_without_a_recorded_previous_index_is_refused(tmp_path):
     data = tmp_path / "data"
     data.mkdir()

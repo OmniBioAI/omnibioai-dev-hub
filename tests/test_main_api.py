@@ -88,6 +88,23 @@ def test_warns_when_no_persisted_faiss_index_is_found(caplog):
         importlib.reload(main_module)
 
 
+def test_application_uses_canonical_index_path_and_ignores_environment_override(monkeypatch):
+    """Production index selection is fixed and cannot be overridden by environment."""
+    import api.main as main_module
+    from index.vector_store import VectorStore
+
+    try:
+        monkeypatch.setenv("DEVHUB_INDEX_DIR", "/tmp/unauthorized-index")
+        with (
+            patch.object(VectorStore, "load", return_value=True) as load,
+        ):
+            importlib.reload(main_module)
+        load.assert_called_once_with("/app/data/faiss_index")
+    finally:
+        monkeypatch.delenv("DEVHUB_INDEX_DIR", raising=False)
+        importlib.reload(main_module)
+
+
 def test_guard_requests_middleware_ready():
     """Let RAG requests pass the guard middleware once the control plane is READY."""
     with (

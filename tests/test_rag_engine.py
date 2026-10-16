@@ -5,6 +5,9 @@ generation, LLM streaming, and model-config loading.
 Developer: Manish Kumar <manish@omnibioai.org>
 """
 
+import os
+import subprocess
+import sys
 from unittest.mock import MagicMock, patch
 
 import numpy as np
@@ -29,6 +32,33 @@ def test_ollama_embed_success(mock_post):
     assert vec.shape == (768,)
     assert vec.dtype == np.float32
     mock_post.assert_called_once()
+    assert mock_post.call_args.args[0] == f"{_engine_mod.OLLAMA_URL}/embeddings"
+
+
+def _resolved_ollama_url(env):
+    return subprocess.check_output(
+        [sys.executable, "-c", "import rag.engine; print(rag.engine.OLLAMA_URL)"],
+        cwd=os.getcwd(),
+        env=env,
+        text=True,
+    ).strip()
+
+
+def test_ollama_url_defaults_to_docker_service_and_does_not_consult_ollama_host():
+    """Keep the Docker default when OLLAMA_URL is absent; OLLAMA_HOST is not an alias."""
+    env = {**os.environ, "OLLAMA_HOST": "http://ignored.example:9999"}
+    env.pop("OLLAMA_URL", None)
+    assert _resolved_ollama_url(env) == "http://ollama:11434/api"
+
+
+def test_ollama_url_environment_override_wins_exactly_without_fallback():
+    """Use an explicit host-side evaluation endpoint exactly as supplied."""
+    env = {
+        **os.environ,
+        "OLLAMA_HOST": "http://ignored.example:9999",
+        "OLLAMA_URL": "http://127.0.0.1:11434/api",
+    }
+    assert _resolved_ollama_url(env) == "http://127.0.0.1:11434/api"
 
 @patch("rag.engine.requests.post")
 def test_ollama_embed_batch_dim(mock_post):

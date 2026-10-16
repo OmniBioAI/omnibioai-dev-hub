@@ -356,8 +356,10 @@ the API. The initial start blocks while the index is built; later starts reuse
 the named `devhub-index` volume. The image runs as a non-root `appuser`.
 
 To enable authentication in the container, add
-`-e AUTH_ENABLED=true -e JWT_SECRET=<strong-secret>` to the final `docker
-run`. The container fails fast if authentication is enabled without a secret.
+`-e AUTH_ENABLED=true -e JWT_SECRET=<strong-jwt-secret>
+-e DEVHUB_INTERNAL_PROXY_SECRET=<independent-strong-proxy-secret>` to the final
+`docker run`. The container fails fast if either credential is missing; they
+must not have the same value.
 
 ---
 
@@ -502,6 +504,7 @@ In Docker the server starts automatically as PID 1.
 ```bash
 export AUTH_ENABLED=true
 export JWT_SECRET=...   # HS256 secret, must match omnibioai-auth's SECRET_KEY
+export DEVHUB_INTERNAL_PROXY_SECRET=...  # separate nginx-to-FastAPI credential
 ```
 
 `AUTH_ENABLED=false` (the default for local/`uvicorn --reload` use) runs
@@ -519,22 +522,24 @@ curl -X POST http://localhost:8082/rag/query \
 A missing/invalid/expired token returns `401`. This follows the same
 shared-secret pattern as `omnibioai-model-registry`'s `require_auth`.
 
-**Fail-fast startup check:** if `AUTH_ENABLED=true` and `JWT_SECRET` is
-unset or empty, the app now **refuses to start** — `validate_auth_config()`
+**Fail-fast startup check:** if `AUTH_ENABLED=true` and either `JWT_SECRET` or
+`DEVHUB_INTERNAL_PROXY_SECRET` is unset or empty, the app now **refuses to start** — `validate_auth_config()`
 (`api/auth.py`) raises `RuntimeError` from the FastAPI startup event
 (`api/main.py`) before a single request can be served. Previously an
 unset `JWT_SECRET` silently fell through to validating tokens against an
 empty HMAC secret, which PyJWT accepts, so anyone could forge a valid
 token — this closed that bypass. If you deploy with `AUTH_ENABLED=true`,
-make sure `JWT_SECRET` is actually set or the container/process will not
-come up.
+make sure both independent credentials are set or the container/process will
+not come up.
 
 The Docker image enforces the equivalent check at the shell level before
-nginx or FastAPI start: if `AUTH_ENABLED=true` and `JWT_SECRET` is unset,
+nginx or FastAPI start: if `AUTH_ENABLED=true` and either credential is unset,
 the container exits immediately with an error instead of generating
 nginx's `devhub.conf` with an empty/placeholder value baked into the
 `X-Devhub-Internal` header (the internal UI-proxy auth path — see
-`Dockerfile`'s `CMD`).
+`Dockerfile`'s `CMD`). The header uses only
+`DEVHUB_INTERNAL_PROXY_SECRET`; presenting the JWT signing key in that header
+does not authenticate a request.
 
 `DEBUG_TRACEBACKS` (default: unset/false) controls whether `/rag/query`'s error responses include a full stack trace (`trace` field) — omitted by default, included only when explicitly set to `true`; keep it off in production.
 

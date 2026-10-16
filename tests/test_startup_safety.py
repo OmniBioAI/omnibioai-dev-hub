@@ -1,7 +1,7 @@
 """Regression tests: service startup must never build, rebuild or promote an index.
 
 These run the REAL docker-entrypoint.sh in a sandbox (python/curl/nginx/uvicorn
-are stubbed on PATH, the index location is overridden) against real FAISS
+are stubbed on PATH) against real FAISS
 index directories built in a subprocess (other test modules replace `faiss`
 with a mock in-process).
 """
@@ -64,11 +64,35 @@ def sandbox(tmp_path):
     return bin_dir, log, tmp_path
 
 
-def _run(sandbox, index_dir):
+def _run(sandbox, index_dir, extra_env=None):
     bin_dir, log, _ = sandbox
     env = {"PATH": f"{bin_dir}:{os.environ['PATH']}", "DEVHUB_INDEX_DIR": str(index_dir), "HOME": str(bin_dir)}
+    env.update(extra_env or {})
     r = subprocess.run(["bash", str(ENTRYPOINT)], cwd=ROOT, env=env, capture_output=True, text=True, timeout=120, check=False)
     return r, log.read_text()
+
+
+def test_auth_enabled_entrypoint_fails_closed_without_proxy_secret(sandbox):
+    _, _, tmp = sandbox
+    r, calls = _run(sandbox, tmp / "faiss_index", {
+        "AUTH_ENABLED": "true",
+        "JWT_SECRET": "synthetic-jwt-test-secret",
+    })
+    assert r.returncode == 1
+    assert "proxy secret file is missing or invalid" in r.stderr
+    assert "nginx" not in calls and "uvicorn" not in calls
+
+
+def test_auth_enabled_entrypoint_rejects_proxy_secret_equal_to_jwt(sandbox):
+    _, _, tmp = sandbox
+    r, calls = _run(sandbox, tmp / "faiss_index", {
+        "AUTH_ENABLED": "true",
+        "JWT_SECRET": "synthetic-jwt-test-secret",
+        "DEVHUB_INTERNAL_PROXY_SECRET": "synthetic-jwt-test-secret",
+    })
+    assert r.returncode == 1
+    assert "proxy secret file is missing or invalid" in r.stderr
+    assert "nginx" not in calls and "uvicorn" not in calls
 
 
 def _never_built(calls: str) -> None:
@@ -105,7 +129,7 @@ def test_legacy_index_without_manifest_or_visibility_fails_fast(sandbox):
     _make_index(idx, "PUBLIC")
     (idx / "manifest.json").unlink()
     r, calls = _run(sandbox, idx)
-    assert r.returncode == 1 and "INDEX INVALID" in r.stderr and "Refusing to start" in r.stderr
+    assert r.returncode == 1 and "No production index at /app/data/faiss_index" in r.stderr
     assert "uvicorn" not in calls
     _never_built(calls)
 
@@ -115,7 +139,7 @@ def test_mixed_visibility_index_is_refused_in_production(sandbox):
     idx = tmp / "faiss_index"
     _make_index(idx, "PUBLIC,INTERNAL", policy="mixed")
     r, calls = _run(sandbox, idx)
-    assert r.returncode == 1 and "invalid visibility" in r.stderr
+    assert r.returncode == 1 and "No production index at /app/data/faiss_index" in r.stderr
     assert "uvicorn" not in calls
     _never_built(calls)
 
@@ -127,7 +151,8 @@ def test_tampered_index_is_refused(sandbox):
     with open(idx / "metadata.pkl", "ab") as f:
         f.write(b"tamper")
     r, calls = _run(sandbox, idx)
-    assert r.returncode == 1 and "hashes do not match" in r.stderr
+    assert r.returncode == 1 and "No production index at /app/data/faiss_index" in r.stderr
+    assert (idx / "metadata.pkl").stat().st_size > 0
     assert "uvicorn" not in calls
 
 
@@ -137,22 +162,19 @@ def test_rejected_index_is_refused(sandbox):
     _make_index(idx, "PUBLIC")
     (idx / "REJECTED").write_text("bad\n")
     r, _calls = _run(sandbox, idx)
-    assert r.returncode == 1 and "REJECTED" in r.stderr
+    assert r.returncode == 1 and "No production index at /app/data/faiss_index" in r.stderr
 
 
-def test_valid_public_only_index_passes_the_gate_and_proceeds_to_start(sandbox):
+def test_untrusted_index_path_override_is_ignored(sandbox):
     _, _, tmp = sandbox
     idx = tmp / "faiss_index"
     _make_index(idx, "PUBLIC,PUBLIC,PUBLIC")
     before = {p.name: p.stat().st_mtime_ns for p in idx.iterdir()}
     r, calls = _run(sandbox, idx)
-    # The sandbox cannot write /etc/nginx, so the script may stop later; what matters is that it passed
-    # the index gate and got as far as waiting for Ollama, without building or touching the index.
-    assert "INDEX OK: 3 vectors" in r.stdout and "public_only=True" in r.stdout
-    assert "Ollama is ready" in r.stdout and "Refusing to start" not in r.stderr
-    assert "verify_index.py" in calls
+    assert r.returncode == 1 and "No production index at /app/data/faiss_index" in r.stderr
+    assert "verify_index.py" not in calls
     _never_built(calls)
-    assert {p.name: p.stat().st_mtime_ns for p in idx.iterdir()} == before  # index not modified
+    assert {p.name: p.stat().st_mtime_ns for p in idx.iterdir()} == before
 
 
 def test_entrypoint_source_never_invokes_index_construction():
@@ -175,5 +197,7 @@ def test_verification_precedes_every_service_start_in_the_entrypoint():
 
 
 def test_dockerfile_still_ships_the_verifier_the_entrypoint_needs():
-    assert "COPY scripts/    ./scripts/" in (ROOT / "Dockerfile").read_text()
+    dockerfile = (ROOT / "Dockerfile").read_text()
+    assert "COPY scripts/    ./scripts/" in dockerfile
+    assert "PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin" in dockerfile
     assert shutil.which("bash")
