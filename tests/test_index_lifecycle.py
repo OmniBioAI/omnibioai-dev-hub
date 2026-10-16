@@ -20,10 +20,12 @@ from index.lifecycle import (
 
 
 def _index_dir(path, build_id="b1", metadata=None):
+    from index.lifecycle import artifact_hashes
     path.mkdir(parents=True)
     (path / "index.faiss").write_bytes(b"index")
     (path / "metadata.pkl").write_bytes(b"metadata")
-    write_manifest(path, {"build_id": build_id, "promotion_status": "CANDIDATE"})
+    # A real producer always records the integrity receipt (F-S4-1).
+    write_manifest(path, {"build_id": build_id, "promotion_status": "CANDIDATE", "artifact_hashes": artifact_hashes(path)})
     return path
 
 

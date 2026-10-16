@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 import os
+import re
 import shutil
 from pathlib import Path
 from typing import Any
@@ -23,6 +24,36 @@ REQUIRED_CHUNK_FIELDS = (
     "repo", "relative_path", "source_revision", "document_id", "chunk_id", "content_hash", "chunk_hash",
     "content_state", "verification_state", "citation",
 )
+
+
+# The integrity receipt (manifest["artifact_hashes"]) must cover exactly these
+# artifacts -- the set every producer writes via artifact_hashes() below
+# (build_trusted_index, derive, the legacy rollback record).
+REQUIRED_ARTIFACTS = (INDEX_FILE, METADATA_FILE)
+_SHA256_HEX = re.compile(r"[0-9a-f]{64}")
+
+
+def receipt_problem(manifest: Any, actual_hashes: dict[str, str]) -> str | None:
+    """Return why `manifest` is not a complete, valid integrity receipt for
+    `actual_hashes`, or None if it is. Fails closed on anything unexpected."""
+    if not isinstance(manifest, dict):
+        return "manifest is not a JSON object"
+    expected = manifest.get("artifact_hashes")
+    if not isinstance(expected, dict) or not expected:
+        return "manifest carries no artifact hashes (integrity receipt missing)"
+    unexpected = sorted(str(name) for name in expected if name not in REQUIRED_ARTIFACTS)
+    if unexpected:
+        return f"integrity receipt lists unexpected artifacts: {unexpected}"
+    missing = [name for name in REQUIRED_ARTIFACTS if name not in expected]
+    if missing:
+        return f"integrity receipt is missing required artifacts: {missing}"
+    malformed = [name for name in REQUIRED_ARTIFACTS
+                 if not (isinstance(expected[name], str) and _SHA256_HEX.fullmatch(expected[name]))]
+    if malformed:
+        return f"integrity receipt has malformed sha256 digests: {malformed}"
+    if expected != actual_hashes:
+        return "artifact hashes do not match the manifest (index or metadata changed after build)"
+    return None
 
 
 def artifact_hashes(directory: str | Path) -> dict[str, str]:
@@ -81,15 +112,17 @@ def validate_index_directory(directory: str | Path, *, require_public_only: bool
         return {"ok": False, "reason": f"missing artifacts: {missing}"}
 
     manifest = read_manifest(directory)
+    if not isinstance(manifest, dict):
+        return {"ok": False, "reason": "manifest is not a JSON object"}
     if manifest.get("build_status", "CLEAN") != "CLEAN":
         return {"ok": False, "reason": f"candidate build status is {manifest.get('build_status')}"}
     if manifest.get("visibility_policy") == PUBLIC_ONLY_POLICY:
         require_public_only = True
 
     actual_hashes = artifact_hashes(directory)
-    expected_hashes = manifest.get("artifact_hashes")
-    if expected_hashes and expected_hashes != actual_hashes:
-        return {"ok": False, "reason": "artifact hashes do not match the manifest (index or metadata changed after build)"}
+    problem = receipt_problem(manifest, actual_hashes)
+    if problem:
+        return {"ok": False, "reason": problem}
 
     store = VectorStore()
     if not store.load(str(directory)):
