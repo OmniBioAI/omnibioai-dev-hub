@@ -118,7 +118,7 @@ def query(req: QueryRequest, actor: str = Depends(require_auth)):
             "api_version": "v6"
         }
 
-    except Exception as e:  # noqa: BLE001 -- top-level HTTP boundary: must catch anything to return a clean 500 instead of an unhandled crash
+    except Exception as e:  # top-level HTTP boundary: must catch anything to return a clean 500 instead of an unhandled crash (logged via logger.exception)
         logger.exception("ask query failed")
         detail = {"error": STREAM_ERROR_MESSAGE}
         # Stack traces can leak file paths, internals, and other sensitive

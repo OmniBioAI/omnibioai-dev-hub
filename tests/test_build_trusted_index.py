@@ -6,14 +6,14 @@ telemetry, and per-vector dimension validation are all pure logic here and
 don't need the network or faiss.
 """
 
-import os
 import json
+import os
 from unittest.mock import patch
 
 import pytest
 
-from scripts.build_trusted_index import _check_staging_root_writable, embed_metadata
 from ingestion.trusted import SourcePolicy, discover_documents
+from scripts.build_trusted_index import _check_staging_root_writable, embed_metadata
 
 
 def _meta(chunk_id: str, source: str = "repo:README.md@abc") -> dict:

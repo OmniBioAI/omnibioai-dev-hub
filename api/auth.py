@@ -9,6 +9,7 @@ from typing import Annotated
 
 import jwt as _jwt
 from fastapi import Header, HTTPException, Request
+
 from api.secret_config import load_proxy_secret
 
 _INSECURE_SECRET_VALUES = {"change-me", "change-me-in-production"}
@@ -70,7 +71,7 @@ def validate_auth_config() -> None:
                 "refusing to start with auth misconfigured."
             )
         try:
-            proxy_secret = load_proxy_secret()
+            load_proxy_secret()
         except RuntimeError as exc:
             raise RuntimeError("AUTH_ENABLED is true but the independent proxy secret is invalid or not independent -- refusing to start.") from exc
         jwt_secret = _jwt_secret()

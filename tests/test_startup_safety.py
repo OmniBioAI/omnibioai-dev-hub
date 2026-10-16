@@ -1,95 +1,55 @@
 """Regression tests: service startup must never build, rebuild or promote an index.
 
 These run the REAL docker-entrypoint.sh in a sandbox (python/curl/nginx/uvicorn
-are stubbed on PATH) against real FAISS
-index directories built in a subprocess (other test modules replace `faiss`
-with a mock in-process).
+are stubbed on PATH; see tests/startup_harness.py) against real FAISS index
+directories built in a subprocess (other test modules replace `faiss` with a
+mock in-process). The runtime identity is supplied by an `id` shim here; the
+identity gate itself is covered with the real process identity in
+tests/test_security_regressions.py.
+
+The legacy/mixed/tampered/rejected tests place the synthetic index at the
+canonical /app/data/faiss_index (only possible in the isolated UID-10001
+container, see the `runtime_container` fixture) so the entrypoint actually
+reaches scripts/verify_index.py and the rejection reason can be asserted.
+Before V12G they built the index elsewhere and could only ever observe
+"No production index", whatever the index contained.
 """
 
-import os
 import shutil
-import stat
-import subprocess
-import sys
-import textwrap
-from pathlib import Path
 
-import pytest
+from tests.startup_harness import (
+    CANONICAL_INDEX,
+    ENTRYPOINT,
+    NGINX_CONF,
+    ROOT,
+    make_index,
+    make_sandbox,
+    run_entrypoint,
+)
 
-ROOT = Path(__file__).resolve().parents[1]
-ENTRYPOINT = ROOT / "docker-entrypoint.sh"
-
-MAKE_INDEX = textwrap.dedent('''
-    import sys, numpy as np
-    sys.path.insert(0, {root!r})
-    from index.vector_store import VectorStore
-    from index.lifecycle import artifact_hashes, write_manifest
-    out, visibilities, policy = sys.argv[1], sys.argv[2].split(","), sys.argv[3]
-    vs = VectorStore()
-    meta = [{{"text": f"t{{i}}", "source": f"repo:d{{i}}.md@abc", "repo": "repo", "relative_path": f"d{{i}}.md",
-             "source_revision": "abc", "document_id": f"doc{{i}}", "chunk_id": f"c{{i}}", "content_hash": "h", "chunk_hash": "ch",
-             "content_state": "CURRENT", "verification_state": "CONFIGURED", "bundle": None,
-             "citation": {{"repository": "repo"}}, "visibility": v}} for i, v in enumerate(visibilities)]
-    vs.add(np.random.default_rng(0).normal(size=(len(meta), 768)).astype("float32"), meta)
-    vs.save(out)
-    counts = {{k: visibilities.count(k) for k in ("PUBLIC", "INTERNAL", "REVIEW_REQUIRED")}}
-    manifest = {{"build_id": "b", "build_status": "CLEAN", "artifact_hashes": artifact_hashes(out), "visibility_counts": counts}}
-    if policy == "public_only":
-        manifest["visibility_policy"] = "PUBLIC_ONLY"
-    write_manifest(out, manifest)
-''')
+VERIFY_CALL = f"python scripts/verify_index.py {CANONICAL_INDEX} --require-public-only"
 
 
-def _make_index(path: Path, visibilities: str, policy: str = "public_only") -> None:
-    subprocess.run([sys.executable, "-c", MAKE_INDEX.format(root=str(ROOT)), str(path), visibilities, policy], check=True)
-
-
-def _stub(bin_dir: Path, name: str, body: str) -> None:
-    p = bin_dir / name
-    p.write_text("#!/bin/bash\n" + body + "\n")
-    p.chmod(p.stat().st_mode | stat.S_IEXEC)
-
-
-@pytest.fixture
-def sandbox(tmp_path):
-    bin_dir = tmp_path / "bin"
-    bin_dir.mkdir()
-    log = tmp_path / "calls.log"
-    log.write_text("")
-    _stub(bin_dir, "python", f'echo "python $*" >> {log}\nexec {sys.executable} "$@"')
-    _stub(bin_dir, "curl", f'echo "curl $*" >> {log}\nexit 0')
-    _stub(bin_dir, "nginx", f'echo "nginx" >> {log}')
-    _stub(bin_dir, "uvicorn", f'echo "uvicorn $*" >> {log}')
-    _stub(bin_dir, "sleep", "exit 0")
-    return bin_dir, log, tmp_path
-
-
-def _run(sandbox, index_dir, extra_env=None):
-    bin_dir, log, _ = sandbox
-    env = {"PATH": f"{bin_dir}:{os.environ['PATH']}", "DEVHUB_INDEX_DIR": str(index_dir), "HOME": str(bin_dir)}
-    env.update(extra_env or {})
-    r = subprocess.run(["bash", str(ENTRYPOINT)], cwd=ROOT, env=env, capture_output=True, text=True, timeout=120, check=False)
-    return r, log.read_text()
-
-
-def test_auth_enabled_entrypoint_fails_closed_without_proxy_secret(sandbox):
-    _, _, tmp = sandbox
-    r, calls = _run(sandbox, tmp / "faiss_index", {
+def test_auth_enabled_entrypoint_fails_closed_without_proxy_secret(tmp_path):
+    sb = make_sandbox(tmp_path)
+    r = run_entrypoint(sb, {
         "AUTH_ENABLED": "true",
         "JWT_SECRET": "synthetic-jwt-test-secret",
     })
+    calls = sb.calls()
     assert r.returncode == 1
     assert "proxy secret file is missing or invalid" in r.stderr
     assert "nginx" not in calls and "uvicorn" not in calls
 
 
-def test_auth_enabled_entrypoint_rejects_proxy_secret_equal_to_jwt(sandbox):
-    _, _, tmp = sandbox
-    r, calls = _run(sandbox, tmp / "faiss_index", {
+def test_auth_enabled_entrypoint_rejects_proxy_secret_equal_to_jwt(tmp_path):
+    sb = make_sandbox(tmp_path)
+    r = run_entrypoint(sb, {
         "AUTH_ENABLED": "true",
         "JWT_SECRET": "synthetic-jwt-test-secret",
         "DEVHUB_INTERNAL_PROXY_SECRET": "synthetic-jwt-test-secret",
     })
+    calls = sb.calls()
     assert r.returncode == 1
     assert "proxy secret file is missing or invalid" in r.stderr
     assert "nginx" not in calls and "uvicorn" not in calls
@@ -100,77 +60,85 @@ def _never_built(calls: str) -> None:
         assert forbidden not in calls, f"startup invoked {forbidden}: {calls}"
 
 
-def test_missing_index_fails_fast_with_clear_error_and_builds_nothing(sandbox):
-    _, _, tmp = sandbox
-    r, calls = _run(sandbox, tmp / "faiss_index")
+def _refused_by_verifier(sb, r, reason: str) -> None:
+    """The entrypoint reached the verifier, the verifier inspected the canonical
+    index and printed `reason`, and startup stopped before any service."""
+    calls = sb.calls()
+    assert r.returncode == 1, r.stderr
+    assert VERIFY_CALL in calls, calls
+    assert f"INDEX INVALID: {reason}" in r.stderr, r.stderr
+    assert f"{CANONICAL_INDEX} failed validation" in r.stderr
+    assert "No production index" not in r.stderr
+    assert "curl" not in calls and "nginx" not in calls and "uvicorn" not in calls
+    assert not NGINX_CONF.exists()
+    _never_built(calls)
+
+
+def test_missing_index_fails_fast_with_clear_error_and_builds_nothing(tmp_path):
+    sb = make_sandbox(tmp_path)
+    r = run_entrypoint(sb)
+    calls = sb.calls()
     assert r.returncode == 1
     assert "No production index" in r.stderr and "never builds or promotes" in r.stderr
     assert "uvicorn" not in calls and "nginx" not in calls and "curl" not in calls  # failed before anything started
     _never_built(calls)
-    assert not (tmp / "faiss_index").exists()
+    assert not (tmp_path / "faiss_index").exists()
 
 
-def test_unpromoted_candidate_is_never_used_or_promoted_automatically(sandbox):
-    _, _, tmp = sandbox
-    candidates = tmp / "faiss_candidates" / "cand1"
-    _make_index(candidates, "PUBLIC,PUBLIC")
+def test_unpromoted_candidate_is_never_used_or_promoted_automatically(tmp_path):
+    sb = make_sandbox(tmp_path)
+    candidates = tmp_path / "faiss_candidates" / "cand1"
+    make_index(candidates, "PUBLIC,PUBLIC")
     before = sorted(p.name for p in candidates.iterdir())
-    r, calls = _run(sandbox, tmp / "faiss_index")
+    r = run_entrypoint(sb, {"DEVHUB_INDEX_DIR": str(candidates)})
+    calls = sb.calls()
     assert r.returncode == 1 and "No production index" in r.stderr
     assert "uvicorn" not in calls
-    assert not (tmp / "faiss_index").exists()  # not promoted
+    assert not (tmp_path / "faiss_index").exists()  # not promoted
     assert candidates.exists() and sorted(p.name for p in candidates.iterdir()) == before  # untouched, not consumed
     _never_built(calls)
 
 
-def test_legacy_index_without_manifest_or_visibility_fails_fast(sandbox):
-    _, _, tmp = sandbox
-    idx = tmp / "faiss_index"
-    _make_index(idx, "PUBLIC")
-    (idx / "manifest.json").unlink()
-    r, calls = _run(sandbox, idx)
-    assert r.returncode == 1 and "No production index at /app/data/faiss_index" in r.stderr
-    assert "uvicorn" not in calls
-    _never_built(calls)
+def test_legacy_index_without_manifest_or_visibility_fails_fast(tmp_path, runtime_container):
+    sb = make_sandbox(tmp_path)
+    make_index(CANONICAL_INDEX, "PUBLIC")
+    (CANONICAL_INDEX / "manifest.json").unlink()
+    r = run_entrypoint(sb)
+    _refused_by_verifier(sb, r, "missing artifacts: ['manifest.json']")
 
 
-def test_mixed_visibility_index_is_refused_in_production(sandbox):
-    _, _, tmp = sandbox
-    idx = tmp / "faiss_index"
-    _make_index(idx, "PUBLIC,INTERNAL", policy="mixed")
-    r, calls = _run(sandbox, idx)
-    assert r.returncode == 1 and "No production index at /app/data/faiss_index" in r.stderr
-    assert "uvicorn" not in calls
-    _never_built(calls)
+def test_mixed_visibility_index_is_refused_in_production(tmp_path, runtime_container):
+    sb = make_sandbox(tmp_path)
+    make_index(CANONICAL_INDEX, "PUBLIC,INTERNAL", policy="mixed")
+    r = run_entrypoint(sb)
+    _refused_by_verifier(sb, r, "invalid visibility metadata: [1]")
 
 
-def test_tampered_index_is_refused(sandbox):
-    _, _, tmp = sandbox
-    idx = tmp / "faiss_index"
-    _make_index(idx, "PUBLIC,PUBLIC")
-    with open(idx / "metadata.pkl", "ab") as f:
+def test_tampered_index_is_refused(tmp_path, runtime_container):
+    sb = make_sandbox(tmp_path)
+    make_index(CANONICAL_INDEX, "PUBLIC,PUBLIC")
+    with open(CANONICAL_INDEX / "metadata.pkl", "ab") as f:
         f.write(b"tamper")
-    r, calls = _run(sandbox, idx)
-    assert r.returncode == 1 and "No production index at /app/data/faiss_index" in r.stderr
-    assert (idx / "metadata.pkl").stat().st_size > 0
-    assert "uvicorn" not in calls
+    r = run_entrypoint(sb)
+    _refused_by_verifier(sb, r, "artifact hashes do not match the manifest")
+    assert (CANONICAL_INDEX / "metadata.pkl").read_bytes().endswith(b"tamper")  # inspected, not repaired
 
 
-def test_rejected_index_is_refused(sandbox):
-    _, _, tmp = sandbox
-    idx = tmp / "faiss_index"
-    _make_index(idx, "PUBLIC")
-    (idx / "REJECTED").write_text("bad\n")
-    r, _calls = _run(sandbox, idx)
-    assert r.returncode == 1 and "No production index at /app/data/faiss_index" in r.stderr
+def test_rejected_index_is_refused(tmp_path, runtime_container):
+    sb = make_sandbox(tmp_path)
+    make_index(CANONICAL_INDEX, "PUBLIC")
+    (CANONICAL_INDEX / "REJECTED").write_text("bad\n")
+    r = run_entrypoint(sb)
+    _refused_by_verifier(sb, r, "candidate is marked REJECTED: bad")
 
 
-def test_untrusted_index_path_override_is_ignored(sandbox):
-    _, _, tmp = sandbox
-    idx = tmp / "faiss_index"
-    _make_index(idx, "PUBLIC,PUBLIC,PUBLIC")
+def test_untrusted_index_path_override_is_ignored(tmp_path):
+    sb = make_sandbox(tmp_path)
+    idx = tmp_path / "faiss_index"
+    make_index(idx, "PUBLIC,PUBLIC,PUBLIC")
     before = {p.name: p.stat().st_mtime_ns for p in idx.iterdir()}
-    r, calls = _run(sandbox, idx)
+    r = run_entrypoint(sb, {"DEVHUB_INDEX_DIR": str(idx)})
+    calls = sb.calls()
     assert r.returncode == 1 and "No production index at /app/data/faiss_index" in r.stderr
     assert "verify_index.py" not in calls
     _never_built(calls)

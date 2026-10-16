@@ -147,9 +147,11 @@ async def test_init_control_plane():
         mock_init.assert_called_once()
 
 @pytest.mark.asyncio
-async def test_startup_event():
-    """Initialize the control plane during application startup."""
+async def test_startup_event(monkeypatch):
+    """Initialize the control plane during application startup (as the runtime UID;
+    identity enforcement itself is covered in test_security_regressions.py)."""
     from api.main import startup_event
+    monkeypatch.setattr("os.geteuid", lambda: 10001)
     with patch("api.main.init_control_plane", new_callable=AsyncMock) as mock_init:
         await startup_event()
         mock_init.assert_called_once()

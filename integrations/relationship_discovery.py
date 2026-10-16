@@ -45,7 +45,7 @@ class RelationshipDiscoveryClient:
         freshness: str,
         visibility: str,
     ) -> dict[str, Any]:
-        edge_seed = "|".join((source_key, relationship_type, target_key))
+        edge_seed = f"{source_key}|{relationship_type}|{target_key}"
         return {
             "contract_version": RELATIONSHIP_VERSION,
             "relationship_id": f"relationship:{hashlib.sha256(edge_seed.encode()).hexdigest()}",

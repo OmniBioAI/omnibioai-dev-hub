@@ -5,7 +5,7 @@ import subprocess
 import sys
 from pathlib import Path
 
-from tests.test_startup_safety import _make_index
+from tests.startup_harness import make_index as _make_index
 
 ROOT = Path(__file__).resolve().parents[1]
 CLI = str(ROOT / "scripts" / "promote_index.py")

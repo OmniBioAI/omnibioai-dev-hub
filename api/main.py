@@ -16,10 +16,11 @@ from fastapi.responses import JSONResponse
 
 from api.auth import validate_auth_config
 from api.routes import discovery, rag
+from api.runtime_identity import require_runtime_uid
 from index.graph_store import GraphStore
 from index.plugin_index import PluginIndex
-from index.vector_store import VectorStore
 from index.runtime_path import validate_runtime_index_root
+from index.vector_store import VectorStore
 from rag.control_plane import CONTROL_PLANE
 
 logger = logging.getLogger(__name__)
@@ -101,6 +102,9 @@ async def init_control_plane():
 
 @app.on_event("startup")
 async def startup_event():
+    # Identity first: no other startup work runs under a non-runtime UID
+    # (see api/runtime_identity.py for the alternate-entrypoint rationale).
+    require_runtime_uid()
     # Fail loudly and refuse to start rather than silently serving a
     # deployment that looks auth-protected but isn't -- see api/auth.py's
     # validate_auth_config() for why.

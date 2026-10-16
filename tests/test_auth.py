@@ -419,6 +419,8 @@ def test_startup_refuses_when_auth_enabled_without_secret(monkeypatch):
     this configuration."""
     monkeypatch.setenv("AUTH_ENABLED", "true")
     monkeypatch.delenv("JWT_SECRET", raising=False)
+    # Runtime identity is satisfied so the auth check is what refuses startup.
+    monkeypatch.setattr("os.geteuid", lambda: 10001)
 
     from api.main import startup_event
 

@@ -352,14 +352,19 @@ docker run --rm --name devhub --network devhub-net \
 ```
 
 Open `http://localhost:5173` for the UI, or use `http://localhost:8082` for
-the API. The initial start blocks while the index is built; later starts reuse
-the named `devhub-index` volume. The image runs as a non-root `appuser`.
+the API. Startup never builds or promotes an index: it serves only a promoted,
+PUBLIC-only index at `/app/data/faiss_index` (mount it read-only) and fails
+fast if that index is missing or fails `scripts/verify_index.py`. The image runs
+as UID/GID 10001 and refuses to start under any other identity (both
+`docker-entrypoint.sh` and the FastAPI startup event enforce this).
 
 To enable authentication in the container, add
-`-e AUTH_ENABLED=true -e JWT_SECRET=<strong-jwt-secret>
--e DEVHUB_INTERNAL_PROXY_SECRET=<independent-strong-proxy-secret>` to the final
-`docker run`. The container fails fast if either credential is missing; they
-must not have the same value.
+`-e AUTH_ENABLED=true -e JWT_SECRET=<strong-jwt-secret>` and provide the
+independent internal proxy credential as a file at
+`/run/secrets/devhub_internal_proxy_secret` (owned by UID 10001, mode 0400,
+at least 32 characters, different from `JWT_SECRET`), e.g. a compose/Swarm
+secret. Environment variables are never read for this credential. The container
+fails fast if either credential is missing or invalid.
 
 ---
 
@@ -492,6 +497,11 @@ not a hardcoded list).
 uvicorn api.main:app --host 0.0.0.0 --port 8082 --reload
 ```
 
+The application refuses to start unless its effective UID is 10001 (see
+`api/runtime_identity.py`), so run the server in the container image or as that
+identity. Tests do not need it: the suite exercises routes through `TestClient`
+and runs the identity-dependent tests in an isolated UID-10001 container.
+
 In Docker the server starts automatically as PID 1.
 
 ---
@@ -504,7 +514,8 @@ In Docker the server starts automatically as PID 1.
 ```bash
 export AUTH_ENABLED=true
 export JWT_SECRET=...   # HS256 secret, must match omnibioai-auth's SECRET_KEY
-export DEVHUB_INTERNAL_PROXY_SECRET=...  # separate nginx-to-FastAPI credential
+# separate nginx-to-FastAPI credential: a file, never an environment variable
+#   /run/secrets/devhub_internal_proxy_secret  (UID 10001, mode 0400, >= 32 chars, != JWT_SECRET)
 ```
 
 `AUTH_ENABLED=false` (the default for local/`uvicorn --reload` use) runs
@@ -522,8 +533,8 @@ curl -X POST http://localhost:8082/rag/query \
 A missing/invalid/expired token returns `401`. This follows the same
 shared-secret pattern as `omnibioai-model-registry`'s `require_auth`.
 
-**Fail-fast startup check:** if `AUTH_ENABLED=true` and either `JWT_SECRET` or
-`DEVHUB_INTERNAL_PROXY_SECRET` is unset or empty, the app now **refuses to start** — `validate_auth_config()`
+**Fail-fast startup check:** if `AUTH_ENABLED=true` and `JWT_SECRET` is unset or
+empty, or the proxy secret file is missing or invalid, the app now **refuses to start** — `validate_auth_config()`
 (`api/auth.py`) raises `RuntimeError` from the FastAPI startup event
 (`api/main.py`) before a single request can be served. Previously an
 unset `JWT_SECRET` silently fell through to validating tokens against an
@@ -537,9 +548,11 @@ nginx or FastAPI start: if `AUTH_ENABLED=true` and either credential is unset,
 the container exits immediately with an error instead of generating
 nginx's `devhub.conf` with an empty/placeholder value baked into the
 `X-Devhub-Internal` header (the internal UI-proxy auth path — see
-`Dockerfile`'s `CMD`). The header uses only
-`DEVHUB_INTERNAL_PROXY_SECRET`; presenting the JWT signing key in that header
-does not authenticate a request.
+`Dockerfile`'s `CMD`). The header uses only the file-backed proxy secret;
+presenting the JWT signing key in that header does not authenticate a request.
+The rendered `devhub.conf` is created with mode 0600 for UID 10001; deployments should mount
+`/etc/nginx/conf.d` as a tmpfs so the rendered credential is never persisted
+in the container's writable layer.
 
 `DEBUG_TRACEBACKS` (default: unset/false) controls whether `/rag/query`'s error responses include a full stack trace (`trace` field) — omitted by default, included only when explicitly set to `true`; keep it off in production.
 
