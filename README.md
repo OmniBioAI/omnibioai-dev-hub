@@ -289,7 +289,7 @@ the equivalent local checks, also run `ruff check .`, then in
 `REPO_BASE` is the only required configuration. It must point to the directory that contains the `omnibioai-*` repos as immediate children.
 
 ```bash
-export REPO_BASE=/home/manish/Desktop/machine
+export REPO_BASE=/home/manish/Desktop/omnibioai-ecosystem
 ```
 
 The indexer **exits immediately with a clear error** if no repos are found under `REPO_BASE`:
@@ -297,7 +297,7 @@ The indexer **exits immediately with a clear error** if no repos are found under
 ```text
 ❌  No repos found under REPO_BASE='/some/wrong/path'
     Set REPO_BASE to the directory that contains the omnibioai-* repos.
-    Example:  export REPO_BASE=/home/manish/Desktop/machine
+    Example:  export REPO_BASE=/home/manish/Desktop/omnibioai-ecosystem
     Docker:   -e REPO_BASE=/repos  (with repos volume mounted at /repos)
 ```
 
@@ -786,7 +786,7 @@ Symptom:
 ❌  No repos found under REPO_BASE='/repos'
 ```
 
-Cause: `REPO_BASE` defaults to `/home/manish/Desktop/machine` locally and `/repos` in Docker. If neither is correct, set it explicitly:
+Cause: `REPO_BASE` defaults to `/home/manish/Desktop/omnibioai-ecosystem` locally and `/repos` in Docker. If neither is correct, set it explicitly:
 
 ```bash
 export REPO_BASE=/path/to/parent/of/omnibioai-repos

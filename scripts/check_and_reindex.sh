@@ -10,7 +10,7 @@ conda activate chemoinfo
 
 echo "[$(date)] Checking for new omnibioai-studio release..." >> "$LOG"
 
-cd /home/manish/Desktop/machine/omnibioai-studio || { echo "[$(date)] ERROR: studio repo not found" >> "$LOG"; exit 1; }
+cd /home/manish/Desktop/omnibioai-ecosystem/omnibioai-studio || { echo "[$(date)] ERROR: studio repo not found" >> "$LOG"; exit 1; }
 git fetch --tags >> "$LOG" 2>&1
 
 LATEST=$(git tag --sort=-creatordate | head -1)
@@ -19,9 +19,9 @@ LAST_INDEXED=$(cat "$STATE_FILE" 2>/dev/null || echo "")
 if [ "$LATEST" != "$LAST_INDEXED" ] && [ -n "$LATEST" ]; then
     echo "[$(date)] New release detected: $LATEST (was: $LAST_INDEXED). Reindexing..." >> "$LOG"
 
-    cd /home/manish/Desktop/machine/omnibioai-dev-hub || { echo "[$(date)] ERROR: dev-hub repo not found" >> "$LOG"; exit 1; }
+    cd /home/manish/Desktop/omnibioai-ecosystem/omnibioai-dev-hub || { echo "[$(date)] ERROR: dev-hub repo not found" >> "$LOG"; exit 1; }
 
-    export REPO_BASE=/home/manish/Desktop/machine
+    export REPO_BASE=/home/manish/Desktop/omnibioai-ecosystem
     # Phase 18: build_index.py now writes a staging candidate, never the live
     # index, so it must not be wiped here -- doing so would delete the live
     # index and leave nothing to replace it. Promotion is an explicit step.

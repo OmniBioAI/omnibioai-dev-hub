@@ -292,7 +292,7 @@ def build_candidate(repo_base: str, staging_root: str, build_id: str | None = No
 
 def main() -> int:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--repo-base", default=os.environ.get("REPO_BASE", "/home/manish/Desktop/machine"))
+    parser.add_argument("--repo-base", default=os.environ.get("REPO_BASE", "/home/manish/Desktop/omnibioai-ecosystem"))
     parser.add_argument("--staging-root", default=str(Path(__file__).resolve().parents[1] / "data" / "faiss_candidates"))
     parser.add_argument("--build-id")
     parser.add_argument("--repo-name", action="append", help="limit ingestion to this repository (repeatable)")

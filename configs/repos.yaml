@@ -2,7 +2,7 @@
 # The actual paths are constructed as: ${REPO_BASE}/<name>
 # Set REPO_BASE in your environment or .env file before running build_index.py.
 #
-# Local default:  REPO_BASE=/home/manish/Desktop/machine
+# Local default:  REPO_BASE=/home/manish/Desktop/omnibioai-ecosystem
 # Docker default: REPO_BASE=/repos  (set via ENV in Dockerfile)
 
 repos:
