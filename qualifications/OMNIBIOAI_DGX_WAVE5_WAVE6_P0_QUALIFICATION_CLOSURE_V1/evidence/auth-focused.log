@@ -1,0 +1,162 @@
+Script started on 2026-10-15 11:03:00-05:00 [COMMAND=".qual-venv/bin/python -m pytest -q tests/test_access_token_expiry.py tests/test_jwt_iss_aud.py tests/test_jwt_security_edges.py tests/test_refresh_rotation.py tests/test_token_revocation.py tests/test_session_cookie.py --junitxml=/home/manish/Desktop/omnibioai-ecosystem/omnibioai-dev-hub/qualifications/OMNIBIOAI_DGX_WAVE5_WAVE6_P0_QUALIFICATION_CLOSURE_V1/evidence/auth-focused.junit.xml" <not executed on terminal>]
+.......................................................                  [100%]
+=============================== warnings summary ===============================
+.qual-venv/lib/python3.14/site-packages/sqlalchemy/sql/schema.py:4296: 1 warning
+tests/test_refresh_rotation.py: 26 warnings
+tests/test_token_revocation.py: 15 warnings
+tests/test_session_cookie.py: 36 warnings
+  /tmp/omnibioai-wave5-wave6-qualification-v1/auth/.qual-venv/lib/python3.14/site-packages/sqlalchemy/sql/schema.py:4296: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    return util.wrap_callable(lambda ctx: fn(), fn)  # type: ignore[call-arg, no-any-return, no-untyped-call]  # noqa: E501
+
+app/db/init_admin.py:308
+  /tmp/omnibioai-wave5-wave6-qualification-v1/auth/app/db/init_admin.py:308: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    created_at=datetime.utcnow(),
+
+app/services/audit_service.py:206: 2 warnings
+tests/test_refresh_rotation.py: 11 warnings
+tests/test_token_revocation.py: 5 warnings
+tests/test_session_cookie.py: 19 warnings
+  /tmp/omnibioai-wave5-wave6-qualification-v1/auth/app/services/audit_service.py:206: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    created_at=datetime.utcnow().replace(microsecond=0),
+
+.qual-venv/lib/python3.14/site-packages/fastapi/testclient.py:1
+  /tmp/omnibioai-wave5-wave6-qualification-v1/auth/.qual-venv/lib/python3.14/site-packages/fastapi/testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.
+    from starlette.testclient import TestClient as TestClient  # noqa
+
+tests/test_access_token_expiry.py::test_access_token_exp_matches_configured_expiry_minutes
+  /tmp/omnibioai-wave5-wave6-qualification-v1/auth/tests/test_access_token_expiry.py:29: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    before = datetime.utcnow()
+
+tests/test_access_token_expiry.py: 2 warnings
+tests/test_jwt_iss_aud.py: 2 warnings
+tests/test_refresh_rotation.py: 16 warnings
+tests/test_token_revocation.py: 4 warnings
+tests/test_session_cookie.py: 21 warnings
+  /tmp/omnibioai-wave5-wave6-qualification-v1/auth/app/core/jwt.py:54: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    "exp": datetime.utcnow() + timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES),
+
+tests/test_access_token_expiry.py::test_access_token_exp_matches_configured_expiry_minutes
+  /tmp/omnibioai-wave5-wave6-qualification-v1/auth/tests/test_access_token_expiry.py:31: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    after = datetime.utcnow()
+
+tests/test_access_token_expiry.py::test_access_token_exp_matches_configured_expiry_minutes
+  /tmp/omnibioai-wave5-wave6-qualification-v1/auth/tests/test_access_token_expiry.py:34: DeprecationWarning: datetime.datetime.utcfromtimestamp() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.fromtimestamp(timestamp, datetime.UTC).
+    exp = datetime.utcfromtimestamp(claims["exp"])
+
+tests/test_access_token_expiry.py::test_access_token_exp_matches_default_fifteen_minutes
+  /tmp/omnibioai-wave5-wave6-qualification-v1/auth/tests/test_access_token_expiry.py:54: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    before = datetime.utcnow()
+
+tests/test_access_token_expiry.py::test_access_token_exp_matches_default_fifteen_minutes
+  /tmp/omnibioai-wave5-wave6-qualification-v1/auth/tests/test_access_token_expiry.py:56: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    after = datetime.utcnow()
+
+tests/test_access_token_expiry.py::test_access_token_exp_matches_default_fifteen_minutes
+  /tmp/omnibioai-wave5-wave6-qualification-v1/auth/tests/test_access_token_expiry.py:59: DeprecationWarning: datetime.datetime.utcfromtimestamp() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.fromtimestamp(timestamp, datetime.UTC).
+    exp = datetime.utcfromtimestamp(claims["exp"])
+
+tests/test_access_token_expiry.py::test_refresh_token_exp_matches_configured_expiry_days
+  /tmp/omnibioai-wave5-wave6-qualification-v1/auth/tests/test_access_token_expiry.py:68: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    before = datetime.utcnow()
+
+tests/test_access_token_expiry.py: 1 warning
+tests/test_jwt_iss_aud.py: 1 warning
+tests/test_refresh_rotation.py: 16 warnings
+tests/test_token_revocation.py: 4 warnings
+tests/test_session_cookie.py: 21 warnings
+  /tmp/omnibioai-wave5-wave6-qualification-v1/auth/app/core/jwt.py:65: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    "exp": datetime.utcnow() + timedelta(days=settings.REFRESH_TOKEN_EXPIRE_DAYS),
+
+tests/test_access_token_expiry.py::test_refresh_token_exp_matches_configured_expiry_days
+  /tmp/omnibioai-wave5-wave6-qualification-v1/auth/tests/test_access_token_expiry.py:70: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    after = datetime.utcnow()
+
+tests/test_access_token_expiry.py::test_refresh_token_exp_matches_configured_expiry_days
+  /tmp/omnibioai-wave5-wave6-qualification-v1/auth/tests/test_access_token_expiry.py:73: DeprecationWarning: datetime.datetime.utcfromtimestamp() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.fromtimestamp(timestamp, datetime.UTC).
+    exp = datetime.utcfromtimestamp(claims["exp"])
+
+tests/test_refresh_rotation.py: 8 warnings
+tests/test_token_revocation.py: 4 warnings
+tests/test_session_cookie.py: 16 warnings
+  /tmp/omnibioai-wave5-wave6-qualification-v1/auth/app/services/auth_service.py:359: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    user.last_login_at = datetime.utcnow()
+
+tests/test_refresh_rotation.py: 8 warnings
+tests/test_token_revocation.py: 4 warnings
+tests/test_session_cookie.py: 16 warnings
+  /tmp/omnibioai-wave5-wave6-qualification-v1/auth/app/services/auth_service.py:372: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    expires_at = datetime.utcnow() + timedelta(days=REFRESH_TOKEN_TTL_DAYS)
+
+tests/test_refresh_rotation.py: 9 warnings
+tests/test_token_revocation.py: 4 warnings
+tests/test_session_cookie.py: 16 warnings
+  /tmp/omnibioai-wave5-wave6-qualification-v1/auth/app/services/session_service.py:96: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    now = datetime.utcnow()
+
+tests/test_refresh_rotation.py: 10 warnings
+tests/test_session_cookie.py: 5 warnings
+  /tmp/omnibioai-wave5-wave6-qualification-v1/auth/app/services/auth_service.py:707: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    if db_token.expires_at < datetime.utcnow():
+
+tests/test_refresh_rotation.py: 8 warnings
+tests/test_session_cookie.py: 5 warnings
+  /tmp/omnibioai-wave5-wave6-qualification-v1/auth/app/services/session_service.py:179: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    return not (session.expires_at is not None and session.expires_at < datetime.utcnow())
+
+tests/test_refresh_rotation.py: 9 warnings
+tests/test_session_cookie.py: 6 warnings
+  /tmp/omnibioai-wave5-wave6-qualification-v1/auth/app/services/session_service.py:209: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    now = datetime.utcnow()
+
+tests/test_refresh_rotation.py: 8 warnings
+tests/test_session_cookie.py: 5 warnings
+  /tmp/omnibioai-wave5-wave6-qualification-v1/auth/app/services/auth_service.py:757: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    db_token.rotated_at = datetime.utcnow()
+
+tests/test_refresh_rotation.py: 8 warnings
+tests/test_session_cookie.py: 5 warnings
+  /tmp/omnibioai-wave5-wave6-qualification-v1/auth/app/services/auth_service.py:766: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    new_expires_at = datetime.utcnow() + timedelta(days=REFRESH_TOKEN_TTL_DAYS)
+
+tests/test_refresh_rotation.py: 7 warnings
+tests/test_session_cookie.py: 5 warnings
+  /tmp/omnibioai-wave5-wave6-qualification-v1/auth/app/services/session_service.py:234: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    session.last_activity_at = datetime.utcnow()
+
+tests/test_refresh_rotation.py::test_refresh_after_role_removal_produces_updated_claims
+tests/test_session_cookie.py::test_refresh_body_token_takes_priority_over_cookie
+  /tmp/omnibioai-wave5-wave6-qualification-v1/auth/app/services/session_service.py:278: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    if session.expires_at is not None and session.expires_at < datetime.utcnow():
+
+tests/test_refresh_rotation.py::test_replay_of_already_rotated_refresh_token_fails
+tests/test_refresh_rotation.py::test_reuse_detection_revokes_the_entire_token_family
+tests/test_refresh_rotation.py::test_rotation_chain_of_three_all_work_in_sequence
+tests/test_token_revocation.py::test_blacklisted_access_token_rejected_by_protected_route
+tests/test_session_cookie.py::test_logout_revocation_unchanged
+tests/test_session_cookie.py::test_logout_clears_session_cookie
+tests/test_session_cookie.py::test_logout_clear_cookie_matches_original_scope
+  /tmp/omnibioai-wave5-wave6-qualification-v1/auth/app/services/session_service.py:250: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    session.revoked_at = datetime.utcnow()
+
+tests/test_refresh_rotation.py::test_rotate_refresh_token_rejects_an_already_expired_token
+  /tmp/omnibioai-wave5-wave6-qualification-v1/auth/tests/test_refresh_rotation.py:240: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    expires_at=datetime.utcnow() - timedelta(days=1),
+
+tests/test_refresh_rotation.py::test_rotate_refresh_token_backfills_session_for_a_pre_session_foundation_token
+  /tmp/omnibioai-wave5-wave6-qualification-v1/auth/tests/test_refresh_rotation.py:268: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    expires_at=datetime.utcnow() + timedelta(days=7),
+
+tests/test_token_revocation.py::test_blacklisted_access_token_rejected_by_protected_route
+  /tmp/omnibioai-wave5-wave6-qualification-v1/auth/app/core/token_revocation.py:56: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    now = int(datetime.utcnow().timestamp())
+
+tests/test_session_cookie.py::test_refresh_cookie_only_works
+tests/test_session_cookie.py::test_refresh_body_token_takes_priority_over_cookie
+tests/test_session_cookie.py::test_refresh_invalid_cookie_only_returns_401
+  /tmp/omnibioai-wave5-wave6-qualification-v1/auth/.qual-venv/lib/python3.14/site-packages/starlette/testclient.py:457: DeprecationWarning: Setting per-request cookies=<...> is being deprecated, because the expected behaviour on cookie persistence is ambiguous. Set cookies directly on the client instance instead.
+    return super().request(
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+55 passed, 395 warnings in 13.03s
+
+Script done on 2026-10-15 11:03:16-05:00 [COMMAND_EXIT_CODE="0"]

@@ -21,6 +21,7 @@ import json
 import os
 import shutil
 import sys
+import tempfile
 from pathlib import Path
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
@@ -38,25 +39,50 @@ def _state(data: Path) -> dict:
     return {p.name: sorted(c.name for c in p.iterdir()) for p in sorted(data.iterdir()) if p.is_dir()}
 
 
+def _stage_candidate(source: Path, dest: Path, expected_hashes: dict[str, str]) -> None:
+    """Copy an external candidate into the data filesystem without exposing a partial final path."""
+    dest.parent.mkdir(parents=True, exist_ok=True)
+    partial = Path(tempfile.mkdtemp(prefix=f".{dest.name}.partial-", dir=dest.parent))
+    try:
+        shutil.copytree(source, partial, dirs_exist_ok=True)
+        copied_hashes = artifact_hashes(partial)
+        if copied_hashes != artifact_hashes(source) or copied_hashes != expected_hashes:
+            raise RuntimeError("copied artifact hashes do not match the source/manifest")
+        check = validate_index_directory(partial, require_public_only=True)
+        if not check["ok"]:
+            raise RuntimeError(f"copied candidate invalid: {check['reason']}")
+        os.replace(partial, dest)
+    except Exception:
+        if partial.exists():
+            shutil.rmtree(partial)
+        raise
+
+
 def cmd_promote(args: argparse.Namespace) -> int:
     source, data = Path(args.source), Path(args.data_dir)
     manifest = read_manifest(source)
     build_id = manifest["build_id"]
     dest = data / "faiss_candidates" / build_id
-    if dest.exists():
+    source_is_staged = source.resolve() == dest.resolve()
+    if dest.exists() and not source_is_staged:
         print(f"REFUSED: {dest} already exists", file=sys.stderr)
         return 1
     check = validate_index_directory(source, require_public_only=True)
     if not check["ok"]:
         print(f"REFUSED: source candidate invalid: {check['reason']}", file=sys.stderr)
         return 1
-    (data / "faiss_candidates").mkdir(parents=True, exist_ok=True)
-    shutil.copytree(source, dest)
-    if artifact_hashes(dest) != artifact_hashes(source) or artifact_hashes(dest) != manifest.get("artifact_hashes"):
-        shutil.rmtree(dest)
-        print("REFUSED: copied artifact hashes do not match the source/manifest; copy removed", file=sys.stderr)
-        return 1
-    print(f"copied {build_id}; hashes verified: {artifact_hashes(dest)}")
+    if source_is_staged:
+        if artifact_hashes(source) != manifest.get("artifact_hashes"):
+            print("REFUSED: staged artifact hashes do not match the manifest", file=sys.stderr)
+            return 1
+        print(f"using staged {build_id}; hashes verified: {artifact_hashes(source)}")
+    else:
+        try:
+            _stage_candidate(source, dest, manifest.get("artifact_hashes") or {})
+        except Exception as exc:  # noqa: BLE001 -- report staging failure; active index is still untouched
+            print(f"REFUSED: staging failed: {exc}", file=sys.stderr)
+            return 1
+        print(f"copied {build_id}; hashes verified: {artifact_hashes(dest)}")
     result = promote_candidate(dest, data / "faiss_index", data / "faiss_previous")
     print("PROMOTED " + json.dumps(result))
     print("state " + json.dumps(_state(data)))

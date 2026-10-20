@@ -1,10 +1,10 @@
-fastapi==0.128.0
+fastapi==0.143.2
 uvicorn==0.40.0
-requests==2.32.4
+requests==2.33.0
 numpy==1.26.4
 faiss-cpu==1.15.0
-sentence-transformers==5.4.1
-PyJWT==2.10.1
+sentence-transformers==5.6.0
+PyJWT==2.14.0
 PyYAML==6.0.2
 
 # PyJWT's jwt/utils.py unconditionally imports
@@ -20,5 +20,5 @@ PyYAML==6.0.2
 # cause, same validated fix already applied in omnibioai-tes and
 # omnibioai-control-center (see
 # OMNIBIOAI-SECURITY-AUDIT-ARM64-CRYPTOGRAPHY-SIGILL-2026-09-30.md):
-# cryptography==46.0.3 is the newest clean release.
-cryptography==46.0.3
+# remain on the 46.x ARM64 wheel line while taking the patched release.
+cryptography==46.0.5

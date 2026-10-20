@@ -10,6 +10,7 @@ Developer: Manish Kumar <manish@omnibioai.org>
 """
 
 import asyncio
+import json
 import time
 
 import jwt
@@ -26,6 +27,7 @@ from api.auth import (
 )
 
 SECRET = "test-secret-value"
+PROXY_SECRET = "independent-proxy-secret-value"
 AUDIENCE = "omnibioai-platform"
 ISSUER = "omnibioai-auth"
 
@@ -34,6 +36,7 @@ ISSUER = "omnibioai-auth"
 def configured_claim_validation(monkeypatch):
     monkeypatch.setenv("JWT_AUDIENCE", AUDIENCE)
     monkeypatch.setenv("JWT_ISSUER", ISSUER)
+    monkeypatch.setattr("api.auth.load_proxy_secret", lambda: PROXY_SECRET)
 
 
 def _make_token(secret=SECRET, sub="alice", exp_delta=3600, **extra_claims):
@@ -137,7 +140,11 @@ def test_validate_token_rejects_invalid_or_missing_claims(claims):
         extra["iss"] = None
     payload = {"sub": "alice", "exp": int(time.time()) + 3600, "aud": AUDIENCE, "iss": ISSUER}
     payload.update(extra)
-    token = jwt.encode(payload, SECRET, algorithm="HS256")
+    # PyJWT 2.14 validates claim types while encoding, so these deliberately
+    # malformed-token fixtures use the lower-level JWS encoder to exercise
+    # the application verifier's fail-closed behavior rather than failing in
+    # the test fixture before the request reaches it.
+    token = jwt.api_jws.encode(json.dumps(payload).encode(), SECRET, algorithm="HS256")
     with pytest.raises(AuthError, match="Invalid token"):
         validate_token(token, SECRET, AUDIENCE, ISSUER)
 
@@ -254,7 +261,7 @@ def test_require_auth_internal_header_bypasses_jwt(monkeypatch):
     monkeypatch.setenv("JWT_ISSUER", ISSUER)
 
     # No Authorization header at all -- only the matching internal header.
-    resp = client.get("/protected", headers={"X-Devhub-Internal": SECRET})
+    resp = client.get("/protected", headers={"X-Devhub-Internal": PROXY_SECRET})
 
     assert resp.status_code == 200
     assert resp.json()["actor"] == "devhub-ui"
@@ -285,6 +292,17 @@ def test_require_auth_internal_header_wrong_value_falls_through_and_fails(monkey
     # Wrong internal-header value and no Authorization header -- falls
     # through to the JWT path, which then has nothing to validate.
     resp = client.get("/protected", headers={"X-Devhub-Internal": "wrong-value"})
+
+    assert resp.status_code == 401
+
+
+def test_require_auth_rejects_jwt_secret_as_internal_proxy_credential(monkeypatch):
+    """The JWT signing key must no longer authenticate the nginx-only path."""
+    monkeypatch.setenv("AUTH_ENABLED", "true")
+    monkeypatch.setenv("JWT_SECRET", SECRET)
+    monkeypatch.setenv("DEVHUB_INTERNAL_PROXY_SECRET", PROXY_SECRET)
+
+    resp = client.get("/protected", headers={"X-Devhub-Internal": SECRET})
 
     assert resp.status_code == 401
 
@@ -347,6 +365,33 @@ def test_validate_auth_config_raises_when_enabled_with_blank_secret(monkeypatch)
     monkeypatch.setenv("JWT_SECRET", "   ")  # whitespace-only -> strips to ""
 
     with pytest.raises(RuntimeError, match="AUTH_ENABLED is true but JWT_SECRET is not set"):
+        validate_auth_config()
+
+
+def test_validate_auth_config_requires_independent_proxy_secret(monkeypatch):
+    monkeypatch.setenv("AUTH_ENABLED", "true")
+    monkeypatch.setenv("JWT_SECRET", SECRET)
+    monkeypatch.setattr("api.auth.load_proxy_secret", lambda: (_ for _ in ()).throw(RuntimeError("missing")))
+
+    with pytest.raises(RuntimeError, match="proxy secret is invalid"):
+        validate_auth_config()
+
+
+def test_validate_auth_config_rejects_insecure_jwt_placeholder(monkeypatch):
+    monkeypatch.setenv("AUTH_ENABLED", "true")
+    monkeypatch.setenv("JWT_SECRET", SECRET)
+    monkeypatch.setenv("JWT_SECRET", "change-me")
+
+    with pytest.raises(RuntimeError, match="insecure placeholder"):
+        validate_auth_config()
+
+
+def test_validate_auth_config_rejects_shared_jwt_and_proxy_value(monkeypatch):
+    monkeypatch.setenv("AUTH_ENABLED", "true")
+    monkeypatch.setenv("JWT_SECRET", SECRET)
+    monkeypatch.setattr("api.auth.load_proxy_secret", lambda: (_ for _ in ()).throw(RuntimeError("not independent")))
+
+    with pytest.raises(RuntimeError, match="not independent"):
         validate_auth_config()
 
 

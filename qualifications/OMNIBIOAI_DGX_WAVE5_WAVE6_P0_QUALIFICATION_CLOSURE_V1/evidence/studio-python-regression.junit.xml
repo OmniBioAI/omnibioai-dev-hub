@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="2" failures="0" skipped="0" tests="2" time="0.498" timestamp="2026-10-15T11:06:38.002098-05:00" hostname="spark-c275"><testcase classname="" name="tests.integration.test_service_to_service_oauth" time="0.000"><error message="collection failure">ImportError while importing test module '/tmp/omnibioai-wave5-wave6-qualification-v1/studio-backup/tests/integration/test_service_to_service_oauth.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+/home/manish/miniforge3/lib/python3.14/importlib/__init__.py:88: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/integration/test_service_to_service_oauth.py:30: in &lt;module&gt;
+    import jwt as pyjwt
+E   ModuleNotFoundError: No module named 'jwt'</error></testcase><testcase classname="" name="tests.unit.test_license_server" time="0.000"><error message="collection failure">ImportError while importing test module '/tmp/omnibioai-wave5-wave6-qualification-v1/studio-backup/tests/unit/test_license_server.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+/home/manish/miniforge3/lib/python3.14/importlib/__init__.py:88: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/unit/test_license_server.py:18: in &lt;module&gt;
+    from fastapi.testclient import TestClient
+E   ModuleNotFoundError: No module named 'fastapi'</error></testcase></testsuite></testsuites>

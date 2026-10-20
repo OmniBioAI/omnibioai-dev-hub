@@ -35,11 +35,13 @@ async def test_require_auth_all_modes_and_identity_fields(monkeypatch):
     monkeypatch.delenv("AUTH_ENABLED", raising=False)
     assert await auth.require_auth(SimpleNamespace()) == "system"
 
+    proxy_secret = "synthetic-proxy-secret-value-0123456789"
+    monkeypatch.setattr(auth, "load_proxy_secret", lambda: proxy_secret)
     monkeypatch.setenv("AUTH_ENABLED", "true")
     monkeypatch.setenv("JWT_SECRET", "secret")
     monkeypatch.setenv("JWT_AUDIENCE", "audience")
     monkeypatch.setenv("JWT_ISSUER", "issuer")
-    assert await auth.require_auth(SimpleNamespace(), x_devhub_internal="secret") == "devhub-ui"
+    assert await auth.require_auth(SimpleNamespace(), x_devhub_internal=proxy_secret) == "devhub-ui"
 
     token = jwt.encode({"email": "user@example.com", "aud": "audience", "iss": "issuer", "exp": 4102444800}, "secret", algorithm="HS256")
     assert await auth.require_auth(SimpleNamespace(), authorization=f"Bearer {token}") == "user@example.com"

@@ -61,7 +61,7 @@ def build_index():
 
     print("🚀 Trusted V7 Candidate Indexing Starting...")
 
-    repo_base = os.environ.get("REPO_BASE", "/home/manish/Desktop/machine")
+    repo_base = os.environ.get("REPO_BASE", "/home/manish/Desktop/omnibioai-ecosystem")
 
     hardcoded_repo_names = [
         "omnibioai",
@@ -96,7 +96,7 @@ def build_index():
         raise SystemExit(
             f"\n❌  No repos found under REPO_BASE={repo_base!r}\n"
             f"    Set REPO_BASE to the directory that contains the omnibioai-* repos.\n"
-            f"    Example:  export REPO_BASE=/home/manish/Desktop/machine\n"
+            f"    Example:  export REPO_BASE=/home/manish/Desktop/omnibioai-ecosystem\n"
             f"    Docker:   -e REPO_BASE=/repos  (with repos volume mounted at /repos)\n"
         )
 

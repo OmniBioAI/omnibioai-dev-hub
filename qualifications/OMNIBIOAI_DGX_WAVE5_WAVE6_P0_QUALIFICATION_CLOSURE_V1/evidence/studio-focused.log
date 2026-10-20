@@ -1,0 +1,53 @@
+Script started on 2026-10-15 11:04:47-05:00 [COMMAND="npx --yes node@22.12.0 node_modules/vitest/vitest.mjs run --config vitest.app.config.js tests/ui/session.test.js --reporter=default --reporter=json --outputFile=/home/manish/Desktop/omnibioai-ecosystem/omnibioai-dev-hub/qualifications/OMNIBIOAI_DGX_WAVE5_WAVE6_P0_QUALIFICATION_CLOSURE_V1/evidence/studio-focused.json" <not executed on terminal>]
+[?25l(!) Your Vite config uses features that are unsupported by `configLoader: 'native'`, which is planned to become the default in a future major version of Vite:
+  - ESM syntax in a file loaded as CommonJS (vitest.app.config.js:1:1). Use a `.mjs` extension or set `"type": "module"` in the closest package.json
+Set `VITE_CONFIG_NATIVE_IGNORE_WARNING=true` to suppress this warning.
+(node:1033344) ExperimentalWarning: CommonJS module /tmp/omnibioai-wave5-wave6-qualification-v1/studio-session/vitest.app.config.js is loading ES Module /tmp/wave5-agent-c-studio/node_modules/@vitejs/plugin-react/dist/index.js using require().
+Support for loading ES Module in require() is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+ RUN  v4.1.10 /tmp/omnibioai-wave5-wave6-qualification-v1/studio-session
+
+[?2026h
+ ❯ tests/ui/session.test.js [queued]
+
+ Test Files 0 passed (1)
+      Tests 0 passed (0)
+   Start at 11:04:48
+   Duration 902ms
+[?2026l[?2026h[K
+ ❯ tests/ui/session.test.js 0/18
+
+ Test Files 0 passed (1)
+      Tests 0 passed (18)
+   Start at 11:04:48
+   Duration 1.00s
+[?2026l[K ✓ tests/ui/session.test.js (18 tests) 52ms
+   ✓ session boundary (18)
+     ✓ builds auth URLs from configured host and stores cookie-backed sessions 19ms
+     ✓ syncs the access token with the Electron service-webview session 3ms
+     ✓ validates and caches the current user, then clears invalid sessions 6ms
+     ✓ refreshes successfully and clears state for rejected refreshes 3ms
+     ✓ logs out locally even when the server is unreachable 1ms
+     ✓ maps license failures and consumes OAuth redirects without replay 4ms
+     ✓ falls back to a generic license error for an unmapped reason 2ms
+     ✓ activates a valid license key and starts a session 2ms
+     ✓ uses the deployment origin in a browser even when a desktop host is configured 1ms
+     ✓ falls back to a fixed LAN IP only in Electron when no host is configured 0ms
+     ✓ logs in with a password and rejects on a 401 or other failure 3ms
+     ✓ skips the logout request entirely when there is no refresh token 1ms
+     ✓ no-ops a refresh with no refresh token and fails open on a network error 1ms
+     ✓ fails open on a network error while validating the current user 1ms
+     ✓ detects Electron via either preload bridge 0ms
+     ✓ subscribes and unsubscribes from session-change events 1ms
+     ✓ lists OAuth providers and confirms an account link, surfacing JSON and non-JSON failures 2ms
+     ✓ parses an error redirect and a bare success redirect with no tokens 1ms
+
+ Test Files  1 passed (1)
+      Tests  18 passed (18)
+   Start at  11:04:48
+   Duration  1.16s (transform 48ms, setup 101ms, import 35ms, tests 52ms, environment 857ms)
+
+JSON report written to /home/manish/Desktop/omnibioai-ecosystem/omnibioai-dev-hub/qualifications/OMNIBIOAI_DGX_WAVE5_WAVE6_P0_QUALIFICATION_CLOSURE_V1/evidence/studio-focused.json
+[?25h
+Script done on 2026-10-15 11:04:49-05:00 [COMMAND_EXIT_CODE="0"]

@@ -1,43 +1,31 @@
 #!/bin/bash
 set -euo pipefail
 
-# Root-then-drop-to-appuser wrapper around the container's real startup
-# sequence (below). Needed specifically for /app/data: it's a host bind
-# mount (${MACHINE_DIR}/omnibioai-dev-hub/data:/app/data, see
-# docker-compose.yml), so it doesn't exist at image-build time and
-# overlays whatever the Dockerfile's own build-time
-# `chown -R appuser:appuser /app` set -- with whatever ownership the host
-# directory actually has. That host directory predates appuser's uid
-# 10001 (owned by the host user's uid 1000), so build_index.py's final
-# faiss.write_index() step was hitting "Permission denied" writing
-# index.faiss -- confirmed live 2026-09-13: the index build ran to full
-# completion (every document loaded and embedded) and only failed at
-# this last step, so it looked like a slow/stuck build rather than a
-# permission bug, and reproduced identically on every restart-on-failure
-# retry since the index was never actually persisted.
-#
-# Same fix this Dockerfile already applies to /var/log/nginx,
-# /var/lib/nginx, /etc/nginx/conf.d (see its own chown -R
-# appuser:appuser comment) -- those are baked into the image, so a
-# build-time chown is enough. /app/data can't be fixed at build time
-# because the bind mount isn't there yet, so it has to happen here, at
-# container start, as root, before dropping to appuser for everything
-# else (index build, nginx, uvicorn) -- self-re-execs this same script
-# as appuser once the chown is done, rather than requiring gosu/su-exec
-# (neither is installed in the base image; `runuser` already is).
-if [ "$(id -u)" = "0" ]; then
-  chown -R appuser:appuser /app/data
-  exec runuser -u appuser -- "$0" "$@"
+# Production always runs directly as UID 10001. This entrypoint never
+# changes ownership or permissions on mounted host artifacts.
+if [ "$(id -u)" != "10001" ]; then
+  echo 'Dev Hub must run as UID 10001; refusing startup.' >&2
+  exit 1
 fi
 
-# Everything below is unchanged from the previous inline CMD -- same
-# steps, same order, same behavior, now running as appuser (uid 10001)
-# after the re-exec above.
+# Fail closed if invoked under a different identity; no root re-exec path.
 _auth_enabled=$(printf '%s' "${AUTH_ENABLED:-}" | tr -d '[:space:]' | tr '[:upper:]' '[:lower:]')
-if [ "$_auth_enabled" = 'true' ] && [ -z "${JWT_SECRET:-}" ]; then
-  echo '❌ AUTH_ENABLED is true but JWT_SECRET is not set -- refusing to start with the internal UI-proxy auth header silently falling back to a placeholder.' >&2
-  echo '   Set JWT_SECRET before starting this container.' >&2
-  exit 1
+if [ "$_auth_enabled" = 'true' ]; then
+  if [ -z "${JWT_SECRET:-}" ]; then
+    echo '❌ AUTH_ENABLED is true but JWT_SECRET is not set -- refusing to start.' >&2
+    echo '   Set JWT_SECRET before starting this container.' >&2
+    exit 1
+  fi
+  case "${JWT_SECRET}" in
+    change-me|change-me-in-production)
+      echo '❌ JWT_SECRET uses an insecure placeholder -- refusing to start.' >&2
+      exit 1
+      ;;
+  esac
+  if ! python -c 'from api.secret_config import load_proxy_secret; load_proxy_secret()' >/dev/null 2>&1; then
+    echo 'Dev Hub proxy secret file is missing or invalid; refusing startup.' >&2
+    exit 1
+  fi
 fi
 
 # Production serves a pre-built, explicitly promoted, PUBLIC-only index. Startup
@@ -52,7 +40,8 @@ fi
 #   unpromoted candidate    -> ignored; only /app/data/faiss_index is ever served
 # NB: with a restart policy of on-failure a failing start will loop, so freeze
 # restarts before any index maintenance (see the promotion runbook).
-_index_dir="${DEVHUB_INDEX_DIR:-/app/data/faiss_index}"
+_index_dir=/app/data/faiss_index
+python -c 'from index.runtime_path import validate_runtime_index_root; validate_runtime_index_root("/app/data/faiss_index")' || exit 1
 if [ ! -f "$_index_dir/index.faiss" ]; then
   echo "❌ No production index at $_index_dir (index.faiss missing)." >&2
   echo '   Refusing to start: the service never builds or promotes an index implicitly.' >&2
@@ -72,7 +61,10 @@ until curl -sf http://ollama:11434/api/tags > /dev/null 2>&1; do
 done
 echo '✅ Ollama is ready'
 
-printf 'server {\n    listen 5173;\n    root /usr/share/nginx/html;\n    index index.html;\n    location / { try_files $uri $uri/ /index.html; }\n    location /api/ { proxy_pass http://127.0.0.1:8082; proxy_set_header Host $host; }\n    location /rag/ { proxy_pass http://127.0.0.1:8082; proxy_set_header X-Devhub-Internal "%s"; }\n    location /health { proxy_pass http://127.0.0.1:8082; }\n    location /status { proxy_pass http://127.0.0.1:8082; }\n    location /docs   { proxy_pass http://127.0.0.1:8082; }\n}\n' "${JWT_SECRET:-}" > /etc/nginx/conf.d/devhub.conf
+_proxy_secret=$(python -c 'from api.secret_config import load_proxy_secret; print(load_proxy_secret(), end="")')
+umask 077
+printf 'server {\n    listen 5173;\n    root /usr/share/nginx/html;\n    index index.html;\n    location / { try_files $uri $uri/ /index.html; }\n    location /api/ { proxy_pass http://127.0.0.1:8082; proxy_set_header Host $host; }\n    location /rag/ { proxy_pass http://127.0.0.1:8082; proxy_set_header X-Devhub-Internal "%s"; }\n    location /health { proxy_pass http://127.0.0.1:8082; }\n    location /status { proxy_pass http://127.0.0.1:8082; }\n    location /docs   { proxy_pass http://127.0.0.1:8082; }\n}\n' "$_proxy_secret" > /etc/nginx/conf.d/devhub.conf
+unset _proxy_secret
 
 nginx
 echo '🌐 nginx started on port 5173'

@@ -1,0 +1,5 @@
+Script started on 2026-10-15 11:01:45-05:00 [COMMAND="python3 -m pytest -q tests/test_backup_mysql.py --junitxml=/home/manish/Desktop/omnibioai-ecosystem/omnibioai-dev-hub/qualifications/OMNIBIOAI_DGX_WAVE5_WAVE6_P0_QUALIFICATION_CLOSURE_V1/evidence/backup-focused.junit.xml" <not executed on terminal>]
+......................................                                   [100%]
+38 passed in 3.17s
+
+Script done on 2026-10-15 11:01:48-05:00 [COMMAND_EXIT_CODE="0"]

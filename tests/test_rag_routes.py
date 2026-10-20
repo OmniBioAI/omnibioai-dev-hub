@@ -112,16 +112,18 @@ def test_query_endpoint_failure_traceback_enabled(client, mock_control_plane, mo
 
 
 def test_query_endpoint_failure_traceback_disabled(client, mock_control_plane, monkeypatch):
-    """Return a 500 with the error message but no traceback when DEBUG_TRACEBACKS is unset."""
+    """Return a generic 500 without exception text or traceback when debugging is unset."""
     monkeypatch.delenv("DEBUG_TRACEBACKS", raising=False)
     engine = _engine()
-    engine.retrieve.side_effect = Exception("Query Failed")
+    engine.retrieve.side_effect = Exception("internal-host password=hunter2 /srv/secret.py")
     mock_control_plane.get_engine.return_value = engine
 
     response = client.post("/query", json={"query": "hello"})
 
     assert response.status_code == 500
-    assert response.json()["detail"]["error"] == "Query Failed"
+    body = response.text
+    assert response.json()["detail"]["error"] == "Ask OmniBioAI could not complete this request."
+    assert "internal-host" not in body and "hunter2" not in body and "secret.py" not in body
     assert "trace" not in response.json()["detail"]
 
 
@@ -220,6 +222,8 @@ def test_client_cannot_widen_visibility_or_lower_relevance_via_request_body(clie
     client.post("/query", json={
         "query": "q", "allowed_visibilities": ["PUBLIC", "INTERNAL", "REVIEW_REQUIRED"],
         "min_relevance": 0.0, "visibility": "INTERNAL",
+        "index_dir": "../../faiss_candidates/devhub-41b13f3a1a32",
+        "index_path": "/app/data/faiss_candidates/devhub-41b13f3a1a32",
     })
 
     engine.retrieve.assert_called_once_with("q", repo=None, bundle=None, allowed_visibilities={"PUBLIC"}, min_relevance=0.64)

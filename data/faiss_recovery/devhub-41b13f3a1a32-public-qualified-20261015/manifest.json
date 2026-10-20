@@ -1,0 +1,80 @@
+{
+  "artifact_hashes": {
+    "index.faiss": "6f523ce2adc7ac0d0b73a31f5942b4c42625eb4cd3f97676fd688563c8a324af",
+    "metadata.pkl": "99f187bfba060b26f5297da99afab43f63d79978b836c92ede8bd22852900024"
+  },
+  "build_id": "devhub-41b13f3a1a32-public",
+  "build_status": "CLEAN",
+  "build_timestamp": "2026-10-15T16:43:57Z",
+  "chunked": 2331,
+  "derivation": "public-only-filter; vectors copied bit-for-bit from the source candidate, not re-embedded",
+  "derived": true,
+  "derived_from": {
+    "artifact_hashes": {
+      "index.faiss": "afa6c1823f39bac277ce665b4db4813fe2d1dc0ebe9414a967bdf0ed7116231c",
+      "metadata.pkl": "8c239c3659a1f15befb8eec95d60bf65cf103edfe31dfaa1788b8f70ceb55140"
+    },
+    "build_id": "devhub-41b13f3a1a32",
+    "build_status": "CLEAN",
+    "chunk_count": 35676,
+    "manifest_sha256": "768438146fed621d82c2efc2053c9f593a44a86ea0575c5d713209e4b04da93e",
+    "visibility_counts": {
+      "INTERNAL": 33345,
+      "PUBLIC": 2331,
+      "REVIEW_REQUIRED": 0
+    }
+  },
+  "embedded": 2331,
+  "embedding_dimension": 768,
+  "embedding_failures": [],
+  "embedding_identity": "ollama:nomic-embed-text:revision-unknown",
+  "embedding_model": "nomic-embed-text",
+  "embedding_provider": "ollama",
+  "embedding_telemetry": {
+    "batch_size": 25,
+    "cooldown_seconds": 5.0,
+    "duplicate_chunks_removed": 0,
+    "embedding_elapsed_seconds": 7534.61,
+    "failed_embeddings": 0,
+    "note": "telemetry of the SOURCE build; this artifact was not embedded",
+    "retry_count": 0,
+    "second_chance_recovered": 0,
+    "successful_embeddings": 35676,
+    "total_embedding_attempts": 35676
+  },
+  "evaluation_status": "NOT_EVALUATED",
+  "excluded_by_policy": {
+    "INTERNAL": {
+      "chunks": 33345,
+      "documents": 1926
+    },
+    "REVIEW_REQUIRED": {
+      "chunks": 0,
+      "documents": 0
+    }
+  },
+  "indexed": 2331,
+  "ingestion_failures": [],
+  "metadata_schema_version": "devhub.trusted-ingestion.v1",
+  "missing_repositories": [],
+  "parsed": 152,
+  "promotion_status": "CANDIDATE",
+  "repositories": [
+    "omnibioai-docs"
+  ],
+  "repository_revisions": {
+    "omnibioai-docs": "1c1d4bc6b5e4f44420d7cccfcc5658f7d6e5f984"
+  },
+  "retrievable": 2331,
+  "schema": "devhub.index-manifest.v1",
+  "selected_chunk_count": 2331,
+  "selected_document_count": 152,
+  "source_selection_policy_version": "phase18-source-selection-v1",
+  "vector_backend": "FAISS IndexFlatIP",
+  "visibility_counts": {
+    "INTERNAL": 0,
+    "PUBLIC": 2331,
+    "REVIEW_REQUIRED": 0
+  },
+  "visibility_policy": "PUBLIC_ONLY"
+}

@@ -1,0 +1,2587 @@
+Script started on 2026-10-15 11:06:35-05:00 [COMMAND="npx --yes node@22.12.0 node_modules/vitest/vitest.mjs run --config vitest.app.config.js --reporter=default --reporter=json --outputFile=/home/manish/Desktop/omnibioai-ecosystem/omnibioai-dev-hub/qualifications/OMNIBIOAI_DGX_WAVE5_WAVE6_P0_QUALIFICATION_CLOSURE_V1/evidence/studio-ui-regression.json" <not executed on terminal>]
+[?25l(!) Your Vite config uses features that are unsupported by `configLoader: 'native'`, which is planned to become the default in a future major version of Vite:
+  - ESM syntax in a file loaded as CommonJS (vitest.app.config.js:1:1). Use a `.mjs` extension or set `"type": "module"` in the closest package.json
+Set `VITE_CONFIG_NATIVE_IGNORE_WARNING=true` to suppress this warning.
+(node:1069915) ExperimentalWarning: CommonJS module /tmp/omnibioai-wave5-wave6-qualification-v1/studio-session/vitest.app.config.js is loading ES Module /tmp/wave5-agent-c-studio/node_modules/@vitejs/plugin-react/dist/index.js using require().
+Support for loading ES Module in require() is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+ RUN  v4.1.10 /tmp/omnibioai-wave5-wave6-qualification-v1/studio-session
+
+[?2026h
+ ❯ tests/ui/account-security.test.jsx [queued]
+
+ Test Files 0 passed (97)
+      Tests 0 passed (0)
+   Start at 11:06:36
+   Duration 640ms
+[?2026l[?2026h[K
+ ❯ tests/ui/account-security.test.jsx [queued]
+ ❯ tests/ui/app-shell.test.jsx [queued]
+
+ Test Files 0 passed (97)
+      Tests 0 passed (0)
+   Start at 11:06:36
+   Duration 1.03s
+[?2026l[?2026h[K ❯ tests/ui/app-shell.test.jsx (0 test)
+
+ ❯ tests/ui/account-security.test.jsx [queued]
+ ❯ tests/ui/billing.test.jsx [queued]
+ ❯ tests/ui/explore-domains.test.jsx [queued]
+ ❯ tests/ui/nav-components.test.jsx [queued]
+ ❯ tests/ui/profile.test.jsx [queued]
+ ❯ tests/ui/web-session.test.js [queued]
+
+ Test Files 1 failed | 0 passed (97)
+      Tests 0 passed (0)
+   Start at 11:06:36
+   Duration 1.15s
+[?2026l[?2026h[K ❯ tests/ui/account-security.test.jsx (0 test)
+
+ ❯ tests/ui/account-personalization.test.jsx [queued]
+ ❯ tests/ui/account-plan.test.jsx [queued]
+ ❯ tests/ui/billing.test.jsx [queued]
+ ❯ tests/ui/explore-domains.test.jsx [queued]
+ ❯ tests/ui/nav-components.test.jsx [queued]
+ ❯ tests/ui/organization-connections.test.jsx [queued]
+ ❯ tests/ui/plugin-api.test.js [queued]
+ ❯ tests/ui/plugin-batch-contracts.test.js [queued]
+ ❯ tests/ui/profile.test.jsx [queued]
+ ❯ tests/ui/web-session.test.js [queued]
+
+ Test Files 2 failed | 0 passed (97)
+      Tests 0 passed (0)
+   Start at 11:06:36
+   Duration 1.28s
+[?2026l[?2026h[K ❯ tests/ui/billing.test.jsx (0 test)
+ ❯ tests/ui/explore-domains.test.jsx (0 test)
+ ❯ tests/ui/nav-components.test.jsx (0 test)
+
+ ❯ tests/ui/account-personalization.test.jsx [queued]
+ ❯ tests/ui/account-plan.test.jsx [queued]
+ ❯ tests/ui/artifacts.test.jsx [queued]
+ ❯ tests/ui/explore-domains.test.jsx [queued]
+ ❯ tests/ui/mfa-management.test.jsx [queued]
+ ❯ tests/ui/nav-components.test.jsx [queued]
+ ❯ tests/ui/organization-connections.test.jsx [queued]
+ ❯ tests/ui/plugin-api.test.js [queued]
+ ❯ tests/ui/plugin-batch-contracts.test.js [queued]
+ ❯ tests/ui/profile.test.jsx [queued]
+ ❯ tests/ui/projects.test.jsx [queued]
+ ❯ tests/ui/query-batch.test.jsx [queued]
+ ❯ tests/ui/role-management.test.jsx [queued]
+ ❯ tests/ui/web-session.test.js [queued]
+
+ Test Files 5 failed | 0 passed (97)
+      Tests 0 passed (0)
+   Start at 11:06:36
+   Duration 1.62s
+[?2026l[?2026h[K ❯ tests/ui/organization-connections.test.jsx (0 test)
+
+ ❯ tests/ui/account-personalization.test.jsx [queued]
+ ❯ tests/ui/account-plan.test.jsx [queued]
+ ❯ tests/ui/artifacts.test.jsx [queued]
+ ❯ tests/ui/mfa-management.test.jsx [queued]
+ ❯ tests/ui/nav-components.test.jsx [queued]
+ ❯ tests/ui/organization-connections.test.jsx [queued]
+ ❯ tests/ui/plugin-api.test.js [queued]
+ ❯ tests/ui/plugin-batch-contracts.test.js [queued]
+ ❯ tests/ui/profile.test.jsx [queued]
+ ❯ tests/ui/projects.test.jsx [queued]
+ ❯ tests/ui/query-batch.test.jsx [queued]
+ ❯ tests/ui/role-management.test.jsx [queued]
+ ❯ tests/ui/studio.test.jsx [queued]
+ ❯ tests/ui/web-session.test.js [queued]
+
+ Test Files 6 failed | 0 passed (97)
+      Tests 0 passed (0)
+   Start at 11:06:36
+   Duration 1.74s
+[?2026l[?2026h[K ❯ tests/ui/profile.test.jsx (0 test)
+ ❯ tests/ui/account-personalization.test.jsx (0 test)
+
+ ❯ tests/ui/account-notifications.test.jsx [queued]
+ ❯ tests/ui/account-personalization.test.jsx [queued]
+ ❯ tests/ui/account-plan.test.jsx [queued]
+ ❯ tests/ui/artifacts.test.jsx [queued]
+ ❯ tests/ui/mfa-management.test.jsx [queued]
+ ❯ tests/ui/plugin-api.test.js [queued]
+ ❯ tests/ui/plugin-batch-contracts.test.js [queued]
+ ❯ tests/ui/profile.test.jsx [queued]
+ ❯ tests/ui/projects.test.jsx [queued]
+ ❯ tests/ui/query-batch.test.jsx [queued]
+ ❯ tests/ui/role-management.test.jsx [queued]
+ ❯ tests/ui/studio.test.jsx [queued]
+ ❯ tests/ui/web-session.test.js [queued]
+ ❯ tests/ui/workbench-fields.test.jsx [queued]
+
+ Test Files 8 failed | 0 passed (97)
+      Tests 0 passed (0)
+   Start at 11:06:36
+   Duration 1.92s
+[?2026l[?2026h[K
+ ❯ tests/ui/account-notifications.test.jsx [queued]
+ ❯ tests/ui/account-personalization.test.jsx [queued]
+ ❯ tests/ui/account-plan.test.jsx [queued]
+ ❯ tests/ui/artifacts.test.jsx [queued]
+ ❯ tests/ui/mfa-management.test.jsx [queued]
+ ❯ tests/ui/plugin-api.test.js [queued]
+ ❯ tests/ui/plugin-batch-contracts.test.js [queued]
+ ❯ tests/ui/profile.test.jsx [queued]
+ ❯ tests/ui/projects.test.jsx [queued]
+ ❯ tests/ui/query-batch.test.jsx [queued]
+ ❯ tests/ui/role-management.test.jsx [queued]
+ ❯ tests/ui/studio.test.jsx [queued]
+ ❯ tests/ui/web-session.test.js [queued]
+ ❯ tests/ui/workbench-fields.test.jsx [queued]
+
+ Test Files 8 failed | 0 passed (97)
+      Tests 0 passed (0)
+   Start at 11:06:36
+   Duration 2.06s
+[?2026l[?2026h[K ❯ tests/ui/account-plan.test.jsx (0 test)
+
+ ❯ tests/ui/account-notifications.test.jsx [queued]
+ ❯ tests/ui/account-personalization.test.jsx [queued]
+ ❯ tests/ui/account-plan.test.jsx [queued]
+ ❯ tests/ui/artifacts.test.jsx [queued]
+ ❯ tests/ui/mfa-management.test.jsx [queued]
+ ❯ tests/ui/plugin-api.test.js [queued]
+ ❯ tests/ui/plugin-batch-contracts.test.js [queued]
+ ❯ tests/ui/profile.test.jsx [queued]
+ ❯ tests/ui/projects.test.jsx [queued]
+ ❯ tests/ui/query-batch.test.jsx [queued]
+ ❯ tests/ui/role-management.test.jsx [queued]
+ ❯ tests/ui/studio.test.jsx [queued]
+ ❯ tests/ui/web-session.test.js [queued]
+ ❯ tests/ui/workbench-fields.test.jsx [queued]
+
+ Test Files 9 failed | 0 passed (97)
+      Tests 0 passed (0)
+   Start at 11:06:36
+   Duration 2.24s
+[?2026l[?2026h[K ❯ tests/ui/role-management.test.jsx (0 test)
+ ❯ tests/ui/query-batch.test.jsx (0 test)
+ ❯ tests/ui/mfa-management.test.jsx (0 test)
+
+ ❯ tests/ui/account-notifications.test.jsx [queued]
+ ❯ tests/ui/artifacts.test.jsx [queued]
+ ❯ tests/ui/integrations.test.jsx [queued]
+ ❯ tests/ui/membership-plans.test.jsx [queued]
+ ❯ tests/ui/mfa-management.test.jsx [queued]
+ ❯ tests/ui/plugin-api.test.js [queued]
+ ❯ tests/ui/plugin-batch-contracts.test.js [queued]
+ ❯ tests/ui/projects.test.jsx [queued]
+ ❯ tests/ui/query-batch.test.jsx [queued]
+ ❯ tests/ui/role-management.test.jsx [queued]
+ ❯ tests/ui/studio.test.jsx [queued]
+ ❯ tests/ui/web-session.test.js 7/15
+ ❯ tests/ui/workbench-fields.test.jsx [queued]
+ ❯ tests/ui/workbench-resource-select.test.jsx [queued]
+
+ Test Files 12 failed | 0 passed (97)
+      Tests 7 passed (15)
+   Start at 11:06:36
+   Duration 2.58s
+[?2026l[?2026h[K ✓ tests/ui/web-session.test.js (15 tests) 148ms
+ ❯ tests/ui/artifacts.test.jsx (0 test)
+
+ ❯ tests/ui/account-notifications.test.jsx [queued]
+ ❯ tests/ui/artifacts.test.jsx [queued]
+ ❯ tests/ui/integrations.test.jsx [queued]
+ ❯ tests/ui/membership-plans.test.jsx [queued]
+ ❯ tests/ui/mfa-management.test.jsx [queued]
+ ❯ tests/ui/plugin-api.test.js [queued]
+ ❯ tests/ui/plugin-batch-contracts.test.js [queued]
+ ❯ tests/ui/projects.test.jsx [queued]
+ ❯ tests/ui/query-batch.test.jsx [queued]
+ ❯ tests/ui/role-management.test.jsx [queued]
+ ❯ tests/ui/studio.test.jsx [queued]
+ ❯ tests/ui/web-session.test.js 15/15
+ ❯ tests/ui/workbench-fields.test.jsx [queued]
+ ❯ tests/ui/workbench-resource-select.test.jsx [queued]
+
+ Test Files 13 failed | 1 passed (97)
+      Tests 15 passed (15)
+   Start at 11:06:36
+   Duration 2.70s
+[?2026l[?2026h[K ❯ tests/ui/studio.test.jsx (0 test)
+
+ ❯ tests/ui/account-notifications.test.jsx [queued]
+ ❯ tests/ui/artifacts.test.jsx [queued]
+ ❯ tests/ui/integrations.test.jsx [queued]
+ ❯ tests/ui/jobs.test.jsx [queued]
+ ❯ tests/ui/membership-plans.test.jsx [queued]
+ ❯ tests/ui/mfa-management.test.jsx [queued]
+ ❯ tests/ui/plugin-api.test.js [queued]
+ ❯ tests/ui/plugin-batch-contracts.test.js [queued]
+ ❯ tests/ui/projects.test.jsx [queued]
+ ❯ tests/ui/settings.test.jsx [queued]
+ ❯ tests/ui/studio.test.jsx [queued]
+ ❯ tests/ui/web-session.test.js 15/15
+ ❯ tests/ui/workbench-fields.test.jsx [queued]
+ ❯ tests/ui/workbench-resource-select.test.jsx [queued]
+
+ Test Files 14 failed | 1 passed (97)
+      Tests 15 passed (15)
+   Start at 11:06:36
+   Duration 2.91s
+[?2026l[?2026h[K ❯ tests/ui/projects.test.jsx (0 test)
+
+ ❯ tests/ui/account-menu.test.jsx [queued]
+ ❯ tests/ui/account-notifications.test.jsx [queued]
+ ❯ tests/ui/artifacts.test.jsx [queued]
+ ❯ tests/ui/integrations.test.jsx [queued]
+ ❯ tests/ui/jobs.test.jsx [queued]
+ ❯ tests/ui/membership-plans.test.jsx [queued]
+ ❯ tests/ui/plugin-api.test.js [queued]
+ ❯ tests/ui/plugin-batch-contracts.test.js [queued]
+ ❯ tests/ui/projects.test.jsx [queued]
+ ❯ tests/ui/settings.test.jsx [queued]
+ ❯ tests/ui/studio.test.jsx [queued]
+ ❯ tests/ui/web-session.test.js 15/15
+ ❯ tests/ui/workbench-fields.test.jsx [queued]
+ ❯ tests/ui/workbench-resource-select.test.jsx [queued]
+
+ Test Files 15 failed | 1 passed (97)
+      Tests 15 passed (15)
+   Start at 11:06:36
+   Duration 3.05s
+[?2026l[?2026h[K ❯ tests/ui/account-notifications.test.jsx (0 test)
+
+ ❯ tests/ui/account-menu.test.jsx [queued]
+ ❯ tests/ui/account-notifications.test.jsx [queued]
+ ❯ tests/ui/artifacts.test.jsx [queued]
+ ❯ tests/ui/integrations.test.jsx [queued]
+ ❯ tests/ui/jobs.test.jsx [queued]
+ ❯ tests/ui/membership-plans.test.jsx [queued]
+ ❯ tests/ui/plugin-api.test.js [queued]
+ ❯ tests/ui/plugin-batch-contracts.test.js [queued]
+ ❯ tests/ui/project-collaboration.test.jsx [queued]
+ ❯ tests/ui/projects.test.jsx [queued]
+ ❯ tests/ui/settings.test.jsx [queued]
+ ❯ tests/ui/studio.test.jsx [queued]
+ ❯ tests/ui/workbench-fields.test.jsx [queued]
+ ❯ tests/ui/workbench-resource-select.test.jsx [queued]
+
+ Test Files 16 failed | 1 passed (97)
+      Tests 15 passed (15)
+   Start at 11:06:36
+   Duration 3.32s
+[?2026l[?2026h[K ❯ tests/ui/workbench-fields.test.jsx (0 test)
+
+ ❯ tests/ui/account-menu.test.jsx [queued]
+ ❯ tests/ui/account-notifications.test.jsx [queued]
+ ❯ tests/ui/integrations.test.jsx [queued]
+ ❯ tests/ui/jobs.test.jsx [queued]
+ ❯ tests/ui/membership-plans.test.jsx [queued]
+ ❯ tests/ui/plugin-api.test.js [queued]
+ ❯ tests/ui/plugin-batch-contracts.test.js [queued]
+ ❯ tests/ui/project-collaboration.test.jsx [queued]
+ ❯ tests/ui/session.test.js [queued]
+ ❯ tests/ui/settings.test.jsx [queued]
+ ❯ tests/ui/workbench-components.test.jsx [queued]
+ ❯ tests/ui/workbench-fields.test.jsx [queued]
+ ❯ tests/ui/workbench-resource-select.test.jsx [queued]
+ ❯ tests/ui/workbench-results.test.jsx [queued]
+
+ Test Files 17 failed | 1 passed (97)
+      Tests 15 passed (15)
+   Start at 11:06:36
+   Duration 3.42s
+[?2026l[?2026h[K ❯ tests/ui/workbench-resource-select.test.jsx (0 test)
+ ❯ tests/ui/membership-plans.test.jsx (0 test)
+
+ ❯ tests/ui/account-menu.test.jsx [queued]
+ ❯ tests/ui/account-preferences.test.jsx [queued]
+ ❯ tests/ui/integrations.test.jsx [queued]
+ ❯ tests/ui/jobs.test.jsx [queued]
+ ❯ tests/ui/membership-plans.test.jsx [queued]
+ ❯ tests/ui/plugin-api.test.js 0/19
+ ❯ tests/ui/plugin-batch-contracts.test.js [queued]
+ ❯ tests/ui/project-collaboration.test.jsx [queued]
+ ❯ tests/ui/services.test.jsx [queued]
+ ❯ tests/ui/session.test.js [queued]
+ ❯ tests/ui/settings.test.jsx [queued]
+ ❯ tests/ui/workbench-components.test.jsx [queued]
+ ❯ tests/ui/workbench-resource-select.test.jsx [queued]
+ ❯ tests/ui/workbench-results.test.jsx [queued]
+
+ Test Files 19 failed | 1 passed (97)
+      Tests 15 passed (34)
+   Start at 11:06:36
+   Duration 3.64s
+[?2026l[?2026h[K ❯ tests/ui/integrations.test.jsx (0 test)
+ ✓ tests/ui/plugin-api.test.js (19 tests) 22ms
+
+ ❯ tests/ui/account-menu.test.jsx [queued]
+ ❯ tests/ui/account-preferences.test.jsx [queued]
+ ❯ tests/ui/integrations.test.jsx [queued]
+ ❯ tests/ui/jobs.test.jsx [queued]
+ ❯ tests/ui/membership-plans.test.jsx [queued]
+ ❯ tests/ui/plugin-api.test.js 19/19
+ ❯ tests/ui/plugin-batch-contracts.test.js [queued]
+ ❯ tests/ui/project-collaboration.test.jsx [queued]
+ ❯ tests/ui/services.test.jsx [queued]
+ ❯ tests/ui/session.test.js [queued]
+ ❯ tests/ui/settings.test.jsx [queued]
+ ❯ tests/ui/workbench-catalog-contracts.test.js [queued]
+ ❯ tests/ui/workbench-components.test.jsx [queued]
+ ❯ tests/ui/workbench-results.test.jsx [queued]
+
+ Test Files 20 failed | 2 passed (97)
+      Tests 34 passed (34)
+   Start at 11:06:36
+   Duration 3.78s
+[?2026l[?2026h[K ❯ tests/ui/settings.test.jsx (0 test)
+
+ ❯ tests/ui/account-menu.test.jsx [queued]
+ ❯ tests/ui/account-preferences.test.jsx [queued]
+ ❯ tests/ui/artifactsApi.test.js [queued]
+ ❯ tests/ui/integrationsApi.test.js [queued]
+ ❯ tests/ui/jobs.test.jsx [queued]
+ ❯ tests/ui/plugin-api.test.js 19/19
+ ❯ tests/ui/plugin-batch-contracts.test.js [queued]
+ ❯ tests/ui/project-collaboration.test.jsx [queued]
+ ❯ tests/ui/services.test.jsx [queued]
+ ❯ tests/ui/session.test.js [queued]
+ ❯ tests/ui/settings.test.jsx [queued]
+ ❯ tests/ui/workbench-catalog-contracts.test.js [queued]
+ ❯ tests/ui/workbench-components.test.jsx [queued]
+ ❯ tests/ui/workbench-results.test.jsx [queued]
+
+ Test Files 21 failed | 2 passed (97)
+      Tests 34 passed (34)
+   Start at 11:06:36
+   Duration 3.90s
+[?2026l[?2026h[K ❯ tests/ui/account-menu.test.jsx (0 test)
+ ❯ tests/ui/jobs.test.jsx (0 test)
+
+ ❯ tests/ui/account-menu.test.jsx [queued]
+ ❯ tests/ui/account-preferences.test.jsx [queued]
+ ❯ tests/ui/artifactsApi.test.js [queued]
+ ❯ tests/ui/integrationsApi.test.js [queued]
+ ❯ tests/ui/jobs.test.jsx [queued]
+ ❯ tests/ui/plugin-api.test.js 19/19
+ ❯ tests/ui/plugin-batch-contracts.test.js [queued]
+ ❯ tests/ui/project-collaboration.test.jsx [queued]
+ ❯ tests/ui/services.test.jsx [queued]
+ ❯ tests/ui/session.test.js [queued]
+ ❯ tests/ui/settings.test.jsx [queued]
+ ❯ tests/ui/workbench-catalog-contracts.test.js [queued]
+ ❯ tests/ui/workbench-components.test.jsx [queued]
+ ❯ tests/ui/workbench-results.test.jsx [queued]
+
+ Test Files 23 failed | 2 passed (97)
+      Tests 34 passed (34)
+   Start at 11:06:36
+   Duration 4.09s
+[?2026l[?2026h[K ❯ tests/ui/project-collaboration.test.jsx (0 test)
+
+ ❯ tests/ui/account-menu.test.jsx [queued]
+ ❯ tests/ui/account-preferences.test.jsx [queued]
+ ❯ tests/ui/artifactsApi.test.js [queued]
+ ❯ tests/ui/integrationsApi.test.js [queued]
+ ❯ tests/ui/jobs.test.jsx [queued]
+ ❯ tests/ui/plugin-batch-contracts.test.js 0/138
+ ❯ tests/ui/project-collaboration.test.jsx [queued]
+ ❯ tests/ui/services.test.jsx [queued]
+ ❯ tests/ui/session.test.js [queued]
+ ❯ tests/ui/settings.test.jsx [queued]
+ ❯ tests/ui/workbench-catalog-contracts.test.js [queued]
+ ❯ tests/ui/workbench-choice-fields.test.jsx [queued]
+ ❯ tests/ui/workbench-components.test.jsx [queued]
+ ❯ tests/ui/workbench-results.test.jsx [queued]
+
+ Test Files 24 failed | 2 passed (97)
+      Tests 34 passed (172)
+   Start at 11:06:36
+   Duration 4.20s
+[?2026l[?2026h[K ❯ tests/ui/workbench-results.test.jsx (0 test)
+ ❯ tests/ui/account-preferences.test.jsx (0 test)
+
+ ❯ tests/ui/account-menu.test.jsx [queued]
+ ❯ tests/ui/account-preferences.test.jsx [queued]
+ ❯ tests/ui/artifactsApi.test.js [queued]
+ ❯ tests/ui/integrationsApi.test.js [queued]
+ ❯ tests/ui/jobs.test.jsx [queued]
+ ❯ tests/ui/plugin-batch-contracts.test.js 0/138
+ ❯ tests/ui/project-collaboration.test.jsx [queued]
+ ❯ tests/ui/securityApi.test.js [queued]
+ ❯ tests/ui/services.test.jsx [queued]
+ ❯ tests/ui/session.test.js [queued]
+ ❯ tests/ui/workbench-catalog-contracts.test.js [queued]
+ ❯ tests/ui/workbench-choice-fields.test.jsx [queued]
+ ❯ tests/ui/workbench-components.test.jsx [queued]
+ ❯ tests/ui/workbench-results.test.jsx [queued]
+
+ Test Files 26 failed | 2 passed (97)
+      Tests 34 passed (172)
+   Start at 11:06:36
+   Duration 4.30s
+[?2026l[?2026h[K ❯ tests/ui/workbench-components.test.jsx (0 test)
+ ✓ tests/ui/plugin-batch-contracts.test.js (138 tests) 89ms
+
+ ❯ tests/ui/account-preferences.test.jsx [queued]
+ ❯ tests/ui/artifactsApi.test.js [queued]
+ ❯ tests/ui/integrationsApi.test.js [queued]
+ ❯ tests/ui/jobs.test.jsx [queued]
+ ❯ tests/ui/notificationsApi.test.js [queued]
+ ❯ tests/ui/plugin-batch-contracts.test.js 138/138
+ ❯ tests/ui/project-collaboration.test.jsx [queued]
+ ❯ tests/ui/securityApi.test.js [queued]
+ ❯ tests/ui/services.test.jsx [queued]
+ ❯ tests/ui/session.test.js 0/18
+ ❯ tests/ui/workbench-catalog-contracts.test.js [queued]
+ ❯ tests/ui/workbench-choice-fields.test.jsx [queued]
+ ❯ tests/ui/workbench-components.test.jsx [queued]
+ ❯ tests/ui/workbench-results.test.jsx [queued]
+
+ Test Files 27 failed | 3 passed (97)
+      Tests 172 passed (190)
+   Start at 11:06:36
+   Duration 4.41s
+[?2026l[?2026h[K ❯ tests/ui/services.test.jsx (0 test)
+
+ ❯ tests/ui/account-preferences.test.jsx [queued]
+ ❯ tests/ui/artifactsApi.test.js [queued]
+ ❯ tests/ui/integrationsApi.test.js [queued]
+ ❯ tests/ui/jobs.test.jsx [queued]
+ ❯ tests/ui/notificationsApi.test.js [queued]
+ ❯ tests/ui/plugin-batch-contracts.test.js 138/138
+ ❯ tests/ui/project-collaboration.test.jsx [queued]
+ ❯ tests/ui/securityApi.test.js [queued]
+ ❯ tests/ui/services.test.jsx [queued]
+ ❯ tests/ui/session.test.js 1/18
+ ❯ tests/ui/workbench-catalog-contracts.test.js [queued]
+ ❯ tests/ui/workbench-choice-fields.test.jsx [queued]
+ ❯ tests/ui/workbench-components.test.jsx [queued]
+ ❯ tests/ui/workbench-results.test.jsx [queued]
+
+ Test Files 28 failed | 3 passed (97)
+      Tests 173 passed (190)
+   Start at 11:06:36
+   Duration 4.54s
+[?2026l[?2026h[K ✓ tests/ui/session.test.js (18 tests) 26ms
+ ❯ tests/ui/workbench-choice-fields.test.jsx (0 test)
+
+ ❯ tests/ui/account-preferences.test.jsx [queued]
+ ❯ tests/ui/artifactsApi.test.js [queued]
+ ❯ tests/ui/integrationsApi.test.js [queued]
+ ❯ tests/ui/launch.test.jsx [queued]
+ ❯ tests/ui/notificationsApi.test.js [queued]
+ ❯ tests/ui/plugin-batch-contracts.test.js 138/138
+ ❯ tests/ui/project-collaboration.test.jsx [queued]
+ ❯ tests/ui/securityApi.test.js [queued]
+ ❯ tests/ui/services.test.jsx [queued]
+ ❯ tests/ui/session.test.js 18/18
+ ❯ tests/ui/workbench-catalog-contracts.test.js [queued]
+ ❯ tests/ui/workbench-choice-fields.test.jsx [queued]
+ ❯ tests/ui/workbench-components.test.jsx [queued]
+ ❯ tests/ui/workbench-results.test.jsx [queued]
+
+ Test Files 29 failed | 4 passed (97)
+      Tests 190 passed (190)
+   Start at 11:06:36
+   Duration 4.82s
+[?2026l[?2026h[K ❯ tests/ui/appearance-provider.test.jsx (0 test)
+
+ ❯ tests/ui/account-preferences.test.jsx [queued]
+ ❯ tests/ui/appearance-provider.test.jsx [queued]
+ ❯ tests/ui/artifactsApi.test.js [queued]
+ ❯ tests/ui/billingApi.test.jsx [queued]
+ ❯ tests/ui/integrationsApi.test.js 0/10
+ ❯ tests/ui/launch.test.jsx [queued]
+ ❯ tests/ui/notificationsApi.test.js [queued]
+ ❯ tests/ui/plugin-batch-contracts.test.js 138/138
+ ❯ tests/ui/securityApi.test.js [queued]
+ ❯ tests/ui/services.test.jsx [queued]
+ ❯ tests/ui/session.test.js 18/18
+ ❯ tests/ui/workbench-catalog-contracts.test.js [queued]
+ ❯ tests/ui/workbench-choice-fields.test.jsx [queued]
+ ❯ tests/ui/workbench-components.test.jsx [queued]
+
+ Test Files 30 failed | 4 passed (97)
+      Tests 190 passed (200)
+   Start at 11:06:36
+   Duration 4.92s
+[?2026l[?2026h[K ❯ tests/ui/launch.test.jsx (0 test)
+
+ ❯ tests/ui/appearance-provider.test.jsx [queued]
+ ❯ tests/ui/artifactsApi.test.js [queued]
+ ❯ tests/ui/billingApi.test.jsx [queued]
+ ❯ tests/ui/collaborationApi.test.js [queued]
+ ❯ tests/ui/integrationsApi.test.js 0/10
+ ❯ tests/ui/launch.test.jsx [queued]
+ ❯ tests/ui/notificationsApi.test.js 0/25
+ ❯ tests/ui/plugin-batch-contracts.test.js 138/138
+ ❯ tests/ui/securityApi.test.js 0/38
+ ❯ tests/ui/services.test.jsx [queued]
+ ❯ tests/ui/session.test.js 18/18
+ ❯ tests/ui/workbench-catalog-contracts.test.js [queued]
+ ❯ tests/ui/workbench-choice-fields.test.jsx [queued]
+ ❯ tests/ui/workbench-components.test.jsx [queued]
+
+ Test Files 31 failed | 4 passed (97)
+      Tests 190 passed (263)
+   Start at 11:06:36
+   Duration 5.12s
+[?2026l[?2026h[K ✓ tests/ui/integrationsApi.test.js (10 tests) 119ms
+ ✓ tests/ui/notificationsApi.test.js (25 tests) 71ms
+
+ ❯ tests/ui/appearance-provider.test.jsx [queued]
+ ❯ tests/ui/artifactsApi.test.js 0/15
+ ❯ tests/ui/billingApi.test.jsx [queued]
+ ❯ tests/ui/collaborationApi.test.js [queued]
+ ❯ tests/ui/integrationsApi.test.js 10/10
+ ❯ tests/ui/launch.test.jsx [queued]
+ ❯ tests/ui/notificationsApi.test.js 25/25
+ ❯ tests/ui/plugin-batch-contracts.test.js 138/138
+ ❯ tests/ui/securityApi.test.js 0/38
+ ❯ tests/ui/services.test.jsx [queued]
+ ❯ tests/ui/session.test.js 18/18
+ ❯ tests/ui/workbench-catalog-contracts.test.js [queued]
+ ❯ tests/ui/workbench-choice-fields.test.jsx [queued]
+ ❯ tests/ui/workbench-structured-detail.test.jsx [queued]
+
+ Test Files 31 failed | 6 passed (97)
+      Tests 225 passed (278)
+   Start at 11:06:36
+   Duration 5.29s
+[?2026l[?2026h[K ✓ tests/ui/artifactsApi.test.js (15 tests) 56ms
+ ✓ tests/ui/securityApi.test.js (38 tests) 58ms
+
+ ❯ tests/ui/appearance-provider.test.jsx [queued]
+ ❯ tests/ui/artifactsApi.test.js 15/15
+ ❯ tests/ui/async-analysis-renderer.test.jsx [queued]
+ ❯ tests/ui/billingApi.test.jsx [queued]
+ ❯ tests/ui/collaborationApi.test.js [queued]
+ ❯ tests/ui/coverage_matrix.test.jsx [queued]
+ ❯ tests/ui/developer.test.jsx [queued]
+ ❯ tests/ui/integrationsApi.test.js 10/10
+ ❯ tests/ui/launch.test.jsx [queued]
+ ❯ tests/ui/notificationsApi.test.js 25/25
+ ❯ tests/ui/projectsApi.test.js [queued]
+ ❯ tests/ui/securityApi.test.js 38/38
+ ❯ tests/ui/workbench-catalog-contracts.test.js [queued]
+ ❯ tests/ui/workbench-structured-detail.test.jsx [queued]
+
+ Test Files 31 failed | 8 passed (97)
+      Tests 278 passed (278)
+   Start at 11:06:36
+   Duration 5.39s
+[?2026l[?2026h[K ❯ tests/ui/developer.test.jsx (0 test)
+
+ ❯ tests/ui/artifactsApi.test.js 15/15
+ ❯ tests/ui/async-analysis-renderer.test.jsx [queued]
+ ❯ tests/ui/billingApi.test.jsx 0/10
+ ❯ tests/ui/collaborationApi.test.js [queued]
+ ❯ tests/ui/config-pages.test.jsx [queued]
+ ❯ tests/ui/coverage_matrix.test.jsx [queued]
+ ❯ tests/ui/developer.test.jsx [queued]
+ ❯ tests/ui/integrationsApi.test.js 10/10
+ ❯ tests/ui/notificationsApi.test.js 25/25
+ ❯ tests/ui/preferencesApi.test.js [queued]
+ ❯ tests/ui/projectsApi.test.js [queued]
+ ❯ tests/ui/securityApi.test.js 38/38
+ ❯ tests/ui/workbench-catalog-contracts.test.js [queued]
+ ❯ tests/ui/workbench-structured-detail.test.jsx [queued]
+
+ Test Files 32 failed | 8 passed (97)
+      Tests 278 passed (288)
+   Start at 11:06:36
+   Duration 5.50s
+[?2026l[?2026h[K ✓ tests/ui/billingApi.test.jsx (10 tests) 47ms
+ ❯ tests/ui/workbench-structured-detail.test.jsx (0 test)
+
+ ❯ tests/ui/artifactsApi.test.js 15/15
+ ❯ tests/ui/async-analysis-renderer.test.jsx [queued]
+ ❯ tests/ui/billingApi.test.jsx 10/10
+ ❯ tests/ui/collaborationApi.test.js 0/8
+ ❯ tests/ui/config-pages.test.jsx [queued]
+ ❯ tests/ui/coverage_matrix.test.jsx [queued]
+ ❯ tests/ui/developer.test.jsx [queued]
+ ❯ tests/ui/final13-presentation.test.jsx [queued]
+ ❯ tests/ui/preferencesApi.test.js [queued]
+ ❯ tests/ui/projectsApi.test.js [queued]
+ ❯ tests/ui/securityApi.test.js 38/38
+ ❯ tests/ui/workbench-catalog-contracts.test.js [queued]
+ ❯ tests/ui/workbench-structured-detail.test.jsx [queued]
+ ❯ tests/ui/workbench.test.jsx [queued]
+
+ Test Files 33 failed | 9 passed (97)
+      Tests 288 passed (296)
+   Start at 11:06:36
+   Duration 5.68s
+[?2026l[?2026h[K ❯ tests/ui/async-analysis-renderer.test.jsx (0 test)
+ ❯ tests/ui/coverage_matrix.test.jsx (0 test)
+
+ ❯ tests/ui/artifactsApi.test.js 15/15
+ ❯ tests/ui/async-analysis-renderer.test.jsx [queued]
+ ❯ tests/ui/billingApi.test.jsx 10/10
+ ❯ tests/ui/collaborationApi.test.js 1/8
+ ❯ tests/ui/config-pages.test.jsx [queued]
+ ❯ tests/ui/coverage_matrix.test.jsx [queued]
+ ❯ tests/ui/developer.test.jsx [queued]
+ ❯ tests/ui/final13-presentation.test.jsx [queued]
+ ❯ tests/ui/preferencesApi.test.js [queued]
+ ❯ tests/ui/projectsApi.test.js [queued]
+ ❯ tests/ui/securityApi.test.js 38/38
+ ❯ tests/ui/workbench-catalog-contracts.test.js [queued]
+ ❯ tests/ui/workbench-structured-detail.test.jsx [queued]
+ ❯ tests/ui/workbench.test.jsx [queued]
+
+ Test Files 35 failed | 9 passed (97)
+      Tests 289 passed (296)
+   Start at 11:06:36
+   Duration 5.87s
+[?2026l[?2026h[K ✓ tests/ui/collaborationApi.test.js (8 tests) 51ms
+
+ ❯ tests/ui/async-analysis-renderer.test.jsx [queued]
+ ❯ tests/ui/billingApi.test.jsx 10/10
+ ❯ tests/ui/collaborationApi.test.js 8/8
+ ❯ tests/ui/config-pages.test.jsx [queued]
+ ❯ tests/ui/coverage_matrix.test.jsx [queued]
+ ❯ tests/ui/developer.test.jsx [queued]
+ ❯ tests/ui/final13-presentation.test.jsx [queued]
+ ❯ tests/ui/preferencesApi.test.js [queued]
+ ❯ tests/ui/projectsApi.test.js [queued]
+ ❯ tests/ui/query-renderer-operations.test.jsx [queued]
+ ❯ tests/ui/web-lib.test.js [queued]
+ ❯ tests/ui/workbench-catalog-contracts.test.js [queued]
+ ❯ tests/ui/workbench-structured-detail.test.jsx [queued]
+ ❯ tests/ui/workbench.test.jsx [queued]
+
+ Test Files 35 failed | 10 passed (97)
+      Tests 296 passed (296)
+   Start at 11:06:36
+   Duration 6.09s
+[?2026l[?2026h[K
+ ❯ tests/ui/async-analysis-renderer.test.jsx [queued]
+ ❯ tests/ui/billingApi.test.jsx 10/10
+ ❯ tests/ui/collaborationApi.test.js 8/8
+ ❯ tests/ui/config-pages.test.jsx [queued]
+ ❯ tests/ui/coverage_matrix.test.jsx [queued]
+ ❯ tests/ui/final13-presentation.test.jsx [queued]
+ ❯ tests/ui/preferencesApi.test.js [queued]
+ ❯ tests/ui/projectsApi.test.js [queued]
+ ❯ tests/ui/query-renderer-operations.test.jsx [queued]
+ ❯ tests/ui/query-renderer.test.jsx [queued]
+ ❯ tests/ui/web-lib.test.js [queued]
+ ❯ tests/ui/workbench-catalog-contracts.test.js [queued]
+ ❯ tests/ui/workbench-structured-detail.test.jsx [queued]
+ ❯ tests/ui/workbench.test.jsx [queued]
+
+ Test Files 35 failed | 10 passed (97)
+      Tests 296 passed (296)
+   Start at 11:06:36
+   Duration 6.27s
+[?2026l[?2026h[K ❯ tests/ui/config-pages.test.jsx (0 test)
+ ❯ tests/ui/workbench.test.jsx (0 test)
+
+ ❯ tests/ui/account-layout.test.jsx [queued]
+ ❯ tests/ui/collaborationApi.test.js 8/8
+ ❯ tests/ui/config-pages.test.jsx [queued]
+ ❯ tests/ui/final13-presentation.test.jsx [queued]
+ ❯ tests/ui/generic-plugin-runner.test.jsx [queued]
+ ❯ tests/ui/preferencesApi.test.js [queued]
+ ❯ tests/ui/projectsApi.test.js [queued]
+ ❯ tests/ui/query-renderer-operations.test.jsx [queued]
+ ❯ tests/ui/query-renderer.test.jsx [queued]
+ ❯ tests/ui/web-lib.test.js [queued]
+ ❯ tests/ui/workbench-artifacts.test.jsx [queued]
+ ❯ tests/ui/workbench-catalog-contracts.test.js [queued]
+ ❯ tests/ui/workbench-detail-filter.test.jsx [queued]
+ ❯ tests/ui/workbench.test.jsx [queued]
+
+ Test Files 37 failed | 10 passed (97)
+      Tests 296 passed (296)
+   Start at 11:06:36
+   Duration 6.40s
+[?2026l[?2026h[K ❯ tests/ui/final13-presentation.test.jsx (0 test)
+
+ ❯ tests/ui/account-appearance.test.jsx [queued]
+ ❯ tests/ui/account-layout.test.jsx [queued]
+ ❯ tests/ui/final13-presentation.test.jsx [queued]
+ ❯ tests/ui/generic-plugin-runner.test.jsx [queued]
+ ❯ tests/ui/preferencesApi.test.js [queued]
+ ❯ tests/ui/projectsApi.test.js 1/17
+ ❯ tests/ui/query-renderer-operations.test.jsx [queued]
+ ❯ tests/ui/query-renderer.test.jsx [queued]
+ ❯ tests/ui/web-lib.test.js [queued]
+ ❯ tests/ui/workbench-artifacts.test.jsx [queued]
+ ❯ tests/ui/workbench-catalog-contracts.test.js [queued]
+ ❯ tests/ui/workbench-detail-filter.test.jsx [queued]
+ ❯ tests/ui/workbench-scientific-reference.test.jsx [queued]
+ ❯ tests/ui/workbench.test.jsx [queued]
+
+ Test Files 38 failed | 10 passed (97)
+      Tests 297 passed (313)
+   Start at 11:06:36
+   Duration 6.51s
+[?2026l[?2026h[K ✓ tests/ui/projectsApi.test.js (17 tests) 50ms
+ ❯ tests/ui/query-renderer-operations.test.jsx (0 test)
+ ❯ tests/ui/query-renderer.test.jsx (0 test)
+
+ ❯ tests/ui/account-appearance.test.jsx [queued]
+ ❯ tests/ui/account-layout.test.jsx [queued]
+ ❯ tests/ui/connectionsApi.test.js [queued]
+ ❯ tests/ui/explore.test.jsx [queued]
+ ❯ tests/ui/generic-plugin-runner.test.jsx [queued]
+ ❯ tests/ui/preferencesApi.test.js [queued]
+ ❯ tests/ui/query-renderer-operations.test.jsx [queued]
+ ❯ tests/ui/query-renderer.test.jsx [queued]
+ ❯ tests/ui/web-lib.test.js [queued]
+ ❯ tests/ui/workbench-artifacts.test.jsx [queued]
+ ❯ tests/ui/workbench-catalog-contracts.test.js [queued]
+ ❯ tests/ui/workbench-detail-filter.test.jsx [queued]
+ ❯ tests/ui/workbench-image-gallery.test.jsx [queued]
+ ❯ tests/ui/workbench-scientific-reference.test.jsx [queued]
+
+ Test Files 40 failed | 11 passed (97)
+      Tests 313 passed (313)
+   Start at 11:06:36
+   Duration 6.73s
+[?2026l[?2026h[K ❯ tests/ui/account-appearance.test.jsx (0 test)
+ ❯ tests/ui/generic-plugin-runner.test.jsx (0 test)
+ ❯ tests/ui/workbench-scientific-reference.test.jsx (0 test)
+
+ ❯ tests/ui/account-appearance.test.jsx [queued]
+ ❯ tests/ui/account-layout.test.jsx [queued]
+ ❯ tests/ui/connectionsApi.test.js [queued]
+ ❯ tests/ui/explore.test.jsx [queued]
+ ❯ tests/ui/generic-plugin-runner.test.jsx [queued]
+ ❯ tests/ui/preferencesApi.test.js [queued]
+ ❯ tests/ui/query-renderer-operations.test.jsx [queued]
+ ❯ tests/ui/query-renderer.test.jsx [queued]
+ ❯ tests/ui/web-lib.test.js [queued]
+ ❯ tests/ui/workbench-artifacts.test.jsx [queued]
+ ❯ tests/ui/workbench-catalog-contracts.test.js [queued]
+ ❯ tests/ui/workbench-detail-filter.test.jsx [queued]
+ ❯ tests/ui/workbench-image-gallery.test.jsx [queued]
+ ❯ tests/ui/workbench-scientific-reference.test.jsx [queued]
+
+ Test Files 43 failed | 11 passed (97)
+      Tests 313 passed (313)
+   Start at 11:06:36
+   Duration 6.86s
+[?2026l[?2026h[K ❯ tests/ui/workbench-detail-filter.test.jsx (0 test)
+ ❯ tests/ui/account-layout.test.jsx (0 test)
+ ❯ tests/ui/workbench-artifacts.test.jsx (0 test)
+
+ ❯ tests/ui/account-appearance.test.jsx [queued]
+ ❯ tests/ui/account-layout.test.jsx [queued]
+ ❯ tests/ui/connectionsApi.test.js [queued]
+ ❯ tests/ui/explore.test.jsx [queued]
+ ❯ tests/ui/generic-plugin-runner.test.jsx [queued]
+ ❯ tests/ui/preferencesApi.test.js [queued]
+ ❯ tests/ui/query-renderer.test.jsx [queued]
+ ❯ tests/ui/web-lib.test.js [queued]
+ ❯ tests/ui/workbench-api.test.js [queued]
+ ❯ tests/ui/workbench-artifacts.test.jsx [queued]
+ ❯ tests/ui/workbench-catalog-contracts.test.js [queued]
+ ❯ tests/ui/workbench-detail-filter.test.jsx [queued]
+ ❯ tests/ui/workbench-image-gallery.test.jsx [queued]
+ ❯ tests/ui/workbench-scientific-reference.test.jsx [queued]
+
+ Test Files 46 failed | 11 passed (97)
+      Tests 313 passed (313)
+   Start at 11:06:36
+   Duration 7.03s
+[?2026l[?2026h[K ❯ tests/ui/workbench-image-gallery.test.jsx (0 test)
+
+ ❯ tests/ui/account-layout.test.jsx [queued]
+ ❯ tests/ui/connectionsApi.test.js [queued]
+ ❯ tests/ui/explore.test.jsx [queued]
+ ❯ tests/ui/generic-plugin-runner.test.jsx [queued]
+ ❯ tests/ui/grafana-viewer.test.jsx [queued]
+ ❯ tests/ui/plugin-page.test.jsx [queued]
+ ❯ tests/ui/preferencesApi.test.js 0/28
+ ❯ tests/ui/web-lib.test.js [queued]
+ ❯ tests/ui/workbench-api.test.js [queued]
+ ❯ tests/ui/workbench-artifacts.test.jsx [queued]
+ ❯ tests/ui/workbench-catalog-contracts.test.js [queued]
+ ❯ tests/ui/workbench-detail-filter.test.jsx [queued]
+ ❯ tests/ui/workbench-image-gallery.test.jsx [queued]
+ ❯ tests/ui/workbench-scientific-reference.test.jsx [queued]
+
+ Test Files 47 failed | 11 passed (97)
+      Tests 313 passed (341)
+   Start at 11:06:36
+   Duration 7.34s
+[?2026l[?2026h[K ❯ tests/ui/explore.test.jsx (0 test)
+ ✓ tests/ui/preferencesApi.test.js (28 tests) 91ms
+
+ ❯ tests/ui/account-layout.test.jsx [queued]
+ ❯ tests/ui/connectionsApi.test.js [queued]
+ ❯ tests/ui/explore.test.jsx [queued]
+ ❯ tests/ui/grafana-viewer.test.jsx [queued]
+ ❯ tests/ui/license-gate.test.jsx [queued]
+ ❯ tests/ui/plugin-page.test.jsx [queued]
+ ❯ tests/ui/preferencesApi.test.js 28/28
+ ❯ tests/ui/web-lib.test.js [queued]
+ ❯ tests/ui/workbench-api.test.js [queued]
+ ❯ tests/ui/workbench-artifacts.test.jsx [queued]
+ ❯ tests/ui/workbench-catalog-contracts.test.js [queued]
+ ❯ tests/ui/workbench-detail-filter.test.jsx [queued]
+ ❯ tests/ui/workbench-image-gallery.test.jsx [queued]
+ ❯ tests/ui/workbench-scientific-reference.test.jsx [queued]
+
+ Test Files 48 failed | 12 passed (97)
+      Tests 341 passed (341)
+   Start at 11:06:36
+   Duration 7.46s
+[?2026l[?2026h[K ❯ tests/ui/grafana-viewer.test.jsx (0 test)
+
+ ❯ tests/ui/account-layout.test.jsx [queued]
+ ❯ tests/ui/connectionsApi.test.js [queued]
+ ❯ tests/ui/explore.test.jsx [queued]
+ ❯ tests/ui/grafana-viewer.test.jsx [queued]
+ ❯ tests/ui/license-gate.test.jsx [queued]
+ ❯ tests/ui/logs.test.jsx [queued]
+ ❯ tests/ui/plugin-api-operations.test.js [queued]
+ ❯ tests/ui/plugin-page.test.jsx [queued]
+ ❯ tests/ui/preferencesApi.test.js 28/28
+ ❯ tests/ui/web-lib.test.js [queued]
+ ❯ tests/ui/workbench-api.test.js [queued]
+ ❯ tests/ui/workbench-artifacts.test.jsx [queued]
+ ❯ tests/ui/workbench-catalog-contracts.test.js [queued]
+ ❯ tests/ui/workbench-image-gallery.test.jsx [queued]
+
+ Test Files 49 failed | 12 passed (97)
+      Tests 341 passed (341)
+   Start at 11:06:36
+   Duration 7.62s
+[?2026l[?2026h[K ❯ tests/ui/plugin-page.test.jsx (0 test)
+
+ ❯ tests/ui/app.test.jsx [queued]
+ ❯ tests/ui/connectionsApi.test.js 0/28
+ ❯ tests/ui/explore.test.jsx [queued]
+ ❯ tests/ui/grafana-viewer.test.jsx [queued]
+ ❯ tests/ui/launcher-polling-auth.test.jsx [queued]
+ ❯ tests/ui/license-gate.test.jsx [queued]
+ ❯ tests/ui/logs.test.jsx [queued]
+ ❯ tests/ui/plugin-api-operations.test.js [queued]
+ ❯ tests/ui/plugin-page.test.jsx [queued]
+ ❯ tests/ui/preferencesApi.test.js 28/28
+ ❯ tests/ui/web-lib.test.js [queued]
+ ❯ tests/ui/workbench-api.test.js [queued]
+ ❯ tests/ui/workbench-catalog-contracts.test.js [queued]
+ ❯ tests/ui/workbench-image-gallery.test.jsx [queued]
+
+ Test Files 50 failed | 12 passed (97)
+      Tests 341 passed (369)
+   Start at 11:06:36
+   Duration 7.74s
+[?2026l[?2026h[K ✓ tests/ui/web-lib.test.js (11 tests) 26ms
+ ❯ tests/ui/logs.test.jsx (0 test)
+
+ ❯ tests/ui/app.test.jsx [queued]
+ ❯ tests/ui/connectionsApi.test.js 0/28
+ ❯ tests/ui/explore.test.jsx [queued]
+ ❯ tests/ui/grafana-viewer.test.jsx [queued]
+ ❯ tests/ui/launcher-polling-auth.test.jsx [queued]
+ ❯ tests/ui/license-gate.test.jsx [queued]
+ ❯ tests/ui/logs.test.jsx [queued]
+ ❯ tests/ui/plugin-api-operations.test.js [queued]
+ ❯ tests/ui/plugin-page.test.jsx [queued]
+ ❯ tests/ui/preferencesApi.test.js 28/28
+ ❯ tests/ui/stripePortal.test.js [queued]
+ ❯ tests/ui/web-lib.test.js 11/11
+ ❯ tests/ui/workbench-api.test.js 1/19
+ ❯ tests/ui/workbench-catalog-contracts.test.js [queued]
+
+ Test Files 51 failed | 13 passed (97)
+      Tests 353 passed (399)
+   Start at 11:06:36
+   Duration 7.90s
+[?2026l[?2026h[K ✓ tests/ui/workbench-api.test.js (19 tests) 49ms
+ ❯ tests/ui/license-gate.test.jsx (0 test)
+ ❯ tests/ui/connectionsApi.test.js (28 tests | 1 failed) 94ms
+   ✓ projects only safe metadata and uses canonical no-store authenticated URL 39ms
+   ✓ rejects malformed or noncanonical metadata 0 3ms
+   ✓ rejects malformed or noncanonical metadata 1 19ms
+   ✓ rejects malformed or noncanonical metadata 2 1ms
+   ✓ rejects malformed or noncanonical metadata 3 1ms
+   ✓ rejects malformed or noncanonical metadata 4 0ms
+   ✓ rejects malformed or noncanonical metadata 5 0ms
+   ✓ rejects malformed or noncanonical metadata 6 0ms
+   ✓ rejects malformed JSON without leaking it 13ms
+   ✓ validates secret before transport 0 2ms
+   ✓ validates secret before transport 1 5ms
+   ✓ validates secret before transport 2 0ms
+   ✓ validates secret before transport 3 0ms
+   ✓ validates secret before transport 4 0ms
+   ✓ rejects unknown providers and invalid organization contexts 0ms
+   ✓ does not read mutation bodies 0ms
+   ✓ sanitizes HTTP 401 0ms
+   ✓ sanitizes HTTP 403 0ms
+   ✓ sanitizes HTTP 400 0ms
+   ✓ sanitizes HTTP 405 0ms
+   ✓ sanitizes HTTP 422 0ms
+   ✓ sanitizes HTTP 500 0ms
+   ✓ sanitizes HTTP 502 0ms
+   ✓ sanitizes HTTP 503 0ms
+   ✓ rejects stale responses before and after JSON parsing 3ms
+   ✓ accepts a canonical empty slot with nullable metadata 0ms
+   ✓ discards all secret and private response fields 0ms
+   × uses only public canonical routes and preserves org and authentication on all operations 2ms
+
+ ❯ tests/ui/app.test.jsx [queued]
+ ❯ tests/ui/connectionsApi.test.js 28/28
+ ❯ tests/ui/grafana-viewer.test.jsx [queued]
+ ❯ tests/ui/launcher-polling-auth.test.jsx [queued]
+ ❯ tests/ui/license-gate.test.jsx [queued]
+ ❯ tests/ui/logs.test.jsx [queued]
+ ❯ tests/ui/platformAdminApi.test.jsx [queued]
+ ❯ tests/ui/plugin-api-operations.test.js 0/11
+ ❯ tests/ui/plugin-page.test.jsx [queued]
+ ❯ tests/ui/preferencesApi.test.js 28/28
+ ❯ tests/ui/stripePortal.test.js [queued]
+ ❯ tests/ui/web-lib.test.js 11/11
+ ❯ tests/ui/workbench-api.test.js 19/19
+ ❯ tests/ui/workbench-catalog-contracts.test.js [queued]
+
+ Test Files 53 failed | 14 passed (97)
+      Tests 1 failed | 398 passed (410)
+   Start at 11:06:36
+   Duration 8.02s
+[?2026l[?2026h[K ❯ tests/ui/app.test.jsx (0 test)
+ ❯ tests/ui/launcher-polling-auth.test.jsx (0 test)
+
+ ❯ tests/ui/app.test.jsx [queued]
+ ❯ tests/ui/connectionsApi.test.js 28/28
+ ❯ tests/ui/grafana-viewer.test.jsx [queued]
+ ❯ tests/ui/launcher-polling-auth.test.jsx [queued]
+ ❯ tests/ui/license-gate.test.jsx [queued]
+ ❯ tests/ui/logs.test.jsx [queued]
+ ❯ tests/ui/platformAdminApi.test.jsx [queued]
+ ❯ tests/ui/plugin-api-operations.test.js 0/11
+ ❯ tests/ui/plugin-page.test.jsx [queued]
+ ❯ tests/ui/service-viewer.test.jsx [queued]
+ ❯ tests/ui/stripePortal.test.js [queued]
+ ❯ tests/ui/web-lib.test.js 11/11
+ ❯ tests/ui/workbench-api.test.js 19/19
+ ❯ tests/ui/workbench-catalog-contracts.test.js [queued]
+
+ Test Files 55 failed | 14 passed (97)
+      Tests 1 failed | 398 passed (410)
+   Start at 11:06:36
+   Duration 8.15s
+[?2026l[?2026h[K ✓ tests/ui/plugin-api-operations.test.js (11 tests) 108ms
+ ❯ tests/ui/service-viewer.test.jsx (0 test)
+
+ ❯ tests/ui/apiKeysApi.test.jsx [queued]
+ ❯ tests/ui/app.test.jsx [queued]
+ ❯ tests/ui/appearanceApi.test.js [queued]
+ ❯ tests/ui/auth.test.jsx [queued]
+ ❯ tests/ui/connectionsApi.test.js 28/28
+ ❯ tests/ui/explore-api.test.js [queued]
+ ❯ tests/ui/launcher-polling-auth.test.jsx [queued]
+ ❯ tests/ui/license-gate.test.jsx [queued]
+ ❯ tests/ui/platformAdminApi.test.jsx 0/6
+ ❯ tests/ui/plugin-api-operations.test.js 11/11
+ ❯ tests/ui/service-viewer.test.jsx [queued]
+ ❯ tests/ui/stripePortal.test.js 0/8
+ ❯ tests/ui/workbench-api.test.js 19/19
+ ❯ tests/ui/workbench-catalog-contracts.test.js [queued]
+
+ Test Files 56 failed | 15 passed (97)
+      Tests 1 failed | 409 passed (424)
+   Start at 11:06:36
+   Duration 8.35s
+[?2026l[?2026h[K ✓ tests/ui/platformAdminApi.test.jsx (6 tests) 31ms
+ ❯ tests/ui/auth.test.jsx (0 test)
+
+ ❯ tests/ui/apiKeysApi.test.jsx [queued]
+ ❯ tests/ui/app.test.jsx [queued]
+ ❯ tests/ui/appearanceApi.test.js [queued]
+ ❯ tests/ui/auth.test.jsx [queued]
+ ❯ tests/ui/connectionsApi.test.js 28/28
+ ❯ tests/ui/explore-api.test.js [queued]
+ ❯ tests/ui/launcher-polling-auth.test.jsx [queued]
+ ❯ tests/ui/license-gate.test.jsx [queued]
+ ❯ tests/ui/platformAdminApi.test.jsx 6/6
+ ❯ tests/ui/plugin-api-operations.test.js 11/11
+ ❯ tests/ui/service-viewer.test.jsx [queued]
+ ❯ tests/ui/service-worker-reload.test.js [queued]
+ ❯ tests/ui/stripePortal.test.js 0/8
+ ❯ tests/ui/workbench-catalog-contracts.test.js [queued]
+
+ Test Files 57 failed | 16 passed (97)
+      Tests 1 failed | 415 passed (424)
+   Start at 11:06:36
+   Duration 8.51s
+[?2026l[?2026h[K ✓ tests/ui/stripePortal.test.js (8 tests) 205ms
+
+ ❯ tests/ui/apiKeysApi.test.jsx 0/3
+ ❯ tests/ui/app.test.jsx [queued]
+ ❯ tests/ui/appearanceApi.test.js 0/10
+ ❯ tests/ui/auth.test.jsx [queued]
+ ❯ tests/ui/components.test.jsx [queued]
+ ❯ tests/ui/connectionsApi.test.js 28/28
+ ❯ tests/ui/explore-api.test.js [queued]
+ ❯ tests/ui/launcher-polling-auth.test.jsx [queued]
+ ❯ tests/ui/platformAdminApi.test.jsx 6/6
+ ❯ tests/ui/plugin-api-operations.test.js 11/11
+ ❯ tests/ui/service-viewer.test.jsx [queued]
+ ❯ tests/ui/service-worker-reload.test.js [queued]
+ ❯ tests/ui/stripePortal.test.js 8/8
+ ❯ tests/ui/workbench-catalog-contracts.test.js [queued]
+
+ Test Files 57 failed | 17 passed (97)
+      Tests 1 failed | 423 passed (437)
+   Start at 11:06:36
+   Duration 8.61s
+[?2026l[?2026h[K ✓ tests/ui/apiKeysApi.test.jsx (3 tests) 52ms
+ ✓ tests/ui/appearanceApi.test.js (10 tests) 50ms
+
+ ❯ tests/ui/apiKeysApi.test.jsx 3/3
+ ❯ tests/ui/appearanceApi.test.js 10/10
+ ❯ tests/ui/auth.test.jsx [queued]
+ ❯ tests/ui/brand-identity.test.jsx [queued]
+ ❯ tests/ui/bug-report.test.jsx [queued]
+ ❯ tests/ui/components.test.jsx [queued]
+ ❯ tests/ui/explore-api.test.js 0/3
+ ❯ tests/ui/launcher-polling-auth.test.jsx [queued]
+ ❯ tests/ui/platformAdminApi.test.jsx 6/6
+ ❯ tests/ui/plugin-api-operations.test.js 11/11
+ ❯ tests/ui/service-viewer.test.jsx [queued]
+ ❯ tests/ui/service-worker-reload.test.js [queued]
+ ❯ tests/ui/stripePortal.test.js 8/8
+ ❯ tests/ui/workbench-catalog-contracts.test.js [queued]
+
+ Test Files 57 failed | 19 passed (97)
+      Tests 1 failed | 436 passed (440)
+   Start at 11:06:36
+   Duration 8.72s
+[?2026l[?2026h[K ❯ tests/ui/components.test.jsx (0 test)
+
+ ❯ tests/ui/apiKeysApi.test.jsx 3/3
+ ❯ tests/ui/appearanceApi.test.js 10/10
+ ❯ tests/ui/auth.test.jsx [queued]
+ ❯ tests/ui/brand-identity.test.jsx [queued]
+ ❯ tests/ui/bug-report.test.jsx [queued]
+ ❯ tests/ui/components.test.jsx [queued]
+ ❯ tests/ui/explore-api.test.js 1/3
+ ❯ tests/ui/launcher-polling-auth.test.jsx [queued]
+ ❯ tests/ui/platformAdminApi.test.jsx 6/6
+ ❯ tests/ui/plugin-api-operations.test.js 11/11
+ ❯ tests/ui/service-viewer.test.jsx [queued]
+ ❯ tests/ui/service-worker-reload.test.js 0/2
+ ❯ tests/ui/stripePortal.test.js 8/8
+ ❯ tests/ui/workbench-catalog-contracts.test.js [queued]
+
+ Test Files 58 failed | 19 passed (97)
+      Tests 1 failed | 437 passed (442)
+   Start at 11:06:36
+   Duration 9.07s
+[?2026l[?2026h[K ✓ tests/ui/service-worker-reload.test.js (2 tests) 16ms
+ ✓ tests/ui/explore-api.test.js (3 tests) 70ms
+
+ ❯ tests/ui/apiKeysApi.test.jsx 3/3
+ ❯ tests/ui/appearanceApi.test.js 10/10
+ ❯ tests/ui/auth.test.jsx [queued]
+ ❯ tests/ui/brand-identity.test.jsx [queued]
+ ❯ tests/ui/bug-report.test.jsx [queued]
+ ❯ tests/ui/components.test.jsx [queued]
+ ❯ tests/ui/explore-api.test.js 3/3
+ ❯ tests/ui/oauth-link-confirm.test.jsx [queued]
+ ❯ tests/ui/platformAdminApi.test.jsx 6/6
+ ❯ tests/ui/service-viewer.test.jsx [queued]
+ ❯ tests/ui/service-worker-reload.test.js 2/2
+ ❯ tests/ui/static-png-result.test.jsx [queued]
+ ❯ tests/ui/stripePortal.test.js 8/8
+ ❯ tests/ui/workbench-catalog-contracts.test.js [queued]
+
+ Test Files 58 failed | 21 passed (97)
+      Tests 1 failed | 441 passed (442)
+   Start at 11:06:36
+   Duration 9.17s
+[?2026l[?2026h[K ❯ tests/ui/bug-report.test.jsx (0 test)
+
+ ❯ tests/ui/apiKeysApi.test.jsx 3/3
+ ❯ tests/ui/appearanceApi.test.js 10/10
+ ❯ tests/ui/auth.test.jsx [queued]
+ ❯ tests/ui/brand-identity.test.jsx [queued]
+ ❯ tests/ui/bug-report.test.jsx [queued]
+ ❯ tests/ui/components.test.jsx [queued]
+ ❯ tests/ui/explore-api.test.js 3/3
+ ❯ tests/ui/oauth-link-confirm.test.jsx [queued]
+ ❯ tests/ui/platformAdminApi.test.jsx 6/6
+ ❯ tests/ui/service-worker-reload.test.js 2/2
+ ❯ tests/ui/static-png-result.test.jsx [queued]
+ ❯ tests/ui/stripePortal.test.js 8/8
+ ❯ tests/ui/wizard.test.jsx [queued]
+ ❯ tests/ui/workbench-catalog-contracts.test.js [queued]
+
+ Test Files 59 failed | 21 passed (97)
+      Tests 1 failed | 441 passed (442)
+   Start at 11:06:36
+   Duration 9.28s
+[?2026l[?2026h[K ❯ tests/ui/brand-identity.test.jsx (0 test)
+
+ ❯ tests/ui/account-help.test.jsx [queued]
+ ❯ tests/ui/appearanceApi.test.js 10/10
+ ❯ tests/ui/brand-identity.test.jsx [queued]
+ ❯ tests/ui/bug-report.test.jsx [queued]
+ ❯ tests/ui/components.test.jsx [queued]
+ ❯ tests/ui/explore-api.test.js 3/3
+ ❯ tests/ui/oauth-link-confirm.test.jsx [queued]
+ ❯ tests/ui/omni-page.test.jsx [queued]
+ ❯ tests/ui/service-worker-reload.test.js 2/2
+ ❯ tests/ui/static-png-result.test.jsx [queued]
+ ❯ tests/ui/store.test.js [queued]
+ ❯ tests/ui/videos.test.jsx [queued]
+ ❯ tests/ui/wizard.test.jsx [queued]
+ ❯ tests/ui/workbench-catalog-contracts.test.js [queued]
+
+ Test Files 60 failed | 21 passed (97)
+      Tests 1 failed | 441 passed (442)
+   Start at 11:06:36
+   Duration 9.38s
+[?2026l[?2026h[K ❯ tests/ui/static-png-result.test.jsx (0 test)
+ ❯ tests/ui/oauth-link-confirm.test.jsx (0 test)
+
+ ❯ tests/ui/account-help.test.jsx [queued]
+ ❯ tests/ui/brand-identity.test.jsx [queued]
+ ❯ tests/ui/bug-report.test.jsx [queued]
+ ❯ tests/ui/components.test.jsx [queued]
+ ❯ tests/ui/explore-api.test.js 3/3
+ ❯ tests/ui/omni-page.test.jsx [queued]
+ ❯ tests/ui/renderer-registry.test.js [queued]
+ ❯ tests/ui/service-worker-reload.test.js 2/2
+ ❯ tests/ui/static-png-result.test.jsx [queued]
+ ❯ tests/ui/store.test.js [queued]
+ ❯ tests/ui/videos.test.jsx [queued]
+ ❯ tests/ui/wizard.test.jsx [queued]
+ ❯ tests/ui/workbench-catalog-contracts.test.js [queued]
+
+ Test Files 62 failed | 21 passed (97)
+      Tests 1 failed | 441 passed (442)
+   Start at 11:06:36
+   Duration 9.52s
+[?2026l[?2026h[K ❯ tests/ui/videos.test.jsx (0 test)
+ ❯ tests/ui/account-help.test.jsx (0 test)
+ ❯ tests/ui/wizard.test.jsx (0 test)
+
+ ❯ tests/ui/brand-identity.test.jsx [queued]
+ ❯ tests/ui/error-boundary.test.jsx [queued]
+ ❯ tests/ui/explore-domain-failure.test.js [queued]
+ ❯ tests/ui/generic-plugin-contracts.test.js [queued]
+ ❯ tests/ui/mode.test.jsx [queued]
+ ❯ tests/ui/omni-page.test.jsx [queued]
+ ❯ tests/ui/renderer-registry.test.js [queued]
+ ❯ tests/ui/static-png-result.test.jsx [queued]
+ ❯ tests/ui/store.test.js [queued]
+ ❯ tests/ui/workbench-catalog-contracts.test.js [queued]
+
+ Test Files 65 failed | 21 passed (97)
+      Tests 1 failed | 441 passed (442)
+   Start at 11:06:36
+   Duration 9.64s
+[?2026l[?2026h[K ❯ tests/ui/omni-page.test.jsx (0 test)
+ ❯ tests/ui/mode.test.jsx (0 test)
+
+ ❯ tests/ui/account-privacy.test.jsx [queued]
+ ❯ tests/ui/error-boundary.test.jsx [queued]
+ ❯ tests/ui/explore-domain-failure.test.js [queued]
+ ❯ tests/ui/generic-plugin-contracts.test.js [queued]
+ ❯ tests/ui/renderer-registry.test.js [queued]
+ ❯ tests/ui/static-png-result.test.jsx [queued]
+ ❯ tests/ui/store.test.js 0/4
+ ❯ tests/ui/workbench-catalog-contracts.test.js [queued]
+
+ Test Files 67 failed | 21 passed (97)
+      Tests 1 failed | 441 passed (446)
+   Start at 11:06:36
+   Duration 9.74s
+[?2026l[?2026h[K ❯ tests/ui/error-boundary.test.jsx (0 test)
+ ✓ tests/ui/store.test.js (4 tests) 18ms
+ ❯ tests/ui/account-privacy.test.jsx (0 test)
+
+ ❯ tests/ui/explore-domain-failure.test.js 1/1
+ ❯ tests/ui/generic-plugin-contracts.test.js 0/2
+ ❯ tests/ui/ide-infrastructure.test.js [queued]
+ ❯ tests/ui/renderer-registry.test.js [queued]
+ ❯ tests/ui/workbench-base.test.jsx [queued]
+ ❯ tests/ui/workbench-catalog-contracts.test.js [queued]
+
+ Test Files 69 failed | 22 passed (97)
+      Tests 1 failed | 446 passed (449)
+   Start at 11:06:36
+   Duration 9.87s
+[?2026l[K ✓ tests/ui/explore-domain-failure.test.js (1 test) 16ms
+ ✓ tests/ui/generic-plugin-contracts.test.js (2 tests) 23ms
+ ❯ tests/ui/workbench-base.test.jsx (0 test)
+ ✓ tests/ui/ide-infrastructure.test.js (4 tests) 11ms
+ ↓ tests/ui/workbench-catalog-contracts.test.js (1 test | 1 skipped)
+ ✓ tests/ui/renderer-registry.test.js (9 tests) 13ms
+
+⎯⎯⎯⎯⎯⎯ Failed Suites 69 ⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/ui/account-appearance.test.jsx [ tests/ui/account-appearance.test.jsx ]
+Error: Failed to resolve import "@testing-library/react" from "tests/ui/account-appearance.test.jsx". Does the file exist?
+  Plugin: vite:import-analysis
+  File: /tmp/omnibioai-wave5-wave6-qualification-v1/studio-session/tests/ui/account-appearance.test.jsx:2:51
+  1  |  import React from "react";
+  2  |  import { cleanup, fireEvent, render, screen } from "@testing-library/react";
+     |                                                      ^
+  3  |  import { afterEach, describe, expect, it } from "vitest";
+  4  |  import AccountAppearance from "../../src/ui/pages/AccountAppearance";
+ ❯ TransformPluginContext._formatLog ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:8766:39
+ ❯ TransformPluginContext.error ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:8763:14
+ ❯ normalizeUrl ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:26632:18
+ ❯ ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:26702:30
+ ❯ TransformPluginContext.transform ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:26668:4
+ ❯ EnvironmentPluginContainer.transform ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:8545:14
+ ❯ loadAndTransform ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:20184:26
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/70]⎯
+
+ FAIL  tests/ui/account-help.test.jsx [ tests/ui/account-help.test.jsx ]
+Error: Failed to resolve import "@testing-library/react" from "tests/ui/account-help.test.jsx". Does the file exist?
+  Plugin: vite:import-analysis
+  File: /tmp/omnibioai-wave5-wave6-qualification-v1/studio-session/tests/ui/account-help.test.jsx:2:51
+  1  |  import React from "react";
+  2  |  import { cleanup, fireEvent, render, screen } from "@testing-library/react";
+     |                                                      ^
+  3  |  import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+  4  |  import AccountHelp from "../../src/ui/pages/AccountHelp";
+ ❯ TransformPluginContext._formatLog ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:8766:39
+ ❯ TransformPluginContext.error ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:8763:14
+ ❯ normalizeUrl ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:26632:18
+ ❯ ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:26702:30
+ ❯ TransformPluginContext.transform ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:26668:4
+ ❯ EnvironmentPluginContainer.transform ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:8545:14
+ ❯ loadAndTransform ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:20184:26
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/70]⎯
+
+ FAIL  tests/ui/account-layout.test.jsx [ tests/ui/account-layout.test.jsx ]
+Error: Failed to resolve import "@testing-library/react" from "tests/ui/account-layout.test.jsx". Does the file exist?
+  Plugin: vite:import-analysis
+  File: /tmp/omnibioai-wave5-wave6-qualification-v1/studio-session/tests/ui/account-layout.test.jsx:2:51
+  1  |  import React from "react";
+  2  |  import { cleanup, fireEvent, render, screen } from "@testing-library/react";
+     |                                                      ^
+  3  |  import { afterEach, describe, expect, it, vi } from "vitest";
+  4  |  import AccountLayout from "../../src/ui/components/AccountLayout";
+ ❯ TransformPluginContext._formatLog ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:8766:39
+ ❯ TransformPluginContext.error ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:8763:14
+ ❯ normalizeUrl ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:26632:18
+ ❯ ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:26702:30
+ ❯ TransformPluginContext.transform ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:26668:4
+ ❯ EnvironmentPluginContainer.transform ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:8545:14
+ ❯ loadAndTransform ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:20184:26
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/70]⎯
+
+ FAIL  tests/ui/account-menu.test.jsx [ tests/ui/account-menu.test.jsx ]
+Error: Failed to resolve import "@testing-library/react" from "tests/ui/account-menu.test.jsx". Does the file exist?
+  Plugin: vite:import-analysis
+  File: /tmp/omnibioai-wave5-wave6-qualification-v1/studio-session/tests/ui/account-menu.test.jsx:2:0
+  2  |  vi.mock("../../src/ui/lib/session", () => ({ logout }));
+  3  |  const __vi_import_0__ = await import("react");
+  4  |  const __vi_import_1__ = await import("@testing-library/react");
+     |                                       ^
+  5  |  const __vi_import_2__ = await import("@testing-library/user-event");
+  6  |  const __vi_import_3__ = await import("react/jsx-dev-runtime");
+ ❯ TransformPluginContext._formatLog ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:8766:39
+ ❯ TransformPluginContext.error ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:8763:14
+ ❯ normalizeUrl ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:26632:18
+ ❯ ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:26702:30
+ ❯ TransformPluginContext.transform ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:26668:4
+ ❯ EnvironmentPluginContainer.transform ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:8545:14
+ ❯ loadAndTransform ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:20184:26
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/70]⎯
+
+ FAIL  tests/ui/account-notifications.test.jsx [ tests/ui/account-notifications.test.jsx ]
+Error: Failed to resolve import "@testing-library/react" from "tests/ui/account-notifications.test.jsx". Does the file exist?
+  Plugin: vite:import-analysis
+  File: /tmp/omnibioai-wave5-wave6-qualification-v1/studio-session/tests/ui/account-notifications.test.jsx:2:0
+  31 |  });
+  32 |  const __vi_import_0__ = await import("react");
+  33 |  const __vi_import_1__ = await import("@testing-library/react");
+     |                                       ^
+  34 |  const __vi_import_2__ = await import("react/jsx-dev-runtime");
+  35 |  const __vi_import_3__ = await import("../../src/ui/lib/notificationsApi");
+ ❯ TransformPluginContext._formatLog ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:8766:39
+ ❯ TransformPluginContext.error ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:8763:14
+ ❯ normalizeUrl ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:26632:18
+ ❯ ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:26702:30
+ ❯ TransformPluginContext.transform ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:26668:4
+ ❯ EnvironmentPluginContainer.transform ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:8545:14
+ ❯ loadAndTransform ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:20184:26
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/70]⎯
+
+ FAIL  tests/ui/account-personalization.test.jsx [ tests/ui/account-personalization.test.jsx ]
+Error: Failed to resolve import "@testing-library/react" from "tests/ui/account-personalization.test.jsx". Does the file exist?
+  Plugin: vite:import-analysis
+  File: /tmp/omnibioai-wave5-wave6-qualification-v1/studio-session/tests/ui/account-personalization.test.jsx:2:0
+  21 |  }));
+  22 |  const __vi_import_0__ = await import("react");
+  23 |  const __vi_import_1__ = await import("@testing-library/react");
+     |                                       ^
+  24 |  const __vi_import_2__ = await import("@testing-library/user-event");
+  25 |  const __vi_import_3__ = await import("react/jsx-dev-runtime");
+ ❯ TransformPluginContext._formatLog ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:8766:39
+ ❯ TransformPluginContext.error ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:8763:14
+ ❯ normalizeUrl ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:26632:18
+ ❯ ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:26702:30
+ ❯ TransformPluginContext.transform ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:26668:4
+ ❯ EnvironmentPluginContainer.transform ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:8545:14
+ ❯ loadAndTransform ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:20184:26
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/70]⎯
+
+ FAIL  tests/ui/account-plan.test.jsx [ tests/ui/account-plan.test.jsx ]
+Error: Failed to resolve import "@testing-library/react" from "tests/ui/account-plan.test.jsx". Does the file exist?
+  Plugin: vite:import-analysis
+  File: /tmp/omnibioai-wave5-wave6-qualification-v1/studio-session/tests/ui/account-plan.test.jsx:2:0
+  7  |  vi.mock("../../src/ui/lib/billingApi", () => billingApi);
+  8  |  const __vi_import_0__ = await import("react");
+  9  |  const __vi_import_1__ = await import("@testing-library/react");
+     |                                       ^
+  10 |  const __vi_import_2__ = await import("react/jsx-dev-runtime");
+  11 |  const __vi_import_3__ = await import("../../src/ui/pages/AccountPlan");
+ ❯ TransformPluginContext._formatLog ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:8766:39
+ ❯ TransformPluginContext.error ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:8763:14
+ ❯ normalizeUrl ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:26632:18
+ ❯ ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:26702:30
+ ❯ TransformPluginContext.transform ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:26668:4
+ ❯ EnvironmentPluginContainer.transform ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:8545:14
+ ❯ loadAndTransform ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:20184:26
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[7/70]⎯
+
+ FAIL  tests/ui/account-preferences.test.jsx [ tests/ui/account-preferences.test.jsx ]
+Error: Failed to resolve import "@testing-library/react" from "tests/ui/account-preferences.test.jsx". Does the file exist?
+  Plugin: vite:import-analysis
+  File: /tmp/omnibioai-wave5-wave6-qualification-v1/studio-session/tests/ui/account-preferences.test.jsx:2:0
+  21 |  }));
+  22 |  const __vi_import_0__ = await import("react");
+  23 |  const __vi_import_1__ = await import("@testing-library/react");
+     |                                       ^
+  24 |  const __vi_import_2__ = await import("react/jsx-dev-runtime");
+  25 |  const __vi_import_3__ = await import("../../src/ui/components/PreferencesProvider");
+ ❯ TransformPluginContext._formatLog ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:8766:39
+ ❯ TransformPluginContext.error ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:8763:14
+ ❯ normalizeUrl ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:26632:18
+ ❯ ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:26702:30
+ ❯ TransformPluginContext.transform ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:26668:4
+ ❯ EnvironmentPluginContainer.transform ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:8545:14
+ ❯ loadAndTransform ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:20184:26
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[8/70]⎯
+
+ FAIL  tests/ui/account-privacy.test.jsx [ tests/ui/account-privacy.test.jsx ]
+Error: Failed to resolve import "@testing-library/react" from "tests/ui/account-privacy.test.jsx". Does the file exist?
+  Plugin: vite:import-analysis
+  File: /tmp/omnibioai-wave5-wave6-qualification-v1/studio-session/tests/ui/account-privacy.test.jsx:2:40
+  1  |  import React from "react";
+  2  |  import { cleanup, render, screen } from "@testing-library/react";
+     |                                           ^
+  3  |  import { afterEach, describe, expect, it } from "vitest";
+  4  |  import AccountPrivacy from "../../src/ui/pages/AccountPrivacy";
+ ❯ TransformPluginContext._formatLog ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:8766:39
+ ❯ TransformPluginContext.error ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:8763:14
+ ❯ normalizeUrl ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:26632:18
+ ❯ ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:26702:30
+ ❯ TransformPluginContext.transform ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:26668:4
+ ❯ EnvironmentPluginContainer.transform ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:8545:14
+ ❯ loadAndTransform ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:20184:26
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[9/70]⎯
+
+ FAIL  tests/ui/account-security.test.jsx [ tests/ui/account-security.test.jsx ]
+Error: Failed to resolve import "@testing-library/react" from "tests/ui/account-security.test.jsx". Does the file exist?
+  Plugin: vite:import-analysis
+  File: /tmp/omnibioai-wave5-wave6-qualification-v1/studio-session/tests/ui/account-security.test.jsx:2:0
+  17 |  }));
+  18 |  const __vi_import_0__ = await import("react");
+  19 |  const __vi_import_1__ = await import("@testing-library/react");
+     |                                       ^
+  20 |  const __vi_import_2__ = await import("react/jsx-dev-runtime");
+  21 |  const __vi_import_3__ = await import("../../src/ui/pages/AccountSecurity");
+ ❯ TransformPluginContext._formatLog ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:8766:39
+ ❯ TransformPluginContext.error ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:8763:14
+ ❯ normalizeUrl ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:26632:18
+ ❯ ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:26702:30
+ ❯ TransformPluginContext.transform ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:26668:4
+ ❯ EnvironmentPluginContainer.transform ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:8545:14
+ ❯ loadAndTransform ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:20184:26
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[10/70]⎯
+
+ FAIL  tests/ui/app-shell.test.jsx [ tests/ui/app-shell.test.jsx ]
+Error: Failed to resolve import "@testing-library/react" from "tests/ui/app-shell.test.jsx". Does the file exist?
+  Plugin: vite:import-analysis
+  File: /tmp/omnibioai-wave5-wave6-qualification-v1/studio-session/tests/ui/app-shell.test.jsx:8:0
+  303 |  const __vi_import_0__ = await import("react");
+  304 |  const __vi_import_1__ = await import("react/jsx-dev-runtime");
+  305 |  const __vi_import_2__ = await import("@testing-library/react");
+      |                                       ^
+  306 |  const __vi_import_3__ = await import("../../src/ui/App");
+  307 |  
+ ❯ TransformPluginContext._formatLog ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:8766:39
+ ❯ TransformPluginContext.error ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:8763:14
+ ❯ normalizeUrl ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:26632:18
+ ❯ ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:26702:30
+ ❯ TransformPluginContext.transform ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:26668:4
+ ❯ EnvironmentPluginContainer.transform ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:8545:14
+ ❯ loadAndTransform ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:20184:26
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[11/70]⎯
+
+ FAIL  tests/ui/app.test.jsx [ tests/ui/app.test.jsx ]
+Error: Failed to resolve import "@testing-library/react" from "tests/ui/app.test.jsx". Does the file exist?
+  Plugin: vite:import-analysis
+  File: /tmp/omnibioai-wave5-wave6-qualification-v1/studio-session/tests/ui/app.test.jsx:3:0
+  114 |  const __vi_import_0__ = await import("react");
+  115 |  const __vi_import_1__ = await import("react/jsx-dev-runtime");
+  116 |  const __vi_import_2__ = await import("@testing-library/react");
+      |                                       ^
+  117 |  const __vi_import_3__ = await import("../../src/ui/App");
+  118 |  
+ ❯ TransformPluginContext._formatLog ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:8766:39
+ ❯ TransformPluginContext.error ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:8763:14
+ ❯ normalizeUrl ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:26632:18
+ ❯ ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:26702:30
+ ❯ TransformPluginContext.transform ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:26668:4
+ ❯ EnvironmentPluginContainer.transform ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:8545:14
+ ❯ loadAndTransform ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:20184:26
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[12/70]⎯
+
+ FAIL  tests/ui/appearance-provider.test.jsx [ tests/ui/appearance-provider.test.jsx ]
+Error: Failed to resolve import "@testing-library/react" from "tests/ui/appearance-provider.test.jsx". Does the file exist?
+  Plugin: vite:import-analysis
+  File: /tmp/omnibioai-wave5-wave6-qualification-v1/studio-session/tests/ui/appearance-provider.test.jsx:2:45
+  1  |  import React from "react";
+  2  |  import { act, cleanup, render, screen } from "@testing-library/react";
+     |                                                ^
+  3  |  import { afterEach, describe, expect, it, vi } from "vitest";
+  4  |  import AppearanceProvider, { useAppearance } from "../../src/ui/components/AppearanceProvider";
+ ❯ TransformPluginContext._formatLog ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:8766:39
+ ❯ TransformPluginContext.error ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:8763:14
+ ❯ normalizeUrl ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:26632:18
+ ❯ ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:26702:30
+ ❯ TransformPluginContext.transform ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:26668:4
+ ❯ EnvironmentPluginContainer.transform ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:8545:14
+ ❯ loadAndTransform ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:20184:26
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[13/70]⎯
+
+ FAIL  tests/ui/artifacts.test.jsx [ tests/ui/artifacts.test.jsx ]
+Error: Failed to resolve import "@testing-library/react" from "tests/ui/artifacts.test.jsx". Does the file exist?
+  Plugin: vite:import-analysis
+  File: /tmp/omnibioai-wave5-wave6-qualification-v1/studio-session/tests/ui/artifacts.test.jsx:2:0
+  9  |  vi.mock("../../src/ui/components/PreferencesProvider", () => ({ useAccountDateTime: () => (value) => value ? `date:${...
+  10 |  const __vi_import_0__ = await import("react");
+  11 |  const __vi_import_1__ = await import("@testing-library/react");
+     |                                       ^
+  12 |  const __vi_import_2__ = await import("react/jsx-dev-runtime");
+  13 |  const __vi_import_3__ = await import("../../src/ui/pages/Artifacts");
+ ❯ TransformPluginContext._formatLog ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:8766:39
+ ❯ TransformPluginContext.error ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:8763:14
+ ❯ normalizeUrl ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:26632:18
+ ❯ ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:26702:30
+ ❯ TransformPluginContext.transform ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:26668:4
+ ❯ EnvironmentPluginContainer.transform ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:8545:14
+ ❯ loadAndTransform ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:20184:26
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[14/70]⎯
+
+ FAIL  tests/ui/async-analysis-renderer.test.jsx [ tests/ui/async-analysis-renderer.test.jsx ]
+Error: Failed to resolve import "@testing-library/react" from "tests/ui/async-analysis-renderer.test.jsx". Does the file exist?
+  Plugin: vite:import-analysis
+  File: /tmp/omnibioai-wave5-wave6-qualification-v1/studio-session/tests/ui/async-analysis-renderer.test.jsx:2:51
+  1  |  import React from "react";
+  2  |  import { cleanup, fireEvent, render, screen } from "@testing-library/react";
+     |                                                      ^
+  3  |  import userEvent from "@testing-library/user-event";
+  4  |  import { afterEach, describe, expect, it, vi } from "vitest";
+ ❯ TransformPluginContext._formatLog ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:8766:39
+ ❯ TransformPluginContext.error ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:8763:14
+ ❯ normalizeUrl ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:26632:18
+ ❯ ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:26702:30
+ ❯ TransformPluginContext.transform ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:26668:4
+ ❯ EnvironmentPluginContainer.transform ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:8545:14
+ ❯ loadAndTransform ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:20184:26
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[15/70]⎯
+
+ FAIL  tests/ui/auth.test.jsx [ tests/ui/auth.test.jsx ]
+Error: Failed to resolve import "@testing-library/react" from "tests/ui/auth.test.jsx". Does the file exist?
+  Plugin: vite:import-analysis
+  File: /tmp/omnibioai-wave5-wave6-qualification-v1/studio-session/tests/ui/auth.test.jsx:2:0
+  13 |  }));
+  14 |  const __vi_import_0__ = await import("react");
+  15 |  const __vi_import_1__ = await import("@testing-library/react");
+     |                                       ^
+  16 |  const __vi_import_2__ = await import("react/jsx-dev-runtime");
+  17 |  const __vi_import_3__ = await import("../../src/ui/components/Login");
+ ❯ TransformPluginContext._formatLog ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:8766:39
+ ❯ TransformPluginContext.error ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:8763:14
+ ❯ normalizeUrl ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:26632:18
+ ❯ ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:26702:30
+ ❯ TransformPluginContext.transform ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:26668:4
+ ❯ EnvironmentPluginContainer.transform ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:8545:14
+ ❯ loadAndTransform ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:20184:26
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[16/70]⎯
+
+ FAIL  tests/ui/billing.test.jsx [ tests/ui/billing.test.jsx ]
+Error: Failed to resolve import "@testing-library/user-event" from "tests/ui/billing.test.jsx". Does the file exist?
+  Plugin: vite:import-analysis
+  File: /tmp/omnibioai-wave5-wave6-qualification-v1/studio-session/tests/ui/billing.test.jsx:2:0
+  14 |  vi.mock("../../src/ui/lib/platformAdminApi", () => platformAdminApi);
+  15 |  const __vi_import_0__ = await import("react");
+  16 |  const __vi_import_1__ = await import("@testing-library/user-event");
+     |                                       ^
+  17 |  const __vi_import_2__ = await import("@testing-library/react");
+  18 |  const __vi_import_3__ = await import("react/jsx-dev-runtime");
+ ❯ TransformPluginContext._formatLog ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:8766:39
+ ❯ TransformPluginContext.error ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:8763:14
+ ❯ normalizeUrl ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:26632:18
+ ❯ ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:26702:30
+ ❯ TransformPluginContext.transform ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:26668:4
+ ❯ EnvironmentPluginContainer.transform ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:8545:14
+ ❯ loadAndTransform ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:20184:26
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[17/70]⎯
+
+ FAIL  tests/ui/brand-identity.test.jsx [ tests/ui/brand-identity.test.jsx ]
+Error: Failed to resolve import "@testing-library/react" from "tests/ui/brand-identity.test.jsx". Does the file exist?
+  Plugin: vite:import-analysis
+  File: /tmp/omnibioai-wave5-wave6-qualification-v1/studio-session/tests/ui/brand-identity.test.jsx:2:0
+  2  |  vi.mock("../../src/ui/lib/session", () => ({ logout }));
+  3  |  const __vi_import_0__ = await import("react");
+  4  |  const __vi_import_1__ = await import("@testing-library/react");
+     |                                       ^
+  5  |  const __vi_import_2__ = await import("react/jsx-dev-runtime");
+  6  |  const __vi_import_3__ = await import("../../src/ui/components/brand/OmniBioAILogo");
+ ❯ TransformPluginContext._formatLog ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:8766:39
+ ❯ TransformPluginContext.error ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:8763:14
+ ❯ normalizeUrl ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:26632:18
+ ❯ ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:26702:30
+ ❯ TransformPluginContext.transform ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:26668:4
+ ❯ EnvironmentPluginContainer.transform ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:8545:14
+ ❯ loadAndTransform ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:20184:26
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[18/70]⎯
+
+ FAIL  tests/ui/bug-report.test.jsx [ tests/ui/bug-report.test.jsx ]
+Error: Failed to resolve import "@testing-library/react" from "tests/ui/bug-report.test.jsx". Does the file exist?
+  Plugin: vite:import-analysis
+  File: /tmp/omnibioai-wave5-wave6-qualification-v1/studio-session/tests/ui/bug-report.test.jsx:2:60
+  1  |  import React from "react";
+  2  |  import { render, screen, fireEvent, waitFor, cleanup } from "@testing-library/react";
+     |                                                               ^
+  3  |  import { afterEach, describe, expect, it, vi } from "vitest";
+  4  |  import BugReport from "../../src/ui/components/BugReport";
+ ❯ TransformPluginContext._formatLog ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:8766:39
+ ❯ TransformPluginContext.error ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:8763:14
+ ❯ normalizeUrl ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:26632:18
+ ❯ ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:26702:30
+ ❯ TransformPluginContext.transform ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:26668:4
+ ❯ EnvironmentPluginContainer.transform ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:8545:14
+ ❯ loadAndTransform ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:20184:26
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[19/70]⎯
+
+ FAIL  tests/ui/components.test.jsx [ tests/ui/components.test.jsx ]
+Error: Failed to resolve import "@testing-library/react" from "tests/ui/components.test.jsx". Does the file exist?
+  Plugin: vite:import-analysis
+  File: /tmp/omnibioai-wave5-wave6-qualification-v1/studio-session/tests/ui/components.test.jsx:2:42
+  1  |  import React from "react";
+  2  |  import { fireEvent, render, screen } from "@testing-library/react";
+     |                                             ^
+  3  |  import { describe, expect, it, vi } from "vitest";
+  4  |  import { Btn, HealthCard, Input, Select, ToggleRow } from "../../src/ui/components/UI";
+ ❯ TransformPluginContext._formatLog ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:8766:39
+ ❯ TransformPluginContext.error ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:8763:14
+ ❯ normalizeUrl ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:26632:18
+ ❯ ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:26702:30
+ ❯ TransformPluginContext.transform ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:26668:4
+ ❯ EnvironmentPluginContainer.transform ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:8545:14
+ ❯ loadAndTransform ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:20184:26
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[20/70]⎯
+
+ FAIL  tests/ui/config-pages.test.jsx [ tests/ui/config-pages.test.jsx ]
+Error: Failed to resolve import "@testing-library/react" from "tests/ui/config-pages.test.jsx". Does the file exist?
+  Plugin: vite:import-analysis
+  File: /tmp/omnibioai-wave5-wave6-qualification-v1/studio-session/tests/ui/config-pages.test.jsx:2:51
+  1  |  import React from "react";
+  2  |  import { render, screen, fireEvent, cleanup } from "@testing-library/react";
+     |                                                      ^
+  3  |  import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+  4  |  import Cloud from "../../src/ui/pages/Cloud";
+ ❯ TransformPluginContext._formatLog ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:8766:39
+ ❯ TransformPluginContext.error ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:8763:14
+ ❯ normalizeUrl ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:26632:18
+ ❯ ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:26702:30
+ ❯ TransformPluginContext.transform ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:26668:4
+ ❯ EnvironmentPluginContainer.transform ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:8545:14
+ ❯ loadAndTransform ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:20184:26
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[21/70]⎯
+
+ FAIL  tests/ui/coverage_matrix.test.jsx [ tests/ui/coverage_matrix.test.jsx ]
+Error: Failed to resolve import "@testing-library/react" from "tests/ui/coverage_matrix.test.jsx". Does the file exist?
+  Plugin: vite:import-analysis
+  File: /tmp/omnibioai-wave5-wave6-qualification-v1/studio-session/tests/ui/coverage_matrix.test.jsx:2:0
+  43 |  }));
+  44 |  const __vi_import_0__ = await import("react");
+  45 |  const __vi_import_1__ = await import("@testing-library/react");
+     |                                       ^
+  46 |  const __vi_import_2__ = await import("react/jsx-dev-runtime");
+  47 |  const __vi_import_3__ = await import("../../src/ui/pages/Mode");
+ ❯ TransformPluginContext._formatLog ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:8766:39
+ ❯ TransformPluginContext.error ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:8763:14
+ ❯ normalizeUrl ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:26632:18
+ ❯ ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:26702:30
+ ❯ TransformPluginContext.transform ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:26668:4
+ ❯ EnvironmentPluginContainer.transform ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:8545:14
+ ❯ loadAndTransform ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:20184:26
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[22/70]⎯
+
+ FAIL  tests/ui/developer.test.jsx [ tests/ui/developer.test.jsx ]
+Error: Failed to resolve import "@testing-library/react" from "tests/ui/developer.test.jsx". Does the file exist?
+  Plugin: vite:import-analysis
+  File: /tmp/omnibioai-wave5-wave6-qualification-v1/studio-session/tests/ui/developer.test.jsx:2:0
+  6  |  vi.mock("../../src/ui/lib/apiKeysApi", () => api);
+  7  |  const __vi_import_0__ = await import("react");
+  8  |  const __vi_import_1__ = await import("@testing-library/react");
+     |                                       ^
+  9  |  const __vi_import_2__ = await import("react/jsx-dev-runtime");
+  10 |  const __vi_import_3__ = await import("../../src/ui/pages/Developer");
+ ❯ TransformPluginContext._formatLog ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:8766:39
+ ❯ TransformPluginContext.error ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:8763:14
+ ❯ normalizeUrl ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:26632:18
+ ❯ ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:26702:30
+ ❯ TransformPluginContext.transform ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:26668:4
+ ❯ EnvironmentPluginContainer.transform ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:8545:14
+ ❯ loadAndTransform ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:20184:26
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[23/70]⎯
+
+ FAIL  tests/ui/error-boundary.test.jsx [ tests/ui/error-boundary.test.jsx ]
+Error: Failed to resolve import "@testing-library/react" from "tests/ui/error-boundary.test.jsx". Does the file exist?
+  Plugin: vite:import-analysis
+  File: /tmp/omnibioai-wave5-wave6-qualification-v1/studio-session/tests/ui/error-boundary.test.jsx:2:51
+  1  |  import React from "react";
+  2  |  import { render, screen, fireEvent, cleanup } from "@testing-library/react";
+     |                                                      ^
+  3  |  import { afterEach, describe, expect, it, vi } from "vitest";
+  4  |  import ErrorBoundary from "../../src/ui/components/ErrorBoundary";
+ ❯ TransformPluginContext._formatLog ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:8766:39
+ ❯ TransformPluginContext.error ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:8763:14
+ ❯ normalizeUrl ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:26632:18
+ ❯ ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:26702:30
+ ❯ TransformPluginContext.transform ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:26668:4
+ ❯ EnvironmentPluginContainer.transform ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:8545:14
+ ❯ loadAndTransform ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:20184:26
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[24/70]⎯
+
+ FAIL  tests/ui/explore-domains.test.jsx [ tests/ui/explore-domains.test.jsx ]
+Error: Failed to resolve import "@testing-library/react" from "tests/ui/explore-domains.test.jsx". Does the file exist?
+  Plugin: vite:import-analysis
+  File: /tmp/omnibioai-wave5-wave6-qualification-v1/studio-session/tests/ui/explore-domains.test.jsx:2:0
+  2  |  vi.mock("../../src/ui/lib/exploreApi", () => ({ loadExploreResources }));
+  3  |  const __vi_import_0__ = await import("react");
+  4  |  const __vi_import_1__ = await import("@testing-library/react");
+     |                                       ^
+  5  |  const __vi_import_2__ = await import("../../scripts/generate-explore-domains.mjs");
+  6  |  const __vi_import_3__ = await import("../../src/ui/catalogs/exploreDomains.json");
+ ❯ TransformPluginContext._formatLog ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:8766:39
+ ❯ TransformPluginContext.error ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:8763:14
+ ❯ normalizeUrl ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:26632:18
+ ❯ ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:26702:30
+ ❯ TransformPluginContext.transform ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:26668:4
+ ❯ EnvironmentPluginContainer.transform ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:8545:14
+ ❯ loadAndTransform ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:20184:26
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[25/70]⎯
+
+ FAIL  tests/ui/explore.test.jsx [ tests/ui/explore.test.jsx ]
+Error: Failed to resolve import "@testing-library/react" from "tests/ui/explore.test.jsx". Does the file exist?
+  Plugin: vite:import-analysis
+  File: /tmp/omnibioai-wave5-wave6-qualification-v1/studio-session/tests/ui/explore.test.jsx:2:0
+  2  |  vi.mock("../../src/ui/lib/exploreApi", () => ({ loadExploreResources }));
+  3  |  const __vi_import_0__ = await import("react");
+  4  |  const __vi_import_1__ = await import("@testing-library/react");
+     |                                       ^
+  5  |  const __vi_import_2__ = await import("react/jsx-dev-runtime");
+  6  |  const __vi_import_3__ = await import("../../src/ui/pages/Explore");
+ ❯ TransformPluginContext._formatLog ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:8766:39
+ ❯ TransformPluginContext.error ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:8763:14
+ ❯ normalizeUrl ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:26632:18
+ ❯ ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:26702:30
+ ❯ TransformPluginContext.transform ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:26668:4
+ ❯ EnvironmentPluginContainer.transform ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:8545:14
+ ❯ loadAndTransform ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:20184:26
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[26/70]⎯
+
+ FAIL  tests/ui/final13-presentation.test.jsx [ tests/ui/final13-presentation.test.jsx ]
+Error: Failed to resolve import "@testing-library/react" from "tests/ui/final13-presentation.test.jsx". Does the file exist?
+  Plugin: vite:import-analysis
+  File: /tmp/omnibioai-wave5-wave6-qualification-v1/studio-session/tests/ui/final13-presentation.test.jsx:2:51
+  1  |  import React from "react";
+  2  |  import { cleanup, fireEvent, render, screen } from "@testing-library/react";
+     |                                                      ^
+  3  |  import { afterEach, describe, expect, it, vi } from "vitest";
+  4  |  import InformationalRenderer from "../../src/ui/components/workbench/InformationalRenderer";
+ ❯ TransformPluginContext._formatLog ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:8766:39
+ ❯ TransformPluginContext.error ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:8763:14
+ ❯ normalizeUrl ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:26632:18
+ ❯ ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:26702:30
+ ❯ TransformPluginContext.transform ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:26668:4
+ ❯ EnvironmentPluginContainer.transform ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:8545:14
+ ❯ loadAndTransform ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:20184:26
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[27/70]⎯
+
+ FAIL  tests/ui/generic-plugin-runner.test.jsx [ tests/ui/generic-plugin-runner.test.jsx ]
+Error: Failed to resolve import "@testing-library/react" from "tests/ui/generic-plugin-runner.test.jsx". Does the file exist?
+  Plugin: vite:import-analysis
+  File: /tmp/omnibioai-wave5-wave6-qualification-v1/studio-session/tests/ui/generic-plugin-runner.test.jsx:2:51
+  1  |  import React from "react";
+  2  |  import { cleanup, fireEvent, render, screen } from "@testing-library/react";
+     |                                                      ^
+  3  |  import userEvent from "@testing-library/user-event";
+  4  |  import { afterEach, describe, expect, it, vi } from "vitest";
+ ❯ TransformPluginContext._formatLog ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:8766:39
+ ❯ TransformPluginContext.error ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:8763:14
+ ❯ normalizeUrl ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:26632:18
+ ❯ ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:26702:30
+ ❯ TransformPluginContext.transform ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:26668:4
+ ❯ EnvironmentPluginContainer.transform ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:8545:14
+ ❯ loadAndTransform ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:20184:26
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[28/70]⎯
+
+ FAIL  tests/ui/grafana-viewer.test.jsx [ tests/ui/grafana-viewer.test.jsx ]
+Error: Failed to resolve import "@testing-library/react" from "tests/ui/grafana-viewer.test.jsx". Does the file exist?
+  Plugin: vite:import-analysis
+  File: /tmp/omnibioai-wave5-wave6-qualification-v1/studio-session/tests/ui/grafana-viewer.test.jsx:2:0
+  1  |  const __vi_import_0__ = await import("react");
+  2  |  const __vi_import_1__ = await import("@testing-library/react");
+     |                                       ^
+  3  |  const __vi_import_2__ = await import("react/jsx-dev-runtime");
+  4  |  
+ ❯ TransformPluginContext._formatLog ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:8766:39
+ ❯ TransformPluginContext.error ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:8763:14
+ ❯ normalizeUrl ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:26632:18
+ ❯ ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:26702:30
+ ❯ TransformPluginContext.transform ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:26668:4
+ ❯ EnvironmentPluginContainer.transform ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:8545:14
+ ❯ loadAndTransform ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:20184:26
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[29/70]⎯
+
+ FAIL  tests/ui/integrations.test.jsx [ tests/ui/integrations.test.jsx ]
+Error: Failed to resolve import "@testing-library/react" from "tests/ui/integrations.test.jsx". Does the file exist?
+  Plugin: vite:import-analysis
+  File: /tmp/omnibioai-wave5-wave6-qualification-v1/studio-session/tests/ui/integrations.test.jsx:2:0
+  7  |  vi.mock("../../src/ui/lib/integrationsApi", () => api);
+  8  |  const __vi_import_0__ = await import("react");
+  9  |  const __vi_import_1__ = await import("@testing-library/react");
+     |                                       ^
+  10 |  const __vi_import_2__ = await import("react/jsx-dev-runtime");
+  11 |  const __vi_import_3__ = await import("../../src/ui/pages/Integrations");
+ ❯ TransformPluginContext._formatLog ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:8766:39
+ ❯ TransformPluginContext.error ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:8763:14
+ ❯ normalizeUrl ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:26632:18
+ ❯ ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:26702:30
+ ❯ TransformPluginContext.transform ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:26668:4
+ ❯ EnvironmentPluginContainer.transform ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:8545:14
+ ❯ loadAndTransform ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:20184:26
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[30/70]⎯
+
+ FAIL  tests/ui/jobs.test.jsx [ tests/ui/jobs.test.jsx ]
+Error: Failed to resolve import "@testing-library/react" from "tests/ui/jobs.test.jsx". Does the file exist?
+  Plugin: vite:import-analysis
+  File: /tmp/omnibioai-wave5-wave6-qualification-v1/studio-session/tests/ui/jobs.test.jsx:2:0
+  8  |  }));
+  9  |  const __vi_import_0__ = await import("react");
+  10 |  const __vi_import_1__ = await import("@testing-library/react");
+     |                                       ^
+  11 |  const __vi_import_2__ = await import("react/jsx-dev-runtime");
+  12 |  const __vi_import_3__ = await import("../../src/ui/pages/Jobs");
+ ❯ TransformPluginContext._formatLog ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:8766:39
+ ❯ TransformPluginContext.error ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:8763:14
+ ❯ normalizeUrl ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:26632:18
+ ❯ ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:26702:30
+ ❯ TransformPluginContext.transform ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:26668:4
+ ❯ EnvironmentPluginContainer.transform ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:8545:14
+ ❯ loadAndTransform ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:20184:26
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[31/70]⎯
+
+ FAIL  tests/ui/launch.test.jsx [ tests/ui/launch.test.jsx ]
+Error: Failed to resolve import "@testing-library/react" from "tests/ui/launch.test.jsx". Does the file exist?
+  Plugin: vite:import-analysis
+  File: /tmp/omnibioai-wave5-wave6-qualification-v1/studio-session/tests/ui/launch.test.jsx:2:60
+  1  |  import React from "react";
+  2  |  import { render, screen, fireEvent, waitFor, cleanup } from "@testing-library/react";
+     |                                                               ^
+  3  |  import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+  4  |  import Launch from "../../src/ui/pages/Launch";
+ ❯ TransformPluginContext._formatLog ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:8766:39
+ ❯ TransformPluginContext.error ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:8763:14
+ ❯ normalizeUrl ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:26632:18
+ ❯ ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:26702:30
+ ❯ TransformPluginContext.transform ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:26668:4
+ ❯ EnvironmentPluginContainer.transform ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:8545:14
+ ❯ loadAndTransform ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:20184:26
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[32/70]⎯
+
+ FAIL  tests/ui/launcher-polling-auth.test.jsx [ tests/ui/launcher-polling-auth.test.jsx ]
+Error: Failed to resolve import "@testing-library/react" from "tests/ui/launcher-polling-auth.test.jsx". Does the file exist?
+  Plugin: vite:import-analysis
+  File: /tmp/omnibioai-wave5-wave6-qualification-v1/studio-session/tests/ui/launcher-polling-auth.test.jsx:2:60
+  1  |  import React from "react";
+  2  |  import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
+     |                                                               ^
+  3  |  import { afterEach, describe, expect, it, vi } from "vitest";
+  4  |  import Services from "../../src/ui/pages/Services";
+ ❯ TransformPluginContext._formatLog ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:8766:39
+ ❯ TransformPluginContext.error ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:8763:14
+ ❯ normalizeUrl ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:26632:18
+ ❯ ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:26702:30
+ ❯ TransformPluginContext.transform ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:26668:4
+ ❯ EnvironmentPluginContainer.transform ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:8545:14
+ ❯ loadAndTransform ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:20184:26
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[33/70]⎯
+
+ FAIL  tests/ui/license-gate.test.jsx [ tests/ui/license-gate.test.jsx ]
+Error: Failed to resolve import "@testing-library/react" from "tests/ui/license-gate.test.jsx". Does the file exist?
+  Plugin: vite:import-analysis
+  File: /tmp/omnibioai-wave5-wave6-qualification-v1/studio-session/tests/ui/license-gate.test.jsx:2:60
+  1  |  import React from "react";
+  2  |  import { render, screen, fireEvent, waitFor, cleanup } from "@testing-library/react";
+     |                                                               ^
+  3  |  import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+  4  |  import LicenseGate from "../../src/ui/components/LicenseGate";
+ ❯ TransformPluginContext._formatLog ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:8766:39
+ ❯ TransformPluginContext.error ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:8763:14
+ ❯ normalizeUrl ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:26632:18
+ ❯ ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:26702:30
+ ❯ TransformPluginContext.transform ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:26668:4
+ ❯ EnvironmentPluginContainer.transform ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:8545:14
+ ❯ loadAndTransform ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:20184:26
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[34/70]⎯
+
+ FAIL  tests/ui/logs.test.jsx [ tests/ui/logs.test.jsx ]
+Error: Failed to resolve import "@testing-library/react" from "tests/ui/logs.test.jsx". Does the file exist?
+  Plugin: vite:import-analysis
+  File: /tmp/omnibioai-wave5-wave6-qualification-v1/studio-session/tests/ui/logs.test.jsx:2:60
+  1  |  import React from "react";
+  2  |  import { render, screen, fireEvent, waitFor, cleanup } from "@testing-library/react";
+     |                                                               ^
+  3  |  import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+  4  |  import Logs from "../../src/ui/pages/Logs";
+ ❯ TransformPluginContext._formatLog ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:8766:39
+ ❯ TransformPluginContext.error ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:8763:14
+ ❯ normalizeUrl ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:26632:18
+ ❯ ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:26702:30
+ ❯ TransformPluginContext.transform ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:26668:4
+ ❯ EnvironmentPluginContainer.transform ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:8545:14
+ ❯ loadAndTransform ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:20184:26
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[35/70]⎯
+
+ FAIL  tests/ui/membership-plans.test.jsx [ tests/ui/membership-plans.test.jsx ]
+Error: Failed to resolve import "@testing-library/react" from "tests/ui/membership-plans.test.jsx". Does the file exist?
+  Plugin: vite:import-analysis
+  File: /tmp/omnibioai-wave5-wave6-qualification-v1/studio-session/tests/ui/membership-plans.test.jsx:2:0
+  6  |  vi.mock("../../src/ui/lib/billingApi", () => billingApi);
+  7  |  const __vi_import_0__ = await import("react");
+  8  |  const __vi_import_1__ = await import("@testing-library/react");
+     |                                       ^
+  9  |  const __vi_import_2__ = await import("react/jsx-dev-runtime");
+  10 |  const __vi_import_3__ = await import("../../src/ui/pages/MembershipPlans");
+ ❯ TransformPluginContext._formatLog ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:8766:39
+ ❯ TransformPluginContext.error ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:8763:14
+ ❯ normalizeUrl ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:26632:18
+ ❯ ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:26702:30
+ ❯ TransformPluginContext.transform ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:26668:4
+ ❯ EnvironmentPluginContainer.transform ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:8545:14
+ ❯ loadAndTransform ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:20184:26
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[36/70]⎯
+
+ FAIL  tests/ui/mfa-management.test.jsx [ tests/ui/mfa-management.test.jsx ]
+Error: Failed to resolve import "@testing-library/react" from "tests/ui/mfa-management.test.jsx". Does the file exist?
+  Plugin: vite:import-analysis
+  File: /tmp/omnibioai-wave5-wave6-qualification-v1/studio-session/tests/ui/mfa-management.test.jsx:2:0
+  22 |  }));
+  23 |  const __vi_import_0__ = await import("react");
+  24 |  const __vi_import_1__ = await import("@testing-library/react");
+     |                                       ^
+  25 |  const __vi_import_2__ = await import("react/jsx-dev-runtime");
+  26 |  const __vi_import_3__ = await import("../../src/ui/components/security/MfaManagement");
+ ❯ TransformPluginContext._formatLog ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:8766:39
+ ❯ TransformPluginContext.error ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:8763:14
+ ❯ normalizeUrl ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:26632:18
+ ❯ ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:26702:30
+ ❯ TransformPluginContext.transform ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:26668:4
+ ❯ EnvironmentPluginContainer.transform ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:8545:14
+ ❯ loadAndTransform ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:20184:26
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[37/70]⎯
+
+ FAIL  tests/ui/mode.test.jsx [ tests/ui/mode.test.jsx ]
+Error: Failed to resolve import "@testing-library/react" from "tests/ui/mode.test.jsx". Does the file exist?
+  Plugin: vite:import-analysis
+  File: /tmp/omnibioai-wave5-wave6-qualification-v1/studio-session/tests/ui/mode.test.jsx:2:51
+  1  |  import React from "react";
+  2  |  import { render, screen, fireEvent, cleanup } from "@testing-library/react";
+     |                                                      ^
+  3  |  import { afterEach, describe, expect, it, vi } from "vitest";
+  4  |  import Mode from "../../src/ui/pages/Mode";
+ ❯ TransformPluginContext._formatLog ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:8766:39
+ ❯ TransformPluginContext.error ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:8763:14
+ ❯ normalizeUrl ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:26632:18
+ ❯ ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:26702:30
+ ❯ TransformPluginContext.transform ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:26668:4
+ ❯ EnvironmentPluginContainer.transform ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:8545:14
+ ❯ loadAndTransform ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:20184:26
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[38/70]⎯
+
+ FAIL  tests/ui/nav-components.test.jsx [ tests/ui/nav-components.test.jsx ]
+Error: Failed to resolve import "@testing-library/react" from "tests/ui/nav-components.test.jsx". Does the file exist?
+  Plugin: vite:import-analysis
+  File: /tmp/omnibioai-wave5-wave6-qualification-v1/studio-session/tests/ui/nav-components.test.jsx:2:0
+  2  |  vi.mock("../../src/ui/lib/session", () => ({ logout }));
+  3  |  const __vi_import_0__ = await import("react");
+  4  |  const __vi_import_1__ = await import("@testing-library/react");
+     |                                       ^
+  5  |  const __vi_import_2__ = await import("react/jsx-dev-runtime");
+  6  |  const __vi_import_3__ = await import("../../src/ui/components/Sidebar");
+ ❯ TransformPluginContext._formatLog ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:8766:39
+ ❯ TransformPluginContext.error ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:8763:14
+ ❯ normalizeUrl ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:26632:18
+ ❯ ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:26702:30
+ ❯ TransformPluginContext.transform ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:26668:4
+ ❯ EnvironmentPluginContainer.transform ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:8545:14
+ ❯ loadAndTransform ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:20184:26
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[39/70]⎯
+
+ FAIL  tests/ui/oauth-link-confirm.test.jsx [ tests/ui/oauth-link-confirm.test.jsx ]
+Error: Failed to resolve import "@testing-library/react" from "tests/ui/oauth-link-confirm.test.jsx". Does the file exist?
+  Plugin: vite:import-analysis
+  File: /tmp/omnibioai-wave5-wave6-qualification-v1/studio-session/tests/ui/oauth-link-confirm.test.jsx:2:0
+  2  |  vi.mock("../../src/ui/lib/session", () => ({ confirmOAuthLink }));
+  3  |  const __vi_import_0__ = await import("react");
+  4  |  const __vi_import_1__ = await import("@testing-library/react");
+     |                                       ^
+  5  |  const __vi_import_2__ = await import("react/jsx-dev-runtime");
+  6  |  const __vi_import_3__ = await import("../../src/ui/components/OAuthLinkConfirm");
+ ❯ TransformPluginContext._formatLog ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:8766:39
+ ❯ TransformPluginContext.error ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:8763:14
+ ❯ normalizeUrl ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:26632:18
+ ❯ ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:26702:30
+ ❯ TransformPluginContext.transform ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:26668:4
+ ❯ EnvironmentPluginContainer.transform ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:8545:14
+ ❯ loadAndTransform ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:20184:26
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[40/70]⎯
+
+ FAIL  tests/ui/omni-page.test.jsx [ tests/ui/omni-page.test.jsx ]
+Error: Failed to resolve import "@testing-library/react" from "tests/ui/omni-page.test.jsx". Does the file exist?
+  Plugin: vite:import-analysis
+  File: /tmp/omnibioai-wave5-wave6-qualification-v1/studio-session/tests/ui/omni-page.test.jsx:2:40
+  1  |  import React from "react";
+  2  |  import { cleanup, render, screen } from "@testing-library/react";
+     |                                           ^
+  3  |  import { afterEach, describe, expect, it } from "vitest";
+  4  |  import OmniPage from "../../src/ui/components/OmniPage";
+ ❯ TransformPluginContext._formatLog ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:8766:39
+ ❯ TransformPluginContext.error ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:8763:14
+ ❯ normalizeUrl ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:26632:18
+ ❯ ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:26702:30
+ ❯ TransformPluginContext.transform ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:26668:4
+ ❯ EnvironmentPluginContainer.transform ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:8545:14
+ ❯ loadAndTransform ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:20184:26
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[41/70]⎯
+
+ FAIL  tests/ui/organization-connections.test.jsx [ tests/ui/organization-connections.test.jsx ]
+Error: Failed to resolve import "@testing-library/react" from "tests/ui/organization-connections.test.jsx". Does the file exist?
+  Plugin: vite:import-analysis
+  File: /tmp/omnibioai-wave5-wave6-qualification-v1/studio-session/tests/ui/organization-connections.test.jsx:2:73
+  1  |  import React from "react";
+  2  |  import { act, cleanup, fireEvent, render, screen, waitFor, within } from "@testing-library/react";
+     |                                                                            ^
+  3  |  import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+  4  |  import OrganizationConnections from "../../src/ui/pages/OrganizationConnections";
+ ❯ TransformPluginContext._formatLog ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:8766:39
+ ❯ TransformPluginContext.error ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:8763:14
+ ❯ normalizeUrl ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:26632:18
+ ❯ ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:26702:30
+ ❯ TransformPluginContext.transform ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:26668:4
+ ❯ EnvironmentPluginContainer.transform ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:8545:14
+ ❯ loadAndTransform ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:20184:26
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[42/70]⎯
+
+ FAIL  tests/ui/plugin-page.test.jsx [ tests/ui/plugin-page.test.jsx ]
+Error: Failed to resolve import "@testing-library/react" from "tests/ui/plugin-page.test.jsx". Does the file exist?
+  Plugin: vite:import-analysis
+  File: /tmp/omnibioai-wave5-wave6-qualification-v1/studio-session/tests/ui/plugin-page.test.jsx:2:0
+  23 |  }, this) }));
+  24 |  const __vi_import_0__ = await import("react");
+  25 |  const __vi_import_1__ = await import("@testing-library/react");
+     |                                       ^
+  26 |  const __vi_import_2__ = await import("react/jsx-dev-runtime");
+  27 |  const __vi_import_3__ = await import("../../src/ui/pages/PluginPage");
+ ❯ TransformPluginContext._formatLog ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:8766:39
+ ❯ TransformPluginContext.error ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:8763:14
+ ❯ normalizeUrl ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:26632:18
+ ❯ ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:26702:30
+ ❯ TransformPluginContext.transform ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:26668:4
+ ❯ EnvironmentPluginContainer.transform ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:8545:14
+ ❯ loadAndTransform ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:20184:26
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[43/70]⎯
+
+ FAIL  tests/ui/profile.test.jsx [ tests/ui/profile.test.jsx ]
+Error: Failed to resolve import "@testing-library/react" from "tests/ui/profile.test.jsx". Does the file exist?
+  Plugin: vite:import-analysis
+  File: /tmp/omnibioai-wave5-wave6-qualification-v1/studio-session/tests/ui/profile.test.jsx:2:0
+  9  |  }, this) }));
+  10 |  const __vi_import_0__ = await import("react");
+  11 |  const __vi_import_1__ = await import("@testing-library/react");
+     |                                       ^
+  12 |  const __vi_import_2__ = await import("../../src/ui/pages/Profile");
+  13 |  const __vi_import_3__ = await import("../../src/ui/lib/session");
+ ❯ TransformPluginContext._formatLog ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:8766:39
+ ❯ TransformPluginContext.error ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:8763:14
+ ❯ normalizeUrl ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:26632:18
+ ❯ ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:26702:30
+ ❯ TransformPluginContext.transform ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:26668:4
+ ❯ EnvironmentPluginContainer.transform ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:8545:14
+ ❯ loadAndTransform ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:20184:26
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[44/70]⎯
+
+ FAIL  tests/ui/project-collaboration.test.jsx [ tests/ui/project-collaboration.test.jsx ]
+Error: Failed to resolve import "@testing-library/react" from "tests/ui/project-collaboration.test.jsx". Does the file exist?
+  Plugin: vite:import-analysis
+  File: /tmp/omnibioai-wave5-wave6-qualification-v1/studio-session/tests/ui/project-collaboration.test.jsx:2:0
+  14 |  vi.mock("../../src/ui/lib/collaborationApi", () => api);
+  15 |  const __vi_import_0__ = await import("react");
+  16 |  const __vi_import_1__ = await import("@testing-library/react");
+     |                                       ^
+  17 |  const __vi_import_2__ = await import("react/jsx-dev-runtime");
+  18 |  const __vi_import_3__ = await import("../../src/ui/components/projects/ProjectCollaboration");
+ ❯ TransformPluginContext._formatLog ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:8766:39
+ ❯ TransformPluginContext.error ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:8763:14
+ ❯ normalizeUrl ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:26632:18
+ ❯ ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:26702:30
+ ❯ TransformPluginContext.transform ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:26668:4
+ ❯ EnvironmentPluginContainer.transform ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:8545:14
+ ❯ loadAndTransform ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:20184:26
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[45/70]⎯
+
+ FAIL  tests/ui/projects.test.jsx [ tests/ui/projects.test.jsx ]
+Error: Failed to resolve import "@testing-library/react" from "tests/ui/projects.test.jsx". Does the file exist?
+  Plugin: vite:import-analysis
+  File: /tmp/omnibioai-wave5-wave6-qualification-v1/studio-session/tests/ui/projects.test.jsx:2:0
+  14 |  }, this) }));
+  15 |  const __vi_import_0__ = await import("react");
+  16 |  const __vi_import_1__ = await import("@testing-library/react");
+     |                                       ^
+  17 |  const __vi_import_2__ = await import("react/jsx-dev-runtime");
+  18 |  const __vi_import_3__ = await import("../../src/ui/pages/Projects");
+ ❯ TransformPluginContext._formatLog ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:8766:39
+ ❯ TransformPluginContext.error ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:8763:14
+ ❯ normalizeUrl ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:26632:18
+ ❯ ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:26702:30
+ ❯ TransformPluginContext.transform ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:26668:4
+ ❯ EnvironmentPluginContainer.transform ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:8545:14
+ ❯ loadAndTransform ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:20184:26
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[46/70]⎯
+
+ FAIL  tests/ui/query-batch.test.jsx [ tests/ui/query-batch.test.jsx ]
+Error: Failed to resolve import "@testing-library/react" from "tests/ui/query-batch.test.jsx". Does the file exist?
+  Plugin: vite:import-analysis
+  File: /tmp/omnibioai-wave5-wave6-qualification-v1/studio-session/tests/ui/query-batch.test.jsx:2:0
+  9  |  }, this) }));
+  10 |  const __vi_import_0__ = await import("react");
+  11 |  const __vi_import_1__ = await import("@testing-library/react");
+     |                                       ^
+  12 |  const __vi_import_2__ = await import("../../src/ui/components/workbench/QueryRenderer");
+  13 |  const __vi_import_3__ = await import("../../src/ui/pages/PluginPage");
+ ❯ TransformPluginContext._formatLog ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:8766:39
+ ❯ TransformPluginContext.error ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:8763:14
+ ❯ normalizeUrl ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:26632:18
+ ❯ ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:26702:30
+ ❯ TransformPluginContext.transform ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:26668:4
+ ❯ EnvironmentPluginContainer.transform ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:8545:14
+ ❯ loadAndTransform ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:20184:26
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[47/70]⎯
+
+ FAIL  tests/ui/query-renderer-operations.test.jsx [ tests/ui/query-renderer-operations.test.jsx ]
+Error: Failed to resolve import "@testing-library/react" from "tests/ui/query-renderer-operations.test.jsx". Does the file exist?
+  Plugin: vite:import-analysis
+  File: /tmp/omnibioai-wave5-wave6-qualification-v1/studio-session/tests/ui/query-renderer-operations.test.jsx:2:51
+  1  |  import React from "react";
+  2  |  import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+     |                                                      ^
+  3  |  import { describe, expect, it, vi, beforeEach, afterEach } from "vitest";
+  4  |  import QueryRenderer from "../../src/ui/components/workbench/QueryRenderer";
+ ❯ TransformPluginContext._formatLog ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:8766:39
+ ❯ TransformPluginContext.error ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:8763:14
+ ❯ normalizeUrl ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:26632:18
+ ❯ ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:26702:30
+ ❯ TransformPluginContext.transform ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:26668:4
+ ❯ EnvironmentPluginContainer.transform ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:8545:14
+ ❯ loadAndTransform ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:20184:26
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[48/70]⎯
+
+ FAIL  tests/ui/query-renderer.test.jsx [ tests/ui/query-renderer.test.jsx ]
+Error: Failed to resolve import "@testing-library/react" from "tests/ui/query-renderer.test.jsx". Does the file exist?
+  Plugin: vite:import-analysis
+  File: /tmp/omnibioai-wave5-wave6-qualification-v1/studio-session/tests/ui/query-renderer.test.jsx:2:51
+  1  |  import React from "react";
+  2  |  import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+     |                                                      ^
+  3  |  import { describe, expect, it, vi, beforeEach, afterEach } from "vitest";
+  4  |  import QueryRenderer from "../../src/ui/components/workbench/QueryRenderer";
+ ❯ TransformPluginContext._formatLog ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:8766:39
+ ❯ TransformPluginContext.error ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:8763:14
+ ❯ normalizeUrl ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:26632:18
+ ❯ ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:26702:30
+ ❯ TransformPluginContext.transform ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:26668:4
+ ❯ EnvironmentPluginContainer.transform ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:8545:14
+ ❯ loadAndTransform ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:20184:26
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[49/70]⎯
+
+ FAIL  tests/ui/role-management.test.jsx [ tests/ui/role-management.test.jsx ]
+Error: Failed to resolve import "@testing-library/react" from "tests/ui/role-management.test.jsx". Does the file exist?
+  Plugin: vite:import-analysis
+  File: /tmp/omnibioai-wave5-wave6-qualification-v1/studio-session/tests/ui/role-management.test.jsx:2:0
+  10 |  vi.mock("../../src/ui/lib/rolesApi", () => rolesApi);
+  11 |  const __vi_import_0__ = await import("react");
+  12 |  const __vi_import_1__ = await import("@testing-library/react");
+     |                                       ^
+  13 |  const __vi_import_2__ = await import("react/jsx-dev-runtime");
+  14 |  const __vi_import_3__ = await import("../../src/ui/pages/RoleManagement");
+ ❯ TransformPluginContext._formatLog ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:8766:39
+ ❯ TransformPluginContext.error ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:8763:14
+ ❯ normalizeUrl ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:26632:18
+ ❯ ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:26702:30
+ ❯ TransformPluginContext.transform ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:26668:4
+ ❯ EnvironmentPluginContainer.transform ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:8545:14
+ ❯ loadAndTransform ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:20184:26
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[50/70]⎯
+
+ FAIL  tests/ui/service-viewer.test.jsx [ tests/ui/service-viewer.test.jsx ]
+Error: Failed to resolve import "@testing-library/react" from "tests/ui/service-viewer.test.jsx". Does the file exist?
+  Plugin: vite:import-analysis
+  File: /tmp/omnibioai-wave5-wave6-qualification-v1/studio-session/tests/ui/service-viewer.test.jsx:2:51
+  1  |  import React from "react";
+  2  |  import { render, screen, fireEvent, cleanup } from "@testing-library/react";
+     |                                                      ^
+  3  |  import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+  4  |  import ServiceViewer from "../../src/ui/pages/ServiceViewer";
+ ❯ TransformPluginContext._formatLog ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:8766:39
+ ❯ TransformPluginContext.error ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:8763:14
+ ❯ normalizeUrl ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:26632:18
+ ❯ ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:26702:30
+ ❯ TransformPluginContext.transform ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:26668:4
+ ❯ EnvironmentPluginContainer.transform ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:8545:14
+ ❯ loadAndTransform ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:20184:26
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[51/70]⎯
+
+ FAIL  tests/ui/services.test.jsx [ tests/ui/services.test.jsx ]
+Error: Failed to resolve import "@testing-library/react" from "tests/ui/services.test.jsx". Does the file exist?
+  Plugin: vite:import-analysis
+  File: /tmp/omnibioai-wave5-wave6-qualification-v1/studio-session/tests/ui/services.test.jsx:2:68
+  1  |  import React from "react";
+  2  |  import { render, screen, fireEvent, waitFor, cleanup, within } from "@testing-library/react";
+     |                                                                       ^
+  3  |  import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+  4  |  import Services from "../../src/ui/pages/Services";
+ ❯ TransformPluginContext._formatLog ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:8766:39
+ ❯ TransformPluginContext.error ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:8763:14
+ ❯ normalizeUrl ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:26632:18
+ ❯ ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:26702:30
+ ❯ TransformPluginContext.transform ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:26668:4
+ ❯ EnvironmentPluginContainer.transform ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:8545:14
+ ❯ loadAndTransform ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:20184:26
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[52/70]⎯
+
+ FAIL  tests/ui/settings.test.jsx [ tests/ui/settings.test.jsx ]
+Error: Failed to resolve import "@testing-library/react" from "tests/ui/settings.test.jsx". Does the file exist?
+  Plugin: vite:import-analysis
+  File: /tmp/omnibioai-wave5-wave6-qualification-v1/studio-session/tests/ui/settings.test.jsx:2:60
+  1  |  import React from "react";
+  2  |  import { render, screen, fireEvent, waitFor, cleanup } from "@testing-library/react";
+     |                                                               ^
+  3  |  import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+  4  |  import Settings from "../../src/ui/pages/Settings";
+ ❯ TransformPluginContext._formatLog ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:8766:39
+ ❯ TransformPluginContext.error ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:8763:14
+ ❯ normalizeUrl ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:26632:18
+ ❯ ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:26702:30
+ ❯ TransformPluginContext.transform ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:26668:4
+ ❯ EnvironmentPluginContainer.transform ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:8545:14
+ ❯ loadAndTransform ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:20184:26
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[53/70]⎯
+
+ FAIL  tests/ui/static-png-result.test.jsx [ tests/ui/static-png-result.test.jsx ]
+Error: Failed to resolve import "@testing-library/react" from "tests/ui/static-png-result.test.jsx". Does the file exist?
+  Plugin: vite:import-analysis
+  File: /tmp/omnibioai-wave5-wave6-qualification-v1/studio-session/tests/ui/static-png-result.test.jsx:2:40
+  1  |  import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+  2  |  import { render, screen, waitFor } from "@testing-library/react";
+     |                                           ^
+  3  |  import StaticPngResult from "../../src/ui/components/StaticPngResult";
+  4  |  var _jsxFileName = "/tmp/omnibioai-wave5-wave6-qualification-v1/studio-session/tests/ui/static-png-result.test.jsx";
+ ❯ TransformPluginContext._formatLog ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:8766:39
+ ❯ TransformPluginContext.error ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:8763:14
+ ❯ normalizeUrl ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:26632:18
+ ❯ ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:26702:30
+ ❯ TransformPluginContext.transform ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:26668:4
+ ❯ EnvironmentPluginContainer.transform ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:8545:14
+ ❯ loadAndTransform ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:20184:26
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[54/70]⎯
+
+ FAIL  tests/ui/studio.test.jsx [ tests/ui/studio.test.jsx ]
+Error: Failed to resolve import "@testing-library/react" from "tests/ui/studio.test.jsx". Does the file exist?
+  Plugin: vite:import-analysis
+  File: /tmp/omnibioai-wave5-wave6-qualification-v1/studio-session/tests/ui/studio.test.jsx:2:0
+  12 |  }));
+  13 |  const __vi_import_0__ = await import("react");
+  14 |  const __vi_import_1__ = await import("@testing-library/react");
+     |                                       ^
+  15 |  const __vi_import_2__ = await import("react/jsx-dev-runtime");
+  16 |  const __vi_import_3__ = await import("../../src/ui/pages/Studio");
+ ❯ TransformPluginContext._formatLog ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:8766:39
+ ❯ TransformPluginContext.error ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:8763:14
+ ❯ normalizeUrl ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:26632:18
+ ❯ ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:26702:30
+ ❯ TransformPluginContext.transform ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:26668:4
+ ❯ EnvironmentPluginContainer.transform ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:8545:14
+ ❯ loadAndTransform ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:20184:26
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[55/70]⎯
+
+ FAIL  tests/ui/videos.test.jsx [ tests/ui/videos.test.jsx ]
+Error: Failed to resolve import "@testing-library/react" from "tests/ui/videos.test.jsx". Does the file exist?
+  Plugin: vite:import-analysis
+  File: /tmp/omnibioai-wave5-wave6-qualification-v1/studio-session/tests/ui/videos.test.jsx:2:51
+  1  |  import React from "react";
+  2  |  import { render, screen, fireEvent, cleanup } from "@testing-library/react";
+     |                                                      ^
+  3  |  import { afterEach, describe, expect, it, vi } from "vitest";
+  4  |  import Videos, { VIDEO_LIBRARY_URL } from "../../src/ui/pages/Videos";
+ ❯ TransformPluginContext._formatLog ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:8766:39
+ ❯ TransformPluginContext.error ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:8763:14
+ ❯ normalizeUrl ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:26632:18
+ ❯ ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:26702:30
+ ❯ TransformPluginContext.transform ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:26668:4
+ ❯ EnvironmentPluginContainer.transform ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:8545:14
+ ❯ loadAndTransform ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:20184:26
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[56/70]⎯
+
+ FAIL  tests/ui/wizard.test.jsx [ tests/ui/wizard.test.jsx ]
+Error: Failed to resolve import "@testing-library/react" from "tests/ui/wizard.test.jsx". Does the file exist?
+  Plugin: vite:import-analysis
+  File: /tmp/omnibioai-wave5-wave6-qualification-v1/studio-session/tests/ui/wizard.test.jsx:2:51
+  1  |  import React from "react";
+  2  |  import { render, screen, fireEvent, cleanup } from "@testing-library/react";
+     |                                                      ^
+  3  |  import { afterEach, describe, expect, it, vi } from "vitest";
+  4  |  import Wizard from "../../src/ui/pages/Wizard";
+ ❯ TransformPluginContext._formatLog ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:8766:39
+ ❯ TransformPluginContext.error ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:8763:14
+ ❯ normalizeUrl ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:26632:18
+ ❯ ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:26702:30
+ ❯ TransformPluginContext.transform ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:26668:4
+ ❯ EnvironmentPluginContainer.transform ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:8545:14
+ ❯ loadAndTransform ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:20184:26
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[57/70]⎯
+
+ FAIL  tests/ui/workbench-artifacts.test.jsx [ tests/ui/workbench-artifacts.test.jsx ]
+Error: Failed to resolve import "@testing-library/react" from "tests/ui/workbench-artifacts.test.jsx". Does the file exist?
+  Plugin: vite:import-analysis
+  File: /tmp/omnibioai-wave5-wave6-qualification-v1/studio-session/tests/ui/workbench-artifacts.test.jsx:2:31
+  1  |  import React from "react";
+  2  |  import { render, screen } from "@testing-library/react";
+     |                                  ^
+  3  |  import userEvent from "@testing-library/user-event";
+  4  |  import { describe, expect, it } from "vitest";
+ ❯ TransformPluginContext._formatLog ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:8766:39
+ ❯ TransformPluginContext.error ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:8763:14
+ ❯ normalizeUrl ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:26632:18
+ ❯ ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:26702:30
+ ❯ TransformPluginContext.transform ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:26668:4
+ ❯ EnvironmentPluginContainer.transform ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:8545:14
+ ❯ loadAndTransform ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:20184:26
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[58/70]⎯
+
+ FAIL  tests/ui/workbench-base.test.jsx [ tests/ui/workbench-base.test.jsx ]
+Error: Failed to resolve import "@testing-library/react" from "tests/ui/workbench-base.test.jsx". Does the file exist?
+  Plugin: vite:import-analysis
+  File: /tmp/omnibioai-wave5-wave6-qualification-v1/studio-session/tests/ui/workbench-base.test.jsx:2:40
+  1  |  import React from "react";
+  2  |  import { cleanup, render, screen } from "@testing-library/react";
+     |                                           ^
+  3  |  import { afterEach, describe, expect, it } from "vitest";
+  4  |  import WorkbenchBase from "../../src/ui/components/WorkbenchBase";
+ ❯ TransformPluginContext._formatLog ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:8766:39
+ ❯ TransformPluginContext.error ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:8763:14
+ ❯ normalizeUrl ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:26632:18
+ ❯ ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:26702:30
+ ❯ TransformPluginContext.transform ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:26668:4
+ ❯ EnvironmentPluginContainer.transform ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:8545:14
+ ❯ loadAndTransform ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:20184:26
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[59/70]⎯
+
+ FAIL  tests/ui/workbench-choice-fields.test.jsx [ tests/ui/workbench-choice-fields.test.jsx ]
+Error: Failed to resolve import "@testing-library/react" from "tests/ui/workbench-choice-fields.test.jsx". Does the file exist?
+  Plugin: vite:import-analysis
+  File: /tmp/omnibioai-wave5-wave6-qualification-v1/studio-session/tests/ui/workbench-choice-fields.test.jsx:2:51
+  1  |  import React from "react";
+  2  |  import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+     |                                                      ^
+  3  |  import userEvent from "@testing-library/user-event";
+  4  |  import { afterEach, describe, expect, it, vi } from "vitest";
+ ❯ TransformPluginContext._formatLog ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:8766:39
+ ❯ TransformPluginContext.error ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:8763:14
+ ❯ normalizeUrl ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:26632:18
+ ❯ ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:26702:30
+ ❯ TransformPluginContext.transform ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:26668:4
+ ❯ EnvironmentPluginContainer.transform ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:8545:14
+ ❯ loadAndTransform ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:20184:26
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[60/70]⎯
+
+ FAIL  tests/ui/workbench-components.test.jsx [ tests/ui/workbench-components.test.jsx ]
+Error: Failed to resolve import "@testing-library/react" from "tests/ui/workbench-components.test.jsx". Does the file exist?
+  Plugin: vite:import-analysis
+  File: /tmp/omnibioai-wave5-wave6-qualification-v1/studio-session/tests/ui/workbench-components.test.jsx:2:42
+  1  |  import React from "react";
+  2  |  import { fireEvent, render, screen } from "@testing-library/react";
+     |                                             ^
+  3  |  import userEvent from "@testing-library/user-event";
+  4  |  import { describe, expect, it, vi } from "vitest";
+ ❯ TransformPluginContext._formatLog ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:8766:39
+ ❯ TransformPluginContext.error ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:8763:14
+ ❯ normalizeUrl ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:26632:18
+ ❯ ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:26702:30
+ ❯ TransformPluginContext.transform ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:26668:4
+ ❯ EnvironmentPluginContainer.transform ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:8545:14
+ ❯ loadAndTransform ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:20184:26
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[61/70]⎯
+
+ FAIL  tests/ui/workbench-detail-filter.test.jsx [ tests/ui/workbench-detail-filter.test.jsx ]
+Error: Failed to resolve import "@testing-library/react" from "tests/ui/workbench-detail-filter.test.jsx". Does the file exist?
+  Plugin: vite:import-analysis
+  File: /tmp/omnibioai-wave5-wave6-qualification-v1/studio-session/tests/ui/workbench-detail-filter.test.jsx:2:50
+  1  |  import React from "react";
+  2  |  import { fireEvent, render, screen, within } from "@testing-library/react";
+     |                                                     ^
+  3  |  import { describe, expect, it, vi } from "vitest";
+  4  |  import DetailPanel from "../../src/ui/components/workbench/results/DetailPanel";
+ ❯ TransformPluginContext._formatLog ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:8766:39
+ ❯ TransformPluginContext.error ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:8763:14
+ ❯ normalizeUrl ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:26632:18
+ ❯ ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:26702:30
+ ❯ TransformPluginContext.transform ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:26668:4
+ ❯ EnvironmentPluginContainer.transform ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:8545:14
+ ❯ loadAndTransform ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:20184:26
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[62/70]⎯
+
+ FAIL  tests/ui/workbench-fields.test.jsx [ tests/ui/workbench-fields.test.jsx ]
+Error: Failed to resolve import "@testing-library/react" from "tests/ui/workbench-fields.test.jsx". Does the file exist?
+  Plugin: vite:import-analysis
+  File: /tmp/omnibioai-wave5-wave6-qualification-v1/studio-session/tests/ui/workbench-fields.test.jsx:2:42
+  1  |  import React from "react";
+  2  |  import { fireEvent, render, screen } from "@testing-library/react";
+     |                                             ^
+  3  |  import userEvent from "@testing-library/user-event";
+  4  |  import { describe, expect, it, vi } from "vitest";
+ ❯ TransformPluginContext._formatLog ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:8766:39
+ ❯ TransformPluginContext.error ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:8763:14
+ ❯ normalizeUrl ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:26632:18
+ ❯ ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:26702:30
+ ❯ TransformPluginContext.transform ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:26668:4
+ ❯ EnvironmentPluginContainer.transform ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:8545:14
+ ❯ loadAndTransform ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:20184:26
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[63/70]⎯
+
+ FAIL  tests/ui/workbench-image-gallery.test.jsx [ tests/ui/workbench-image-gallery.test.jsx ]
+Error: Failed to resolve import "@testing-library/react" from "tests/ui/workbench-image-gallery.test.jsx". Does the file exist?
+  Plugin: vite:import-analysis
+  File: /tmp/omnibioai-wave5-wave6-qualification-v1/studio-session/tests/ui/workbench-image-gallery.test.jsx:2:31
+  1  |  import React from "react";
+  2  |  import { render, screen } from "@testing-library/react";
+     |                                  ^
+  3  |  import userEvent from "@testing-library/user-event";
+  4  |  import { describe, expect, it } from "vitest";
+ ❯ TransformPluginContext._formatLog ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:8766:39
+ ❯ TransformPluginContext.error ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:8763:14
+ ❯ normalizeUrl ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:26632:18
+ ❯ ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:26702:30
+ ❯ TransformPluginContext.transform ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:26668:4
+ ❯ EnvironmentPluginContainer.transform ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:8545:14
+ ❯ loadAndTransform ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:20184:26
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[64/70]⎯
+
+ FAIL  tests/ui/workbench-resource-select.test.jsx [ tests/ui/workbench-resource-select.test.jsx ]
+Error: Failed to resolve import "@testing-library/react" from "tests/ui/workbench-resource-select.test.jsx". Does the file exist?
+  Plugin: vite:import-analysis
+  File: /tmp/omnibioai-wave5-wave6-qualification-v1/studio-session/tests/ui/workbench-resource-select.test.jsx:2:48
+  1  |  import React from "react";
+  2  |  import { render, screen, waitFor, within } from "@testing-library/react";
+     |                                                   ^
+  3  |  import userEvent from "@testing-library/user-event";
+  4  |  import { afterEach, describe, expect, it, vi } from "vitest";
+ ❯ TransformPluginContext._formatLog ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:8766:39
+ ❯ TransformPluginContext.error ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:8763:14
+ ❯ normalizeUrl ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:26632:18
+ ❯ ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:26702:30
+ ❯ TransformPluginContext.transform ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:26668:4
+ ❯ EnvironmentPluginContainer.transform ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:8545:14
+ ❯ loadAndTransform ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:20184:26
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[65/70]⎯
+
+ FAIL  tests/ui/workbench-results.test.jsx [ tests/ui/workbench-results.test.jsx ]
+Error: Failed to resolve import "@testing-library/react" from "tests/ui/workbench-results.test.jsx". Does the file exist?
+  Plugin: vite:import-analysis
+  File: /tmp/omnibioai-wave5-wave6-qualification-v1/studio-session/tests/ui/workbench-results.test.jsx:2:50
+  1  |  import React from "react";
+  2  |  import { fireEvent, render, screen, within } from "@testing-library/react";
+     |                                                     ^
+  3  |  import { describe, expect, it, vi } from "vitest";
+  4  |  import ResultsTable, { ResultsTableRow } from "../../src/ui/components/workbench/results/ResultsTable";
+ ❯ TransformPluginContext._formatLog ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:8766:39
+ ❯ TransformPluginContext.error ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:8763:14
+ ❯ normalizeUrl ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:26632:18
+ ❯ ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:26702:30
+ ❯ TransformPluginContext.transform ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:26668:4
+ ❯ EnvironmentPluginContainer.transform ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:8545:14
+ ❯ loadAndTransform ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:20184:26
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[66/70]⎯
+
+ FAIL  tests/ui/workbench-scientific-reference.test.jsx [ tests/ui/workbench-scientific-reference.test.jsx ]
+Error: Failed to resolve import "@testing-library/react" from "tests/ui/workbench-scientific-reference.test.jsx". Does the file exist?
+  Plugin: vite:import-analysis
+  File: /tmp/omnibioai-wave5-wave6-qualification-v1/studio-session/tests/ui/workbench-scientific-reference.test.jsx:2:31
+  1  |  import React from "react";
+  2  |  import { render, screen } from "@testing-library/react";
+     |                                  ^
+  3  |  import userEvent from "@testing-library/user-event";
+  4  |  import { describe, expect, it } from "vitest";
+ ❯ TransformPluginContext._formatLog ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:8766:39
+ ❯ TransformPluginContext.error ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:8763:14
+ ❯ normalizeUrl ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:26632:18
+ ❯ ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:26702:30
+ ❯ TransformPluginContext.transform ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:26668:4
+ ❯ EnvironmentPluginContainer.transform ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:8545:14
+ ❯ loadAndTransform ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:20184:26
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[67/70]⎯
+
+ FAIL  tests/ui/workbench-structured-detail.test.jsx [ tests/ui/workbench-structured-detail.test.jsx ]
+Error: Failed to resolve import "@testing-library/react" from "tests/ui/workbench-structured-detail.test.jsx". Does the file exist?
+  Plugin: vite:import-analysis
+  File: /tmp/omnibioai-wave5-wave6-qualification-v1/studio-session/tests/ui/workbench-structured-detail.test.jsx:2:31
+  1  |  import React from "react";
+  2  |  import { render, screen } from "@testing-library/react";
+     |                                  ^
+  3  |  import { describe, expect, it } from "vitest";
+  4  |  import DetailPanel from "../../src/ui/components/workbench/results/DetailPanel";
+ ❯ TransformPluginContext._formatLog ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:8766:39
+ ❯ TransformPluginContext.error ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:8763:14
+ ❯ normalizeUrl ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:26632:18
+ ❯ ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:26702:30
+ ❯ TransformPluginContext.transform ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:26668:4
+ ❯ EnvironmentPluginContainer.transform ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:8545:14
+ ❯ loadAndTransform ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:20184:26
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[68/70]⎯
+
+ FAIL  tests/ui/workbench.test.jsx [ tests/ui/workbench.test.jsx ]
+Error: Failed to resolve import "@testing-library/react" from "tests/ui/workbench.test.jsx". Does the file exist?
+  Plugin: vite:import-analysis
+  File: /tmp/omnibioai-wave5-wave6-qualification-v1/studio-session/tests/ui/workbench.test.jsx:2:57
+  1  |  import React, { useState } from "react";
+  2  |  import { render, screen, within, waitFor, cleanup } from "@testing-library/react";
+     |                                                            ^
+  3  |  import userEvent from "@testing-library/user-event";
+  4  |  import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+ ❯ TransformPluginContext._formatLog ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:8766:39
+ ❯ TransformPluginContext.error ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:8763:14
+ ❯ normalizeUrl ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:26632:18
+ ❯ ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:26702:30
+ ❯ TransformPluginContext.transform ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:26668:4
+ ❯ EnvironmentPluginContainer.transform ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:8545:14
+ ❯ loadAndTransform ../../../home/manish/Desktop/omnibioai-ecosystem/tmp/OMNIBIOAI_DGX_211_TABLE_V3_FOCUSED_QUALIFICATION_V1/studio-runner/node_modules/vite/dist/node/chunks/node.js:20184:26
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[69/70]⎯
+
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/ui/connectionsApi.test.js > uses only public canonical routes and preserves org and authentication on all operations
+TypeError: Invalid URL
+ ❯ tests/ui/connectionsApi.test.js:47:52
+     45| it("uses only public canonical routes and preserves org and authentica…
+     46|   await getConnection(22); await putConnection(22, "claude", "sk-test"…
+     47|   expect(fetch.mock.calls.map(([url, options]) => [new URL(url).pathna…
+       |                                                    ^
+     48|     ["/orgs/22/provider-keys", "GET"], ["/orgs/22/provider-keys/claude…
+     49|   ]);
+ ❯ tests/ui/connectionsApi.test.js:47:27
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[70/70]⎯
+
+
+ Test Files  70 failed | 26 passed | 1 skipped (97)
+      Tests  1 failed | 461 passed | 1 skipped (463)
+   Start at  11:06:36
+   Duration  10.03s (transform 17.19s, setup 21.44s, import 24.73s, tests 1.61s, environment 70.37s)
+
+JSON report written to /home/manish/Desktop/omnibioai-ecosystem/omnibioai-dev-hub/qualifications/OMNIBIOAI_DGX_WAVE5_WAVE6_P0_QUALIFICATION_CLOSURE_V1/evidence/studio-ui-regression.json
+[?25h
+Script done on 2026-10-15 11:06:46-05:00 [COMMAND_EXIT_CODE="1"]

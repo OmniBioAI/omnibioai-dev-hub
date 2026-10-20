@@ -1,0 +1,30 @@
+Script started on 2026-10-15 11:06:37-05:00 [COMMAND="python3 -m pytest -q tests --ignore=tests/ui --junitxml=/home/manish/Desktop/omnibioai-ecosystem/omnibioai-dev-hub/qualifications/OMNIBIOAI_DGX_WAVE5_WAVE6_P0_QUALIFICATION_CLOSURE_V1/evidence/studio-python-regression.junit.xml" <not executed on terminal>]
+
+==================================== ERRORS ====================================
+_____ ERROR collecting tests/integration/test_service_to_service_oauth.py ______
+ImportError while importing test module '/tmp/omnibioai-wave5-wave6-qualification-v1/studio-backup/tests/integration/test_service_to_service_oauth.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+/home/manish/miniforge3/lib/python3.14/importlib/__init__.py:88: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/integration/test_service_to_service_oauth.py:30: in <module>
+    import jwt as pyjwt
+E   ModuleNotFoundError: No module named 'jwt'
+______________ ERROR collecting tests/unit/test_license_server.py ______________
+ImportError while importing test module '/tmp/omnibioai-wave5-wave6-qualification-v1/studio-backup/tests/unit/test_license_server.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+/home/manish/miniforge3/lib/python3.14/importlib/__init__.py:88: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/unit/test_license_server.py:18: in <module>
+    from fastapi.testclient import TestClient
+E   ModuleNotFoundError: No module named 'fastapi'
+=========================== short test summary info ============================
+ERROR tests/integration/test_service_to_service_oauth.py
+ERROR tests/unit/test_license_server.py
+!!!!!!!!!!!!!!!!!!! Interrupted: 2 errors during collection !!!!!!!!!!!!!!!!!!!!
+2 errors in 0.50s
+
+Script done on 2026-10-15 11:06:38-05:00 [COMMAND_EXIT_CODE="2"]
