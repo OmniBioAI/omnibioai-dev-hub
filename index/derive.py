@@ -29,6 +29,7 @@ from index.lifecycle import (
     validate_index_directory,
     write_manifest,
 )
+from index.published import documents, unpublished_documents
 from index.vector_store import VectorStore
 from ingestion.trusted import sha256_file, utc_now_iso
 
@@ -150,6 +151,127 @@ def derive_public_only(source_dir: str | Path, out_root: str | Path, build_id: s
         "public_chunks": len(metadata),
         "excluded": {v: {"documents": len(excluded_docs[v]), "chunks": excluded_chunks[v]} for v in excluded_docs},
         "excluded_documents": {v: sorted(excluded_docs[v].values(), key=lambda d: (d["repo"], d["relative_path"])) for v in excluded_docs},
+        "vectors_bit_identical": True,
+        "validation": {k: check[k] for k in ("faiss_ntotal", "metadata_count", "dimension", "visibility_counts", "public_only")},
+    }
+    (out_root / f"{build_id}.derivation-report.json").write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")
+    return report
+
+
+def derive_published_subset(source_dir: str | Path, out_root: str | Path, sitemap_routes: set[str], *,
+                            build_id: str | None = None, route_map: dict[str, str] | None = None,
+                            sitemap_source: str | None = None) -> dict[str, Any]:
+    """Build `<out_root>/<build_id>` with only the documents of a PUBLIC_ONLY candidate that are published.
+
+    Published means the document's route is in `sitemap_routes` (index.published).
+    Same guarantees as derive_public_only: vectors copied bit-for-bit, full
+    validation and an atomic rename; a document without a resolvable route is
+    excluded (fail closed).
+    """
+    source_dir = Path(source_dir)
+    out_root = Path(out_root)
+
+    validation = validate_index_directory(source_dir)
+    if not validation["ok"]:
+        raise RuntimeError(f"source candidate is not valid, refusing to derive from it: {validation['reason']}")
+    source_manifest = read_manifest(source_dir)
+    if source_manifest.get("visibility_policy") != PUBLIC_ONLY_POLICY:
+        raise RuntimeError("source candidate is not PUBLIC_ONLY; derive the PUBLIC-only candidate first")
+    if not sitemap_routes:
+        raise RuntimeError("no sitemap routes given; refusing to treat nothing as published")
+
+    build_id = build_id or f"{source_manifest['build_id']}-published"
+    final_dir = out_root / build_id
+    if final_dir.exists():
+        raise RuntimeError(f"derived candidate already exists: {final_dir}")
+    out_root.mkdir(parents=True, exist_ok=True)
+    tmp_dir = out_root / f".{build_id}.partial"
+    if tmp_dir.exists():
+        shutil.rmtree(tmp_dir)
+
+    source = VectorStore()
+    if not source.load(str(source_dir)):
+        raise RuntimeError("source vector store did not load")
+    unpublished = unpublished_documents(source.metadata, sitemap_routes, route_map)
+    dropped = {(d["repo"], d["relative_path"]) for d in unpublished}
+    rows = [i for i, m in enumerate(source.metadata) if (m.get("repo", ""), m.get("relative_path", "")) not in dropped]
+    if not rows:
+        raise RuntimeError("no indexed document is published; nothing to derive")
+
+    all_vectors = source.index.reconstruct_n(0, source.index.ntotal)
+    vectors = np.ascontiguousarray(all_vectors[rows], dtype=np.float32)
+    metadata = [source.metadata[i] for i in rows]
+
+    derived = VectorStore()
+    derived.add(vectors, metadata)
+    derived.save(str(tmp_dir))
+
+    docs = {m["document_id"] for m in metadata}
+    repos = sorted({m["repo"] for m in metadata})
+    excluded = {"documents": [{k: d[k] for k in ("repo", "relative_path", "route", "reason", "chunks")} for d in unpublished],
+                "chunks": sum(d["chunks"] for d in unpublished)}
+    manifest: dict[str, Any] = {
+        **{k: v for k, v in source_manifest.items() if not k.startswith(("promotion_", "previous_index"))},
+        "build_id": build_id,
+        "build_timestamp": utc_now_iso(),
+        "derived": True,
+        "derivation": "published-subset; documents whose route is not in the docs sitemap removed; "
+                      "vectors copied bit-for-bit from the source candidate, not re-embedded",
+        "derived_from": {
+            "build_id": source_manifest["build_id"],
+            "manifest_sha256": sha256_file(source_dir / MANIFEST_FILE),
+            "artifact_hashes": artifact_hashes(source_dir),
+            "build_status": source_manifest["build_status"],
+            "chunk_count": len(source.metadata),
+            "visibility_counts": source_manifest.get("visibility_counts"),
+            "derived_from": source_manifest.get("derived_from"),
+        },
+        "published_check": {"sitemap": sitemap_source, "sitemap_routes": len(sitemap_routes), "checked_at": utc_now_iso(),
+                            "route_source": "metadata+checkout" if route_map else "metadata"},
+        "excluded_not_published": excluded,
+        "visibility_policy": PUBLIC_ONLY_POLICY,
+        "repositories": repos,
+        "repository_revisions": {r: next(m["source_revision"] for m in metadata if m["repo"] == r) for r in repos},
+        "parsed": len(docs),
+        "chunked": len(metadata),
+        "embedded": len(metadata),
+        "indexed": len(metadata),
+        "retrievable": len(metadata),
+        "selected_document_count": len(docs),
+        "selected_chunk_count": len(metadata),
+        "visibility_counts": {"PUBLIC": len(metadata), "INTERNAL": 0, "REVIEW_REQUIRED": 0},
+        "artifact_hashes": artifact_hashes(tmp_dir),
+        "evaluation_status": "NOT_EVALUATED",
+        "promotion_status": "CANDIDATE",
+        "build_status": "CLEAN",
+    }
+    write_manifest(tmp_dir, manifest)
+
+    # Verify before it can be used: full contract, PUBLIC-only, bit-exact vectors, and nothing unpublished left.
+    check = validate_index_directory(tmp_dir, require_public_only=True)
+    if not check["ok"]:
+        shutil.rmtree(tmp_dir)
+        raise RuntimeError(f"derived artifact failed validation: {check['reason']}")
+    reloaded = VectorStore()
+    reloaded.load(str(tmp_dir))
+    if not np.array_equal(reloaded.index.reconstruct_n(0, reloaded.index.ntotal), vectors):
+        shutil.rmtree(tmp_dir)
+        raise RuntimeError("derived vectors are not bit-identical to the source vectors")
+    if reloaded.metadata != metadata:
+        shutil.rmtree(tmp_dir)
+        raise RuntimeError("derived metadata is not identical to the source metadata for the kept rows")
+    if unpublished_documents(reloaded.metadata, sitemap_routes, route_map):
+        shutil.rmtree(tmp_dir)
+        raise RuntimeError("derived artifact still contains unpublished documents")
+
+    os.replace(tmp_dir, final_dir)
+    report = {
+        "derived_dir": str(final_dir),
+        "source_dir": str(source_dir),
+        "published_documents": len(documents(metadata)),
+        "published_chunks": len(metadata),
+        "source_chunks": len(source.metadata),
+        "excluded_not_published": excluded,
         "vectors_bit_identical": True,
         "validation": {k: check[k] for k in ("faiss_ntotal", "metadata_count", "dimension", "visibility_counts", "public_only")},
     }

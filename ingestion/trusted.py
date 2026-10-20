@@ -18,13 +18,21 @@ from itertools import pairwise
 from pathlib import Path
 from typing import Any
 
+import yaml
+
 from processing.chunker import chunk_text
 
 SCHEMA_VERSION = "devhub.trusted-ingestion.v1"
-SOURCE_POLICY_VERSION = "phase18-source-selection-v1"
+SOURCE_POLICY_VERSION = "phase18-source-selection-v2"
 VISIBILITIES = {"PUBLIC", "INTERNAL", "REVIEW_REQUIRED"}
 GENERAL_RETRIEVAL_VISIBILITIES = {"PUBLIC"}
 DOCS_VISIBILITY_INVENTORY = "visibility/VISIBILITY-INVENTORY.json"
+# The docs site withholds pages this manifest classifies PLATFORM_OWNER or
+# REVIEW_REQUIRED (site/docusaurus.config.js `exclude`), whatever their front
+# matter says, so a PUBLIC inventory entry alone does not mean "published".
+DOCS_PUBLICATION_MANIFEST = "reconciliation/OMNIBIOAI-DOCS-V1-2-VISIBILITY-MANIFEST.json"
+DOCS_PUBLICATION_POLICY = "PUBLICATION-POLICY.yaml"
+WITHHELD_PAGE_CLASSIFICATIONS = {"PLATFORM_OWNER": "INTERNAL", "REVIEW_REQUIRED": "REVIEW_REQUIRED"}
 
 SKIP_DIRS = {
     ".git",
@@ -202,7 +210,37 @@ class SourcePolicy:
         return name == "readme.md" or rel_path.startswith("docs/")
 
 
+def front_matter(text: str) -> dict[str, Any]:
+    """The leading `---` YAML block of a markdown document, or {} if absent or unparsable."""
+    m = re.match(r"\A---[ \t]*\n(.*?)\n---[ \t]*(?:\n|\Z)", text, re.DOTALL)
+    if not m:
+        return {}
+    try:
+        data = yaml.safe_load(m.group(1))
+    except yaml.YAMLError:
+        return {}
+    return data if isinstance(data, dict) else {}
+
+
+def normalize_route(route: str) -> str:
+    """Site route in the form the docs sitemap uses: leading and trailing slash."""
+    route = "/" + route.strip().strip("/")
+    return route if route == "/" else route + "/"
+
+
 class VisibilityResolver:
+    """PUBLIC for omnibioai-docs means published on the docs site, not merely classified PUBLIC.
+
+    A docs file is PUBLIC only if all of these hold, otherwise the stricter
+    class wins (fail closed):
+      * the visibility inventory (front-matter derived) says PUBLIC;
+      * it sits in the public docs build input (PUBLICATION-POLICY.yaml
+        build_inputs.docs); anything else is never built, so it is INTERNAL;
+      * the publication manifest does not withhold it (PLATFORM_OWNER ->
+        INTERNAL, REVIEW_REQUIRED -> REVIEW_REQUIRED).
+    A missing manifest or policy makes every docs file REVIEW_REQUIRED.
+    """
+
     def __init__(self, repo_path: Path):
         self.repo_path = repo_path
         self._inventory: dict[str, str] = {}
@@ -214,14 +252,39 @@ class VisibilityResolver:
                 visibility = artifact.get("classification")
                 if path and visibility in VISIBILITIES:
                     self._inventory[path] = visibility
+        self._withheld: dict[str, str] | None = None
+        manifest_path = repo_path / DOCS_PUBLICATION_MANIFEST
+        if manifest_path.exists():
+            data = json.loads(manifest_path.read_text(encoding="utf-8"))
+            self._withheld = {e["path"]: WITHHELD_PAGE_CLASSIFICATIONS[e["page_classification"]]
+                              for e in data.get("entries", [])
+                              if e.get("path") and e.get("page_classification") in WITHHELD_PAGE_CLASSIFICATIONS}
+        self._build_input: str | None = None
+        policy_path = repo_path / DOCS_PUBLICATION_POLICY
+        if policy_path.exists():
+            policy = yaml.safe_load(policy_path.read_text(encoding="utf-8")) or {}
+            docs_input = (policy.get("build_inputs") or {}).get("docs") if isinstance(policy, dict) else None
+            if isinstance(docs_input, str) and docs_input.strip("/"):
+                self._build_input = docs_input.strip("/") + "/"
+
+    def in_public_build_input(self, rel_path: str) -> bool:
+        return self._build_input is not None and rel_path.startswith(self._build_input)
 
     def resolve(self, repo_name: str, rel_path: str) -> tuple[str, str]:
-        if repo_name == "omnibioai-docs":
-            visibility = self._inventory.get(rel_path)
-            if visibility in VISIBILITIES:
-                return visibility, "docs-visibility-inventory"
+        if repo_name != "omnibioai-docs":
+            return "INTERNAL", "repository-docs-default-internal"
+        visibility = self._inventory.get(rel_path)
+        if visibility not in VISIBILITIES:
             return "REVIEW_REQUIRED", "missing-docs-visibility-fail-closed"
-        return "INTERNAL", "repository-docs-default-internal"
+        if visibility != "PUBLIC":
+            return visibility, "docs-visibility-inventory"
+        if self._withheld is None or self._build_input is None:
+            return "REVIEW_REQUIRED", "missing-docs-publication-boundary-fail-closed"
+        if rel_path in self._withheld:
+            return self._withheld[rel_path], "docs-publication-manifest"
+        if not self.in_public_build_input(rel_path):
+            return "INTERNAL", "docs-not-in-public-build"
+        return "PUBLIC", "docs-visibility-inventory"
 
 
 def document_id(repo: str, rel_path: str, revision: str, content_hash: str) -> str:
@@ -286,6 +349,11 @@ def discover_documents(repo_base: str, policy: SourcePolicy | None = None) -> tu
             if visibility == "INTERNAL" and not policy.include_internal_index:
                 stats["skipped_documents"].append({"repo": repo_name, "path": rel_path, "reason": "internal-excluded"})
                 continue
+            route = None  # docs-site route (front matter slug); lets promotion check the page is actually published
+            if repo_name == "omnibioai-docs" and visibility_resolver.in_public_build_input(rel_path):
+                slug = front_matter(text).get("slug")
+                if isinstance(slug, str) and slug.strip():
+                    route = normalize_route(slug)
             content_hash = sha256_text(text)
             doc_id = document_id(repo_name, rel_path, revision, content_hash)
             docs.append({
@@ -301,6 +369,7 @@ def discover_documents(repo_base: str, policy: SourcePolicy | None = None) -> tu
                 "document_type": document_type_for(repo_name, rel_path),
                 "visibility": visibility,
                 "visibility_source": visibility_source,
+                "route": route,
                 "verification_state": verification_state_for(repo_name, rel_path),
                 "source_authority": authority_for(repo_name, rel_path),
                 "content_state": content_state_for(rel_path),

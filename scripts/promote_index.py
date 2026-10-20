@@ -4,7 +4,9 @@
 Run it as the service's own uid (10001) with only the data directory mounted,
 so no host permission changes are needed:
 
-    promote   copy a validated PUBLIC-only candidate under <data-dir>/faiss_candidates,
+    promote   check every indexed document is published on the docs site (--sitemap;
+              routes from chunk metadata or --docs-repo front matter), copy a validated
+              PUBLIC-only candidate under <data-dir>/faiss_candidates,
               verify the copied hashes, validate it, then swap it in as
               <data-dir>/faiss_index, retaining the previous index under
               <data-dir>/faiss_previous
@@ -32,7 +34,17 @@ from index.lifecycle import (
     read_manifest,
     rollback,
     validate_index_directory,
+    write_manifest,
 )
+from index.published import (
+    load_sitemap_routes,
+    route_map_from_checkout,
+    unpublished_documents,
+)
+from index.vector_store import VectorStore
+from ingestion.trusted import utc_now_iso
+
+UNPUBLISHED_SHOWN = 20
 
 
 def _state(data: Path) -> dict:
@@ -58,6 +70,39 @@ def _stage_candidate(source: Path, dest: Path, expected_hashes: dict[str, str]) 
         raise
 
 
+def _published_check(args: argparse.Namespace, source: Path) -> dict | None:
+    """Every indexed document must be on the docs site. Returns the check record, or None after printing REFUSED."""
+    if args.skip_published_check:
+        print("WARNING: published check SKIPPED (--skip-published-check); recorded in the manifest", file=sys.stderr)
+        return {"status": "SKIPPED", "checked_at": utc_now_iso()}
+    if not args.sitemap:
+        print("REFUSED: --sitemap is required: every indexed document must be published on the docs site "
+              "(pass --skip-published-check to override deliberately)", file=sys.stderr)
+        return None
+    try:
+        routes = load_sitemap_routes(args.sitemap)
+    except Exception as exc:  # noqa: BLE001 -- any unreadable sitemap refuses promotion
+        print(f"REFUSED: cannot read sitemap {args.sitemap}: {exc}", file=sys.stderr)
+        return None
+    store = VectorStore()
+    if not store.load(str(source)):
+        print("REFUSED: candidate vector store did not load", file=sys.stderr)
+        return None
+    paths = {m.get("relative_path", "") for m in store.metadata}
+    route_map = route_map_from_checkout(args.docs_repo, paths) if args.docs_repo else None
+    bad = unpublished_documents(store.metadata, routes, route_map)
+    if bad:
+        print(f"REFUSED: {len(bad)} indexed documents are not published on the docs site:", file=sys.stderr)
+        for d in bad[:UNPUBLISHED_SHOWN]:
+            print(f"  {d['repo']}:{d['relative_path']} route={d['route']} ({d['reason']}, {d['chunks']} chunks)", file=sys.stderr)
+        if len(bad) > UNPUBLISHED_SHOWN:
+            print(f"  ... and {len(bad) - UNPUBLISHED_SHOWN} more", file=sys.stderr)
+        return None
+    print(f"published check: all {len(paths)} documents are in the sitemap ({len(routes)} routes)")
+    return {"status": "PASSED", "sitemap": args.sitemap, "sitemap_routes": len(routes), "documents": len(paths),
+            "route_source": "metadata+checkout" if route_map else "metadata", "checked_at": utc_now_iso()}
+
+
 def cmd_promote(args: argparse.Namespace) -> int:
     source, data = Path(args.source), Path(args.data_dir)
     manifest = read_manifest(source)
@@ -70,6 +115,9 @@ def cmd_promote(args: argparse.Namespace) -> int:
     check = validate_index_directory(source, require_public_only=True)
     if not check["ok"]:
         print(f"REFUSED: source candidate invalid: {check['reason']}", file=sys.stderr)
+        return 1
+    published = _published_check(args, source)
+    if published is None:
         return 1
     if source_is_staged:
         if artifact_hashes(source) != manifest.get("artifact_hashes"):
@@ -84,6 +132,9 @@ def cmd_promote(args: argparse.Namespace) -> int:
             return 1
         print(f"copied {build_id}; hashes verified: {artifact_hashes(dest)}")
     result = promote_candidate(dest, data / "faiss_index", data / "faiss_previous")
+    promoted = read_manifest(data / "faiss_index")
+    promoted["promotion_published_check"] = published
+    write_manifest(data / "faiss_index", promoted)
     print("PROMOTED " + json.dumps(result))
     print("state " + json.dumps(_state(data)))
     return 0
@@ -107,6 +158,10 @@ def main() -> int:
     p = sub.add_parser("promote")
     p.add_argument("--source", required=True, help="validated PUBLIC-only candidate directory (read-only mount is fine)")
     p.add_argument("--data-dir", default="/app/data")
+    p.add_argument("--sitemap", help="docs sitemap.xml (URL or file); every indexed document must be listed in it")
+    p.add_argument("--docs-repo", help="docs checkout to read route slugs from, for indexes without `route` metadata")
+    p.add_argument("--skip-published-check", action="store_true",
+                   help="promote without the sitemap check (recorded as SKIPPED in the promoted manifest)")
     p.set_defaults(fn=cmd_promote)
     r = sub.add_parser("rollback")
     r.add_argument("--data-dir", default="/app/data")

@@ -11,7 +11,10 @@ ROOT = Path(__file__).resolve().parents[1]
 CLI = str(ROOT / "scripts" / "promote_index.py")
 
 
-def _cli(*args):
+def _cli(*args, skip_published_check=True):
+    # Tests not about the published check opt out of it explicitly, as an operator would have to.
+    if skip_published_check and args[0] == "promote" and "--sitemap" not in args:
+        args = (*args, "--skip-published-check")
     return subprocess.run([sys.executable, CLI, *args], capture_output=True, text=True, timeout=120, check=False)
 
 
@@ -130,3 +133,71 @@ def test_rollback_without_a_recorded_previous_index_is_refused(tmp_path):
     _make_index(data / "faiss_index", "PUBLIC")
     r = _cli("rollback", "--data-dir", str(data))
     assert r.returncode == 1 and "no previous index" in r.stderr
+
+
+def _sitemap(tmp_path, *routes):
+    p = tmp_path / "sitemap.xml"
+    p.write_text("<urlset>" + "".join(f"<url><loc>https://docs.example.org{r}</loc></url>" for r in routes) + "</urlset>")
+    return str(p)
+
+
+def _docs_checkout(tmp_path, count):
+    """Front matter slugs for the helper index's d<i>.md documents (which carry no `route`)."""
+    repo = tmp_path / "docs-repo"
+    repo.mkdir()
+    for i in range(count):
+        (repo / f"d{i}.md").write_text(f"---\nslug: /d{i}/\n---\n# d{i}")
+    return str(repo)
+
+
+def test_promote_refuses_without_a_sitemap_unless_explicitly_skipped(tmp_path):
+    data, src = tmp_path / "data", tmp_path / "src"
+    data.mkdir()
+    _make_index(src, "PUBLIC")
+    r = _cli("promote", "--source", str(src), "--data-dir", str(data), skip_published_check=False)
+    assert r.returncode == 1 and "--sitemap is required" in r.stderr
+    assert not (data / "faiss_index").exists() and not (data / "faiss_candidates").exists()
+
+    r = _cli("promote", "--source", str(src), "--data-dir", str(data))  # helper adds --skip-published-check
+    assert r.returncode == 0, r.stderr
+    assert json.loads((data / "faiss_index" / "manifest.json").read_text())["promotion_published_check"]["status"] == "SKIPPED"
+
+
+def test_promote_refuses_a_candidate_with_an_unpublished_document(tmp_path):
+    data, src = tmp_path / "data", tmp_path / "src"
+    data.mkdir()
+    live = _legacy(data)
+    before = _hashes(live)
+    _make_index(src, "PUBLIC,PUBLIC,PUBLIC")
+    r = _cli("promote", "--source", str(src), "--data-dir", str(data),
+             "--sitemap", _sitemap(tmp_path, "/d0/", "/d1/"), "--docs-repo", _docs_checkout(tmp_path, 3))
+    assert r.returncode == 1 and "1 indexed documents are not published" in r.stderr and "d2.md route=/d2/" in r.stderr
+    assert _hashes(live) == before and not (data / "faiss_candidates").exists()
+
+
+def test_promote_refuses_documents_without_a_route_when_no_checkout_is_given(tmp_path):
+    data, src = tmp_path / "data", tmp_path / "src"
+    data.mkdir()
+    _make_index(src, "PUBLIC")
+    r = _cli("promote", "--source", str(src), "--data-dir", str(data), "--sitemap", _sitemap(tmp_path, "/d0/"))
+    assert r.returncode == 1 and "no-route" in r.stderr
+
+
+def test_promote_refuses_an_unreadable_sitemap(tmp_path):
+    data, src = tmp_path / "data", tmp_path / "src"
+    data.mkdir()
+    _make_index(src, "PUBLIC")
+    r = _cli("promote", "--source", str(src), "--data-dir", str(data), "--sitemap", str(tmp_path / "missing.xml"))
+    assert r.returncode == 1 and "cannot read sitemap" in r.stderr
+
+
+def test_promote_records_a_passed_published_check(tmp_path):
+    data, src = tmp_path / "data", tmp_path / "src"
+    data.mkdir()
+    _make_index(src, "PUBLIC,PUBLIC")
+    sitemap = _sitemap(tmp_path, "/", "/d0/", "/d1/")
+    r = _cli("promote", "--source", str(src), "--data-dir", str(data), "--sitemap", sitemap, "--docs-repo", _docs_checkout(tmp_path, 2))
+    assert r.returncode == 0, r.stderr
+    assert "all 2 documents are in the sitemap (3 routes)" in r.stdout
+    check = json.loads((data / "faiss_index" / "manifest.json").read_text())["promotion_published_check"]
+    assert check["status"] == "PASSED" and check["sitemap"] == sitemap and check["route_source"] == "metadata+checkout"
