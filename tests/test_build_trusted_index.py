@@ -228,6 +228,10 @@ def test_public_only_source_policy_excludes_non_public_documents_before_ingestio
         ]}),
         encoding="utf-8",
     )
+    # Publication boundary: `site` is the built docs input and nothing is withheld.
+    (repo / "PUBLICATION-POLICY.yaml").write_text("build_inputs:\n  docs: site\n  static: static\n", encoding="utf-8")
+    (repo / "reconciliation").mkdir()
+    (repo / "reconciliation" / "OMNIBIOAI-DOCS-V1-2-VISIBILITY-MANIFEST.json").write_text('{"entries": []}', encoding="utf-8")
 
     docs, stats = discover_documents(
         str(tmp_path),

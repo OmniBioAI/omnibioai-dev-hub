@@ -6,26 +6,37 @@ import pytest
 
 from ingestion.trusted import (
     SourcePolicy,
+    VisibilityResolver,
     bundle_for,
     chunks_for_document,
     content_state_for,
     discover_documents,
     document_id,
+    front_matter,
+    normalize_route,
 )
+
+
+def _docs_repo(tmp_path, inventory, manifest_entries=(), *, manifest=True, policy=True):
+    """A synthetic omnibioai-docs checkout with the three publication-boundary inputs."""
+    docs = tmp_path / "omnibioai-docs"
+    (docs / "visibility").mkdir(parents=True)
+    (docs / "visibility/VISIBILITY-INVENTORY.json").write_text(json.dumps({
+        "artifacts": [{"path": p, "classification": c} for p, c in inventory.items()]}))
+    if manifest:
+        (docs / "reconciliation").mkdir()
+        (docs / "reconciliation/OMNIBIOAI-DOCS-V1-2-VISIBILITY-MANIFEST.json").write_text(json.dumps({
+            "entries": [{"path": p, "page_classification": c} for p, c in dict(manifest_entries).items()]}))
+    if policy:
+        (docs / "PUBLICATION-POLICY.yaml").write_text("build_inputs:\n  docs: site/docs\n  static: site/static\n")
+    return docs
 
 
 def test_docs_visibility_inventory_preserves_public_and_excludes_review_required(tmp_path):
     repo_base = tmp_path
-    docs = repo_base / "omnibioai-docs"
-    (docs / "visibility").mkdir(parents=True)
+    docs = _docs_repo(tmp_path, {"site/docs/public/index.md": "PUBLIC", "tutorials/review.md": "REVIEW_REQUIRED"})
     (docs / "site/docs/public").mkdir(parents=True)
     (docs / "tutorials").mkdir()
-    (docs / "visibility/VISIBILITY-INVENTORY.json").write_text(json.dumps({
-        "artifacts": [
-            {"path": "site/docs/public/index.md", "classification": "PUBLIC"},
-            {"path": "tutorials/review.md", "classification": "REVIEW_REQUIRED"},
-        ]
-    }))
     (docs / "site/docs/public/index.md").write_text("# Public\n\nVisible")
     (docs / "tutorials/review.md").write_text("# Review\n\nNope")
 
@@ -271,3 +282,76 @@ def test_build_manifest_counts_visibility_documents_and_revisions():
     assert m["repositories"] == ["a", "b"] and m["repository_revisions"] == {"a": "r1", "b": "r2"}
     assert m["missing_repositories"] == ["c"] and m["discovered"] == ["a", "b"]
     assert m["build_status"] == "CLEAN" and m["promotion_status"] == "CANDIDATE"
+
+
+@pytest.mark.parametrize("page_class, expected", [
+    ("PLATFORM_OWNER", ("INTERNAL", "docs-publication-manifest")),
+    ("REVIEW_REQUIRED", ("REVIEW_REQUIRED", "docs-publication-manifest")),
+    ("DEVELOPER", ("PUBLIC", "docs-visibility-inventory")),  # published on the site, so not withheld
+    ("PUBLIC", ("PUBLIC", "docs-visibility-inventory")),
+])
+def test_publication_manifest_withholds_pages_whose_front_matter_says_public(tmp_path, page_class, expected):
+    page = "site/docs/admin/ops.md"
+    docs = _docs_repo(tmp_path, {page: "PUBLIC"}, {page: page_class})
+    assert VisibilityResolver(docs).resolve("omnibioai-docs", page) == expected
+
+
+def test_public_docs_outside_the_build_input_are_never_published(tmp_path):
+    docs = _docs_repo(tmp_path, {"COMPAT.md": "PUBLIC", "site/docs-old/x.md": "PUBLIC"})
+    resolver = VisibilityResolver(docs)
+    assert resolver.resolve("omnibioai-docs", "COMPAT.md") == ("INTERNAL", "docs-not-in-public-build")
+    assert resolver.resolve("omnibioai-docs", "site/docs-old/x.md") == ("INTERNAL", "docs-not-in-public-build")
+
+
+def test_inventory_stricter_than_manifest_wins(tmp_path):
+    page = "site/docs/a.md"
+    docs = _docs_repo(tmp_path, {page: "INTERNAL"}, {page: "PUBLIC"})
+    assert VisibilityResolver(docs).resolve("omnibioai-docs", page) == ("INTERNAL", "docs-visibility-inventory")
+
+
+@pytest.mark.parametrize("missing", ["manifest", "policy"])
+def test_missing_publication_boundary_input_fails_closed(tmp_path, missing):
+    page = "site/docs/a.md"
+    docs = _docs_repo(tmp_path, {page: "PUBLIC"}, manifest=missing != "manifest", policy=missing != "policy")
+    assert VisibilityResolver(docs).resolve("omnibioai-docs", page) == (
+        "REVIEW_REQUIRED", "missing-docs-publication-boundary-fail-closed")
+
+
+def test_route_is_recorded_from_the_front_matter_slug_of_built_pages_only(tmp_path):
+    docs = _docs_repo(tmp_path, {"site/docs/u/start.md": "PUBLIC", "site/docs/u/noslug.md": "PUBLIC",
+                                 "site/docs/admin/ops.md": "PUBLIC", "guides/g.md": "PUBLIC"},
+                      {"site/docs/admin/ops.md": "PLATFORM_OWNER"})
+    (docs / "site/docs/u").mkdir(parents=True)
+    (docs / "site/docs/admin").mkdir()
+    (docs / "guides").mkdir()
+    (docs / "site/docs/u/start.md").write_text("---\ntitle: Start\nslug: /user/start\n---\n# Start\n\nGo")
+    (docs / "site/docs/u/noslug.md").write_text("# No slug\n\nBody")
+    (docs / "site/docs/admin/ops.md").write_text("---\nslug: /admin/ops/\n---\n# Ops\n\nPrivileged")
+    (docs / "guides/g.md").write_text("---\nslug: /guides/g/\n---\n# G\n\nNot built")
+
+    found, _ = discover_documents(str(tmp_path), SourcePolicy(repository_names=["omnibioai-docs"]))
+    by_path = {d["relative_path"]: d for d in found}
+
+    assert by_path["site/docs/u/start.md"]["route"] == "/user/start/"
+    assert by_path["site/docs/u/start.md"]["visibility"] == "PUBLIC"
+    assert by_path["site/docs/u/noslug.md"]["route"] is None
+    assert by_path["site/docs/admin/ops.md"]["visibility"] == "INTERNAL"  # withheld, still indexed as INTERNAL
+    assert by_path["guides/g.md"]["route"] is None and by_path["guides/g.md"]["visibility"] == "INTERNAL"
+    chunk = chunks_for_document(by_path["site/docs/u/start.md"], "b", "m")[0]
+    assert chunk["route"] == "/user/start/"
+
+
+@pytest.mark.parametrize("text, expected", [
+    ("---\nslug: /a/\ntitle: A\n---\n# A", {"slug": "/a/", "title": "A"}),
+    ("# no front matter\n---\nslug: /x/\n---", {}),
+    ("---\n: [unbalanced\n---\nbody", {}),
+    ("---\n- a list\n---\nbody", {}),
+    ("---\nslug: /end/\n---", {"slug": "/end/"}),
+])
+def test_front_matter_reads_only_a_leading_mapping(text, expected):
+    assert front_matter(text) == expected
+
+
+@pytest.mark.parametrize("route, expected", [("/", "/"), ("", "/"), ("/a/b", "/a/b/"), ("a/b/", "/a/b/"), (" /x/ ", "/x/")])
+def test_normalize_route(route, expected):
+    assert normalize_route(route) == expected
