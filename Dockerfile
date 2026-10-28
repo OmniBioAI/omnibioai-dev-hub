@@ -9,7 +9,10 @@
 # pattern already proven in omnibioai-control-center's own Dockerfile.
 FROM --platform=$BUILDPLATFORM node:20-bookworm-slim@sha256:2cf067cfed83d5ea958367df9f966191a942351a2df77d6f0193e162b5febfc0 AS ui-builder
 WORKDIR /ui
+ARG VITE_STUDIO_ORIGIN=
+ENV VITE_STUDIO_ORIGIN=${VITE_STUDIO_ORIGIN}
 COPY omnibioai-dev-hub-ui/package*.json ./
+COPY omnibioai-dev-hub-ui/vendor/omnibioai-design-tokens/ ./vendor/omnibioai-design-tokens/
 RUN npm ci
 # Application source
 COPY omnibioai-dev-hub-ui/ ./
@@ -29,7 +32,7 @@ LABEL org.opencontainers.image.source=https://github.com/OmniBioAI/omnibioai-dev
 
 # curl needed for Ollama readiness check; nginx for UI serving
 RUN apt-get update && apt-get install -y --no-install-recommends \
-        nginx=1.26.3-3+deb13u9 \
+        nginx=1.26.3-3+deb13u10 \
         curl=8.14.1-2+deb13u7 \
     && apt-get purge -y --no-install-recommends \
         docker-ce-cli \
