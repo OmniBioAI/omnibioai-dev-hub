@@ -2,6 +2,46 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
+    <script>
+      (() => {
+        const choices = {
+          obai_theme: ['light', 'dark'],
+          obai_accent: ['teal', 'blue', 'purple', 'orange'],
+          obai_density: ['comfortable', 'compact'],
+          obai_motion: ['system', 'reduce'],
+        };
+        const sensitiveKeys = new Set([
+          'token', 'access_token', 'refresh_token', 'id_token', 'password',
+          'api_key', 'api-key', 'session', 'session_id', 'secret', 'client_secret',
+          'credential', 'authorization', 'auth', 'user_id', 'email', 'organization',
+          'organization_id', 'account', 'account_id',
+        ]);
+        const params = new URLSearchParams(window.location.search);
+        const root = document.documentElement;
+        const systemTheme = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+        const values = {
+          obai_theme: choices.obai_theme.includes(params.get('obai_theme')) ? params.get('obai_theme') : systemTheme,
+          obai_accent: choices.obai_accent.includes(params.get('obai_accent')) ? params.get('obai_accent') : 'teal',
+          obai_density: choices.obai_density.includes(params.get('obai_density')) ? params.get('obai_density') : 'comfortable',
+          obai_motion: choices.obai_motion.includes(params.get('obai_motion')) ? params.get('obai_motion') : 'system',
+        };
+        root.dataset.theme = values.obai_theme;
+        root.dataset.accent = values.obai_accent;
+        root.dataset.density = values.obai_density;
+        root.dataset.motion = values.obai_motion;
+        let changed = false;
+        for (const key of [...params.keys()]) {
+          if ((key.startsWith('obai_') && !Object.hasOwn(choices, key)) || sensitiveKeys.has(key.toLowerCase())) {
+            params.delete(key);
+            changed = true;
+          }
+        }
+        for (const [key, value] of Object.entries(values)) {
+          if (params.has(key) && params.get(key) !== value) { params.set(key, value); changed = true; }
+        }
+        if (changed) window.history.replaceState(null, '', `${window.location.pathname}?${params}${window.location.hash}`);
+      })();
+    </script>
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>omnibioai-dev-hub-ui</title>

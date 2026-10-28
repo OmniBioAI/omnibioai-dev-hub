@@ -62,9 +62,10 @@ done
 echo '✅ Ollama is ready'
 
 _proxy_secret=$(python -c 'from api.secret_config import load_proxy_secret; print(load_proxy_secret(), end="")')
+_frame_policy="frame-ancestors 'self' https://webstudio.omnibioai.org"
 umask 077
-printf 'server {\n    listen 5173;\n    root /usr/share/nginx/html;\n    index index.html;\n    location / { try_files $uri $uri/ /index.html; }\n    location /api/ { proxy_pass http://127.0.0.1:8082; proxy_set_header Host $host; }\n    location /rag/ { proxy_pass http://127.0.0.1:8082; proxy_set_header X-Devhub-Internal "%s"; }\n    location /health { proxy_pass http://127.0.0.1:8082; }\n    location /status { proxy_pass http://127.0.0.1:8082; }\n    location /docs   { proxy_pass http://127.0.0.1:8082; }\n}\n' "$_proxy_secret" > /etc/nginx/conf.d/devhub.conf
-unset _proxy_secret
+printf 'server {\n    listen 5173;\n    root /usr/share/nginx/html;\n    index index.html;\n    add_header Content-Security-Policy "%s" always;\n    location / { try_files $uri $uri/ /index.html; }\n    location /api/ { proxy_pass http://127.0.0.1:8082; proxy_set_header Host $host; }\n    location /rag/ { proxy_pass http://127.0.0.1:8082; proxy_set_header X-Devhub-Internal "%s"; }\n    location /health { proxy_pass http://127.0.0.1:8082; }\n    location /status { proxy_pass http://127.0.0.1:8082; }\n    location /docs   { proxy_pass http://127.0.0.1:8082; }\n}\n' "$_frame_policy" "$_proxy_secret" > /etc/nginx/conf.d/devhub.conf
+unset _proxy_secret _frame_policy
 
 nginx
 echo '🌐 nginx started on port 5173'

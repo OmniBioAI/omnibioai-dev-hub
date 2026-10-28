@@ -9,7 +9,10 @@
 # pattern already proven in omnibioai-control-center's own Dockerfile.
 FROM --platform=$BUILDPLATFORM node:20-bookworm-slim@sha256:2cf067cfed83d5ea958367df9f966191a942351a2df77d6f0193e162b5febfc0 AS ui-builder
 WORKDIR /ui
+ARG VITE_STUDIO_ORIGIN=
+ENV VITE_STUDIO_ORIGIN=${VITE_STUDIO_ORIGIN}
 COPY omnibioai-dev-hub-ui/package*.json ./
+COPY omnibioai-dev-hub-ui/vendor/omnibioai-design-tokens/ ./vendor/omnibioai-design-tokens/
 RUN npm ci
 # Application source
 COPY omnibioai-dev-hub-ui/ ./

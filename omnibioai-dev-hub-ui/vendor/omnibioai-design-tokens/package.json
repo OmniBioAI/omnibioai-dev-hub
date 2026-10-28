@@ -1,0 +1,33 @@
+{
+  "name": "@omnibioai/design-tokens",
+  "version": "1.1.0",
+  "description": "OmniBioAI unified design tokens",
+  "main": "tokens.js",
+  "types": "tokens.ts",
+  "files": [
+    "tokens.css",
+    "tokens.js",
+    "tokens.ts"
+  ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/OmniBioAI/omnibioai-design-tokens.git"
+  },
+  "exports": {
+    ".": "./tokens.js",
+    "./tokens.css": "./tokens.css",
+    "./tokens.js": "./tokens.js"
+  },
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com",
+    "@omnibioai:registry": "https://npm.pkg.github.com"
+  },
+  "scripts": {
+    "test": "node --test",
+    "test:coverage": "c8 --temp-directory /tmp/omnibioai-design-tokens-coverage --reports-dir /tmp/omnibioai-design-tokens-coverage/report --reporter=text --reporter=html node --test"
+  },
+  "devDependencies": {
+    "c8": "^12.0.0"
+  }
+}
