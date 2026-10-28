@@ -32,7 +32,7 @@ LABEL org.opencontainers.image.source=https://github.com/OmniBioAI/omnibioai-dev
 
 # curl needed for Ollama readiness check; nginx for UI serving
 RUN apt-get update && apt-get install -y --no-install-recommends \
-        nginx=1.26.3-3+deb13u9 \
+        nginx=1.26.3-3+deb13u10 \
         curl=8.14.1-2+deb13u7 \
     && apt-get purge -y --no-install-recommends \
         docker-ce-cli \
