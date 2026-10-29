@@ -23,7 +23,7 @@ if [ "$_auth_enabled" = 'true' ]; then
       ;;
   esac
   if ! python -c 'from api.secret_config import load_proxy_secret; load_proxy_secret()' >/dev/null 2>&1; then
-    echo 'Dev Hub proxy secret file is missing or invalid; refusing startup.' >&2
+    echo 'Required setting devhub_internal_proxy_secret is missing or invalid at /run/secrets/devhub_internal_proxy_secret; refusing startup.' >&2
     exit 1
   fi
 fi

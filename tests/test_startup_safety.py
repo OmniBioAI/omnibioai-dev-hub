@@ -56,6 +56,7 @@ def sandbox(tmp_path):
     bin_dir.mkdir()
     log = tmp_path / "calls.log"
     log.write_text("")
+    _stub(bin_dir, "id", 'if [ "$1" = "-u" ]; then echo 10001; else /usr/bin/id "$@"; fi')
     _stub(bin_dir, "python", f'echo "python $*" >> {log}\nexec {sys.executable} "$@"')
     _stub(bin_dir, "curl", f'echo "curl $*" >> {log}\nexit 0')
     _stub(bin_dir, "nginx", f'echo "nginx" >> {log}')
@@ -79,7 +80,8 @@ def test_auth_enabled_entrypoint_fails_closed_without_proxy_secret(sandbox):
         "JWT_SECRET": "synthetic-jwt-test-secret",
     })
     assert r.returncode == 1
-    assert "proxy secret file is missing or invalid" in r.stderr
+    assert "setting devhub_internal_proxy_secret is missing or invalid" in r.stderr
+    assert "/run/secrets/devhub_internal_proxy_secret" in r.stderr
     assert "nginx" not in calls and "uvicorn" not in calls
 
 
@@ -91,7 +93,8 @@ def test_auth_enabled_entrypoint_rejects_proxy_secret_equal_to_jwt(sandbox):
         "DEVHUB_INTERNAL_PROXY_SECRET": "synthetic-jwt-test-secret",
     })
     assert r.returncode == 1
-    assert "proxy secret file is missing or invalid" in r.stderr
+    assert "setting devhub_internal_proxy_secret is missing or invalid" in r.stderr
+    assert "/run/secrets/devhub_internal_proxy_secret" in r.stderr
     assert "nginx" not in calls and "uvicorn" not in calls
 
 
