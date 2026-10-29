@@ -355,11 +355,12 @@ Open `http://localhost:5173` for the UI, or use `http://localhost:8082` for
 the API. The initial start blocks while the index is built; later starts reuse
 the named `devhub-index` volume. The image runs as a non-root `appuser`.
 
-To enable authentication in the container, add
-`-e AUTH_ENABLED=true -e JWT_SECRET=<strong-jwt-secret>
--e DEVHUB_INTERNAL_PROXY_SECRET=<independent-strong-proxy-secret>` to the final
-`docker run`. The container fails fast if either credential is missing; they
-must not have the same value.
+To enable authentication in the container, add `-e AUTH_ENABLED=true`, set the
+JWT environment described below, and mount the independent proxy credential at
+`/run/secrets/devhub_internal_proxy_secret`. The proxy credential is accepted
+only from that file; `DEVHUB_INTERNAL_PROXY_SECRET` is not supported. See
+[Production proxy secret](#production-proxy-secret) for the complete file
+contract and provisioning procedure.
 
 ---
 
@@ -504,7 +505,8 @@ In Docker the server starts automatically as PID 1.
 ```bash
 export AUTH_ENABLED=true
 export JWT_SECRET=...   # HS256 secret, must match omnibioai-auth's SECRET_KEY
-export DEVHUB_INTERNAL_PROXY_SECRET=...  # separate nginx-to-FastAPI credential
+export JWT_AUDIENCE=omnibioai-platform
+export JWT_ISSUER=omnibioai-auth
 ```
 
 `AUTH_ENABLED=false` (the default for local/`uvicorn --reload` use) runs
@@ -523,7 +525,8 @@ A missing/invalid/expired token returns `401`. This follows the same
 shared-secret pattern as `omnibioai-model-registry`'s `require_auth`.
 
 **Fail-fast startup check:** if `AUTH_ENABLED=true` and either `JWT_SECRET` or
-`DEVHUB_INTERNAL_PROXY_SECRET` is unset or empty, the app now **refuses to start** — `validate_auth_config()`
+the file-backed internal proxy credential is missing or invalid, the app now
+**refuses to start** — `validate_auth_config()`
 (`api/auth.py`) raises `RuntimeError` from the FastAPI startup event
 (`api/main.py`) before a single request can be served. Previously an
 unset `JWT_SECRET` silently fell through to validating tokens against an
@@ -533,13 +536,56 @@ make sure both independent credentials are set or the container/process will
 not come up.
 
 The Docker image enforces the equivalent check at the shell level before
-nginx or FastAPI start: if `AUTH_ENABLED=true` and either credential is unset,
-the container exits immediately with an error instead of generating
-nginx's `devhub.conf` with an empty/placeholder value baked into the
-`X-Devhub-Internal` header (the internal UI-proxy auth path — see
-`Dockerfile`'s `CMD`). The header uses only
-`DEVHUB_INTERNAL_PROXY_SECRET`; presenting the JWT signing key in that header
-does not authenticate a request.
+nginx or FastAPI start. It exits immediately rather than generating
+nginx's `devhub.conf` with an invalid value in the `X-Devhub-Internal` header.
+Presenting the JWT signing key in that header does not authenticate a request.
+
+## Production proxy secret
+
+The internal UI proxy credential has one supported source:
+`/run/secrets/devhub_internal_proxy_secret`. The path is fixed; there is no
+dev-hub environment variable that overrides it, and a value supplied through
+`DEVHUB_INTERNAL_PROXY_SECRET` is ignored. The file must:
+
+- be a regular, non-symlink file owned by UID `10001` with exact mode `0400`;
+- contain UTF-8 text of at least 32 characters after surrounding whitespace is
+  removed (there is no narrower character-set restriction);
+- not contain a recognized placeholder; and
+- not equal `JWT_SECRET`.
+
+For the Studio deployment, provision the host source without printing the
+credential:
+
+```bash
+sudo install -d -m 0700 /etc/omnibioai/runtime-secrets
+sudo sh -c 'umask 077; openssl rand -base64 48 > /etc/omnibioai/runtime-secrets/devhub_internal_proxy_secret'
+sudo chown 10001:10001 /etc/omnibioai/runtime-secrets/devhub_internal_proxy_secret
+sudo chmod 0400 /etc/omnibioai/runtime-secrets/devhub_internal_proxy_secret
+```
+
+Mount it with the `devhub_internal_proxy_secret` Compose secret:
+
+```yaml
+services:
+  dev-hub:
+    secrets:
+      - source: devhub_internal_proxy_secret
+        target: devhub_internal_proxy_secret
+        uid: "10001"
+        gid: "10001"
+        mode: 0400
+
+secrets:
+  devhub_internal_proxy_secret:
+    file: /etc/omnibioai/runtime-secrets/devhub_internal_proxy_secret
+```
+
+Local Compose implementations mount a `file:` secret from the host and may not
+apply the long-syntax ownership and mode fields. Keep the host source itself
+owned by UID `10001` with mode `0400` as shown above. The secret is used only
+by nginx inside the dev-hub container when it sends `X-Devhub-Internal` to the
+co-located FastAPI service. Studio's `nginx-router` and `web-ui` must not receive
+or send it.
 
 `DEBUG_TRACEBACKS` (default: unset/false) controls whether `/rag/query`'s error responses include a full stack trace (`trace` field) — omitted by default, included only when explicitly set to `true`; keep it off in production.
 
